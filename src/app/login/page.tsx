@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -10,22 +9,33 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
+import { login, setAuthToken } from "@/services/auth"
 
 export default function LoginPage() {
   const router = useRouter()
-  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError("")
+    setIsLoading(true)
 
-    // Giả lập đăng nhập đơn giản
-    if (username && password) {
-      // Trong thực tế, bạn sẽ gọi API đăng nhập ở đây
+    try {
+      if (!email || !password) {
+        setError("Vui lòng nhập email và mật khẩu")
+        return
+      }
+      const response = await login(email, password)
+      setAuthToken(response.token)
       router.push("/dashboard")
-    } else {
-      setError("Vui lòng nhập tên đăng nhập và mật khẩu")
+      router.refresh()
+    } catch (error: any) {
+      setError(error.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại.")
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -51,12 +61,14 @@ export default function LoginPage() {
           <form onSubmit={handleLogin}>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Tên đăng nhập</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="username"
-                  placeholder="Nhập tên đăng nhập"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  id="email"
+                  type="email"
+                  placeholder="Nhập email của bạn"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -67,10 +79,15 @@ export default function LoginPage() {
                   placeholder="Nhập mật khẩu"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
                 />
               </div>
-              <Button type="submit" className="w-full bg-orange-600 hover:bg-orange-700">
-                Đăng nhập
+              <Button 
+                type="submit" 
+                className="w-full bg-orange-600 hover:bg-orange-700"
+                disabled={isLoading}
+              >
+                {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
               </Button>
             </div>
           </form>
