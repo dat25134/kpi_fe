@@ -20,21 +20,23 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (isLoading) return
+
     setError("")
     setIsLoading(true)
 
     try {
       if (!email || !password) {
         setError("Vui lòng nhập email và mật khẩu")
+        setIsLoading(false)
         return
       }
       const response = await login(email, password)
       setAuthToken(response.token)
       router.push("/dashboard")
-      router.refresh()
     } catch (error: any) {
       setError(error.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại.")
-    } finally {
       setIsLoading(false)
     }
   }
