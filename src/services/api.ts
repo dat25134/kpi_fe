@@ -1,13 +1,57 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { API_CONFIG } from '@/config/api';
+import axios from 'axios';
+import { API_URL } from '@/config/api';
 
-// Tạo instance axios với cấu hình mặc định
-const api: AxiosInstance = axios.create(API_CONFIG);
+// Create axios instance
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-// Thêm interceptor để xử lý request
+let loadingCount = 0;
+let loadingTimeout: NodeJS.Timeout | null = null;
+let showLoadingFn: (() => void) | null = null;
+let hideLoadingFn: (() => void) | null = null;
+
+export const initializeLoading = (show: () => void, hide: () => void) => {
+  showLoadingFn = show;
+  hideLoadingFn = hide;
+};
+
+const showLoading = () => {
+  if (loadingTimeout) {
+    clearTimeout(loadingTimeout);
+    loadingTimeout = null;
+  }
+  
+  loadingCount++;
+  if (loadingCount === 1 && showLoadingFn) {
+    showLoadingFn();
+  }
+};
+
+const hideLoading = () => {
+  loadingCount = Math.max(0, loadingCount - 1);
+  
+  if (loadingCount === 0) {
+    if (loadingTimeout) {
+      clearTimeout(loadingTimeout);
+    }
+    
+    loadingTimeout = setTimeout(() => {
+      if (hideLoadingFn) {
+        hideLoadingFn();
+      }
+      loadingTimeout = null;
+    }, 300); // Small delay to prevent flickering
+  }
+};
+
+// Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Lấy token từ localStorage
+    showLoading();
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -15,30 +59,29 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    hideLoading();
     return Promise.reject(error);
   }
 );
 
-// Thêm interceptor để xử lý response
+// Response interceptor
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    // Xử lý refresh token nếu cần
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      try {
-        // Thêm logic refresh token ở đây nếu cần
-        return api(originalRequest);
-      } catch (refreshError) {
-        // Xử lý lỗi refresh token
-        return Promise.reject(refreshError);
-      }
-    }
-
+  (response) => {
+    hideLoading();
+    return response;
+  },
+  (error) => {
+    hideLoading();
     return Promise.reject(error);
   }
 );
+
+// Reset loading state if something goes wrong
+window.addEventListener('unload', () => {
+  loadingCount = 0;
+  if (hideLoadingFn) {
+    hideLoadingFn();
+  }
+});
 
 export default api; 
