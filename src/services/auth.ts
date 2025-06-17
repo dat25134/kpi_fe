@@ -25,10 +25,11 @@ export const login = async (email: string, password: string): Promise<LoginRespo
 export const setAuthToken = (token: string) => {
   if (token) {
     localStorage.setItem('token', token);
-    document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 ngày
+    document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Strict`;
   } else {
     localStorage.removeItem('token');
-    document.cookie = 'token=; path=/; max-age=0';
+    document.cookie = 'token=; path=/; max-age=0; SameSite=Strict';
+    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict';
   }
 };
 
