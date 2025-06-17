@@ -1,14 +1,29 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Bell, FileText, LayoutDashboard, Building2, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { setAuthToken } from "@/services/auth"
 
 export default function MainHeader() {
   const pathname = usePathname()
+  const router = useRouter()
+
+  const handleLogout = () => {
+    setAuthToken("")
+    router.push("/login")
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-[#0f172a] text-white">
@@ -79,12 +94,33 @@ export default function MainHeader() {
           <Button variant="ghost" size="icon" className="text-white">
             <Bell className="h-5 w-5" />
           </Button>
-          <div className="flex items-center space-x-2">
-            <span className="text-sm hidden md:inline-block">Phạm Ngọc Vinh</span>
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-blue-100 text-blue-900">PNV</AvatarFallback>
-            </Avatar>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <div className="flex items-center space-x-2 cursor-pointer hover:bg-blue-600 rounded-md p-2">
+                <span className="text-sm hidden md:inline-block text-white">Phạm Ngọc Vinh</span>
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-blue-100 text-blue-900">PNV</AvatarFallback>
+                </Avatar>
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Tài khoản của tôi</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => router.push("/profile")}>
+                Thông tin nhân sự
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/settings")}>
+                Cài đặt
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                className="text-red-600 focus:text-red-600"
+                onClick={handleLogout}
+              >
+                Đăng xuất
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
