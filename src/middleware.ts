@@ -7,7 +7,6 @@ const publicRoutes = ['/login', '/api/login']
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value
   const { pathname } = request.nextUrl
-  console.log(token);
   // Kiểm tra xem route hiện tại có phải là route công khai không
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
 

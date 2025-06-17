@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import { login, setAuthToken } from "@/services/auth"
+import { toast } from "sonner"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -34,8 +35,10 @@ export default function LoginPage() {
       }
       const response = await login(email, password)
       setAuthToken(response.token)
+      toast.success("Đăng nhập thành công!")
       router.push("/dashboard")
     } catch (error: any) {
+      toast.error("Đăng nhập thất bại")
       setError(error.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại.")
       setIsLoading(false)
     }

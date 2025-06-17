@@ -52,9 +52,12 @@ const hideLoading = () => {
 api.interceptors.request.use(
   (config) => {
     showLoading();
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Check if we're in the browser before accessing localStorage
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -76,12 +79,14 @@ api.interceptors.response.use(
   }
 );
 
-// Reset loading state if something goes wrong
-window.addEventListener('unload', () => {
-  loadingCount = 0;
-  if (hideLoadingFn) {
-    hideLoadingFn();
-  }
-});
+// Reset loading state if something goes wrong - only in browser
+if (typeof window !== 'undefined') {
+  window.addEventListener('unload', () => {
+    loadingCount = 0;
+    if (hideLoadingFn) {
+      hideLoadingFn();
+    }
+  });
+}
 
 export default api; 

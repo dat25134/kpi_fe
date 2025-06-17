@@ -60,7 +60,7 @@ export default function TaskManagement() {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="mx-auto p-4 w-full">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-4">
           <Button variant="outline" className="flex items-center gap-2 bg-blue-50 border-blue-200">
@@ -74,11 +74,10 @@ export default function TaskManagement() {
         </div>
         <div className="flex items-center space-x-4">
           <div className="text-sm text-gray-500">KPI hiện tại</div>
-          <div className="text-sm text-gray-500">Tạm xếp loại</div>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="text-sm">- / 4.0</div>
-          <div className="text-sm">-</div>
+          <div className="text-sm text-gray-500">/</div>
+          <div className="text-sm text-gray-500">Tạm xếp loại</div> 
+          <div className="text-sm text-gray-500">:</div>
+          <div className="text-sm text-gray-500">- / 4.0</div>
         </div>
       </div>
 
@@ -95,10 +94,10 @@ export default function TaskManagement() {
             <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
           </div>
         </div>
-        <div className="col-span-1 md:col-span-1">
+        <div className="col-span-2 md:col-span-1">
           <label className="text-sm font-medium">Phân loại:</label>
           <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Vui lòng chọn" />
             </SelectTrigger>
             <SelectContent>
