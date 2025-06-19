@@ -25,46 +25,17 @@ import {
   FolderOpen,
 } from "lucide-react"
 
-// Dữ liệu mẫu người dùng hiện tại
-const currentUser = {
-  id: 1,
-  name: "Phạm Ngọc Vinh",
-  avatar: "PNV",
-  email: "pham.ngoc.vinh@company.com",
-  phone: "+84 123 456 789",
-  position: "Trưởng phòng",
-  department: {
-    id: 1,
-    name: "Phòng Quản trị nền tảng số và VTTT",
-    code: "QTNT",
-  },
-  status: "active",
-  joinDate: "15/01/2020",
-  salary: 25000000,
-  address: "123 Đường ABC, Quận 1, TP.HCM",
-  birthDate: "15/05/1985",
-  gender: "Nam",
-  education: "Thạc sĩ Công nghệ thông tin",
-  experience: "8 năm",
-  skills: ["JavaScript", "React", "Node.js", "Python", "SQL", "Project Management"],
-  projects: [
-    { name: "Hệ thống KPI", role: "Project Manager", status: "Đang thực hiện" },
-    { name: "Ứng dụng Tây Ninh Smart", role: "Tech Lead", status: "Hoàn thành" },
-    { name: "Website công ty", role: "Technical Advisor", status: "Hoàn thành" },
-  ],
-}
-
-export default function UserProfile() {
+export default function UserProfile({ userProfile }: { userProfile: any }) {
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
-    name: currentUser.name,
-    email: currentUser.email,
-    phone: currentUser.phone,
-    address: currentUser.address,
-    education: currentUser.education,
-    skills: currentUser.skills.join(", "),
+    name: userProfile?.name || "",
+    email: userProfile?.email || "",
+    phone: userProfile?.phone || "",
+    address: userProfile?.address || "",
+    education: userProfile?.education || "",
+    skills: userProfile?.skills ? userProfile.skills.join(", ") : "",
   })
-
+  console.log(userProfile);
   const handleSave = () => {
     // Xử lý lưu thông tin - trong thực tế sẽ gọi API
     console.log("Saving user data:", formData)
@@ -75,12 +46,12 @@ export default function UserProfile() {
   const handleCancel = () => {
     // Reset form về dữ liệu gốc
     setFormData({
-      name: currentUser.name,
-      email: currentUser.email,
-      phone: currentUser.phone,
-      address: currentUser.address,
-      education: currentUser.education,
-      skills: currentUser.skills.join(", "),
+      name: userProfile?.name || "",
+      email: userProfile?.email || "",
+      phone: userProfile?.phone || "",
+      address: userProfile?.address || "",
+      education: userProfile?.education || "",
+      skills: userProfile?.skills ? userProfile.skills.join(", ") : "",
     })
     setIsEditing(false)
   }
@@ -122,24 +93,24 @@ export default function UserProfile() {
         <CardContent className="pt-6">
           <div className="flex items-start space-x-4">
             <Avatar className="h-20 w-20">
-              <AvatarFallback className="bg-blue-100 text-blue-900 text-xl">{currentUser.avatar}</AvatarFallback>
+              <AvatarFallback className="bg-blue-100 text-blue-900 text-xl">{userProfile?.avatar}</AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h2 className="text-2xl font-bold">{currentUser.name}</h2>
-              <p className="text-lg text-gray-600">{currentUser.position}</p>
+              <h2 className="text-2xl font-bold">{userProfile?.name}</h2>
+              <p className="text-lg text-gray-600">{userProfile?.position}</p>
               <div className="flex items-center gap-2 mt-2">
                 <Badge variant="outline" className="flex items-center gap-1">
                   <Building2 className="h-3 w-3" />
-                  {currentUser.department.name}
+                  {userProfile?.department?.name}
                 </Badge>
                 <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Đang làm việc</Badge>
               </div>
             </div>
             <div className="text-right">
               <div className="text-sm text-gray-500">Mã nhân viên</div>
-              <div className="font-mono font-bold">EMP{currentUser.id.toString().padStart(4, "0")}</div>
+              <div className="font-mono font-bold">EMP{userProfile?.id?.toString().padStart(4, "0")}</div>
               <div className="text-sm text-gray-500 mt-2">Ngày vào làm</div>
-              <div className="font-medium">{currentUser.joinDate}</div>
+              <div className="font-medium">{userProfile?.joinDate}</div>
             </div>
           </div>
         </CardContent>
@@ -171,7 +142,7 @@ export default function UserProfile() {
                   ) : (
                     <div className="flex items-center gap-3">
                       <User className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm">{currentUser.name}</span>
+                      <span className="text-sm">{userProfile?.name}</span>
                     </div>
                   )}
                 </div>
@@ -187,7 +158,7 @@ export default function UserProfile() {
                   ) : (
                     <div className="flex items-center gap-3">
                       <Mail className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm">{currentUser.email}</span>
+                      <span className="text-sm">{userProfile?.email}</span>
                     </div>
                   )}
                 </div>
@@ -202,7 +173,7 @@ export default function UserProfile() {
                   ) : (
                     <div className="flex items-center gap-3">
                       <Phone className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm">{currentUser.phone}</span>
+                      <span className="text-sm">{userProfile?.phone}</span>
                     </div>
                   )}
                 </div>
@@ -218,7 +189,7 @@ export default function UserProfile() {
                   ) : (
                     <div className="flex items-start gap-3">
                       <MapPin className="h-4 w-4 text-gray-400 mt-0.5" />
-                      <span className="text-sm">{currentUser.address}</span>
+                      <span className="text-sm">{userProfile?.address}</span>
                     </div>
                   )}
                 </div>
@@ -232,22 +203,22 @@ export default function UserProfile() {
               <CardContent className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500">Ngày sinh:</span>
-                  <span className="text-sm font-medium">{currentUser.birthDate}</span>
+                  <span className="text-sm font-medium">{userProfile?.birthDate}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500">Giới tính:</span>
-                  <span className="text-sm font-medium">{currentUser.gender}</span>
+                  <span className="text-sm font-medium">{userProfile?.gender}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500">Ngày vào làm:</span>
                   <span className="text-sm font-medium flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    {currentUser.joinDate}
+                    {userProfile?.joinDate}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500">Kinh nghiệm:</span>
-                  <span className="text-sm font-medium">{currentUser.experience}</span>
+                  <span className="text-sm font-medium">{userProfile?.experience}</span>
                 </div>
               </CardContent>
             </Card>
@@ -271,7 +242,7 @@ export default function UserProfile() {
                   />
                 </div>
               ) : (
-                <p className="text-sm font-medium">{currentUser.education}</p>
+                <p className="text-sm font-medium">{userProfile?.education}</p>
               )}
             </CardContent>
           </Card>
@@ -290,15 +261,15 @@ export default function UserProfile() {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-500">Chức vụ:</span>
-                    <Badge variant="default">{currentUser.position}</Badge>
+                    <Badge variant="default">{userProfile?.position}</Badge>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-500">Phòng ban:</span>
-                    <span className="text-sm font-medium">{currentUser.department.name}</span>
+                    <span className="text-sm font-medium">{userProfile?.department?.name}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-500">Mã phòng:</span>
-                    <Badge variant="outline">{currentUser.department.code}</Badge>
+                    <Badge variant="outline">{userProfile?.department?.code}</Badge>
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -308,7 +279,7 @@ export default function UserProfile() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-500">Kinh nghiệm:</span>
-                    <span className="text-sm font-medium">{currentUser.experience}</span>
+                    <span className="text-sm font-medium">{userProfile?.experience}</span>
                   </div>
                 </div>
               </div>
@@ -339,7 +310,7 @@ export default function UserProfile() {
                 </div>
               ) : (
                 <div className="flex flex-wrap gap-2">
-                  {currentUser.skills.map((skill, index) => (
+                  {userProfile?.skills?.map((skill: string, index: number) => (
                     <Badge key={index} variant="secondary" className="px-3 py-1">
                       {skill}
                     </Badge>
@@ -361,7 +332,7 @@ export default function UserProfile() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {currentUser.projects.map((project, index) => (
+                {userProfile?.projects?.map((project: any, index: number) => (
                   <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <h4 className="font-medium">{project.name}</h4>
