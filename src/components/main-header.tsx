@@ -107,11 +107,7 @@ export default function MainHeader() {
               <div className="flex items-center space-x-2 cursor-pointer hover:bg-blue-600 rounded-md p-2">
                 <span className="text-sm hidden md:inline-block text-white">{isLoading ? "Đang tải..." : user?.name || "Không rõ"}</span>
                 <Avatar className="h-8 w-8">
-                  {user?.avatarUrl ? (
-                    <img src={user.avatarUrl} alt={user.name} className="h-8 w-8 rounded-full object-cover" />
-                  ) : (
-                    <AvatarFallback className="bg-blue-100 text-blue-900">{user?.name ? user.name.split(" ").map((w: string) => w[0]).join("").toUpperCase() : "?"}</AvatarFallback>
-                  )}
+                  <AvatarFallback className="bg-blue-100 text-blue-900 text-xl">{user?.avatar}</AvatarFallback>
                 </Avatar>
               </div>
             </DropdownMenuTrigger>
@@ -129,7 +125,7 @@ export default function MainHeader() {
                 className="text-red-600 focus:text-red-600"
                 onClick={handleLogout}
               >
-                Đăng xuất
+                <Link href="/logout">Đăng xuất</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

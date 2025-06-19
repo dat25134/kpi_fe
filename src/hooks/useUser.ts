@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { fetchUserInfo } from "@/services/api";
+import { fetchUserInfo, fetchUserProfile } from "@/services/api";
 
 export function useUser() {
   const { data, error, isLoading } = useSWR("user-info", fetchUserInfo);
@@ -9,3 +9,12 @@ export function useUser() {
     isError: error,
   };
 } 
+
+export function useUserProfile() {
+  const { data, error, isLoading } = useSWR("user-profile", fetchUserProfile);
+  return {
+    userProfile: data,
+    isLoading,
+    isError: error,
+  };
+}
