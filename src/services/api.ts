@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { API_CONFIG, API_ENDPOINTS, API_URL } from '@/config/api';
-import { getAuthToken } from "@/services/auth";
+import { getAuthToken, setAuthToken } from "@/services/auth";
+import { toast } from 'sonner';
 
 // Create axios instance
 const api = axios.create({
@@ -9,6 +10,25 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Trong src/services/api.ts
+api.interceptors.response.use(
+  (response) => {
+    hideLoading();
+    return response;
+  },
+  (error) => {
+    hideLoading();
+    if (error.response && (error.response.status === 401 || error.response.status === 419)) {
+      // Xử lý khi bị 401/419 ở mọi request
+      setAuthToken("")
+      toast.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.")
+      window.location.href = "/login";
+      // Ví dụ: logout, redirect, toast, ...
+    }
+    return Promise.reject(error);
+  }
+);
 
 let loadingCount = 0;
 let loadingTimeout: NodeJS.Timeout | null = null;
@@ -101,7 +121,7 @@ export async function fetchUserInfo() {
       Authorization: token ? `Bearer ${token}` : undefined,
     },
   };
-  const response = await axios.get(API_ENDPOINTS.USER.USER_INFO, config);
+  const response = await api.get(API_ENDPOINTS.USER.USER_INFO, config);
   return response.data.data;
 } 
 
@@ -114,6 +134,6 @@ export async function fetchUserProfile() {
       Authorization: token ? `Bearer ${token}` : undefined,
     },
   };
-  const response = await axios.get(API_ENDPOINTS.USER.PROFILE, config);
+  const response = await api.get(API_ENDPOINTS.USER.PROFILE, config);
   return response.data.data;
 }
