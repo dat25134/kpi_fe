@@ -3,7 +3,7 @@ import TaskManagement from "@/components/task-management"
 
 export default function DashboardPage() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-[calc(100vh-100px)] flex-col">
       <MainHeader />
       <div className="flex-1">
         <TaskManagement />
