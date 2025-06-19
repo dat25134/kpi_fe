@@ -35,7 +35,7 @@ export default function UserProfile({ userProfile }: { userProfile: any }) {
     education: userProfile?.education || "",
     skills: userProfile?.skills ? userProfile.skills.join(", ") : "",
   })
-  console.log(userProfile);
+
   const handleSave = () => {
     // Xử lý lưu thông tin - trong thực tế sẽ gọi API
     console.log("Saving user data:", formData)

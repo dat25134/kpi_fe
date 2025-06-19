@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { setAuthToken } from "@/services/auth"
 import { useUser } from "@/hooks/useUser"
+import { toast } from "sonner"
 
 export default function MainHeader() {
   const pathname = usePathname()
@@ -24,6 +25,7 @@ export default function MainHeader() {
 
   const handleLogout = () => {
     setAuthToken("")
+    toast.success("Đăng xuất thành công")
     router.push("/login")
   }
 
