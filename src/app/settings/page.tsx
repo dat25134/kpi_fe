@@ -1,12 +1,12 @@
 import MainHeader from "@/components/main-header"
-import TaskManagement from "@/components/task-management"
+import UserSettings from "@/components/user-settings"
 
-export default function DashboardPage() {
+export default function SettingsPage() {
   return (
     <div className="flex min-h-[calc(100vh-100px)] flex-col">
       <MainHeader />
       <div className="flex-1">
-        <TaskManagement />
+        <UserSettings />
       </div>
     </div>
   )

@@ -119,10 +119,10 @@ export default function MainHeader() {
               <DropdownMenuLabel>Tài khoản của tôi</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => router.push("/profile")}>
-                Thông tin nhân sự
+                <Link href="/profile">Thông tin nhân sự</Link>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push("/settings")}>
-                Cài đặt
+                <Link href="/settings">Cài đặt</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 

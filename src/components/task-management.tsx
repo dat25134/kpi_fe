@@ -236,10 +236,6 @@ export default function TaskManagement() {
         </div>
       </div>
 
-      <div className="mt-8 text-center text-sm text-gray-500">
-        <p>Công ty cổ phần Thăng Long</p>
-      </div>
-
       <AddTaskModal open={isAddModalOpen} onOpenChange={setIsAddModalOpen} onAddTask={handleAddTask} />
     </div>
   )
