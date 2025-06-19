@@ -7,6 +7,7 @@ export const API_ENDPOINTS = {
     REFRESH_TOKEN: `${API_URL}/refresh-token`,
   },
   USER: {
+    USER_INFO: `${API_URL}/user/info`,
     PROFILE: `${API_URL}/user/profile`,
     UPDATE_PROFILE: `${API_URL}/user/profile`,
   },

@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { API_URL } from '@/config/api';
+import { API_CONFIG, API_ENDPOINTS, API_URL } from '@/config/api';
+import { getAuthToken } from "@/services/auth";
 
 // Create axios instance
 const api = axios.create({
@@ -89,4 +90,17 @@ if (typeof window !== 'undefined') {
   });
 }
 
-export default api; 
+export default api;
+
+export async function fetchUserInfo() {
+  const token = getAuthToken();
+  const config = {
+    ...API_CONFIG,
+    headers: {
+      ...API_CONFIG.headers,
+      Authorization: token ? `Bearer ${token}` : undefined,
+    },
+  };
+  const response = await axios.get(API_ENDPOINTS.USER.USER_INFO, config);
+  return response.data.data;
+} 
