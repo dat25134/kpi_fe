@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -11,100 +10,10 @@ import { Building2, Edit, Eye, MoreHorizontal, Plus, Search, Trash2, Users } fro
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import AddDepartmentModal from "./add-department-modal"
 import DepartmentDetailModal from "./department-detail-modal"
+import { useState } from "react"
+import LoadingSpinner from "@/components/ui/loading-spinner"
 
-// Dữ liệu mẫu phòng ban
-const initialDepartments = [
-  {
-    id: 1,
-    name: "Phòng Quản trị nền tảng số và VTTT",
-    code: "QTNT",
-    description: "Phụ trách quản trị hệ thống thông tin, phát triển ứng dụng và hạ tầng công nghệ thông tin",
-    manager: {
-      name: "Phạm Ngọc Vinh",
-      avatar: "PNV",
-      position: "Trưởng phòng",
-    },
-    employeeCount: 8,
-    status: "active",
-    createdAt: "15/01/2024",
-    employees: [
-      { name: "Phạm Ngọc Vinh", position: "Trưởng phòng", avatar: "PNV" },
-      { name: "Phan Vinh Khang", position: "Chuyên viên", avatar: "PVK" },
-      { name: "Lê Hữu Lợi", position: "Chuyên viên", avatar: "LHL" },
-      { name: "Đặng Trần Như Hảo", position: "Chuyên viên", avatar: "ĐTNH" },
-      { name: "Đàm Hải Đăng", position: "Chuyên viên", avatar: "ĐHĐ" },
-      { name: "Võ Đức Mạnh", position: "Chuyên viên", avatar: "VĐM" },
-      { name: "Đoàn Văn Lam Sơn", position: "Chuyên viên", avatar: "ĐVLS" },
-      { name: "Nguyễn Thị Mai", position: "Chuyên viên", avatar: "NTM" },
-    ],
-  },
-  {
-    id: 2,
-    name: "Phòng Tài chính - Kế toán",
-    code: "TCKT",
-    description: "Phụ trách công tác tài chính, kế toán, ngân sách và thanh toán của công ty",
-    manager: {
-      name: "Trần Văn Nam",
-      avatar: "TVN",
-      position: "Trưởng phòng",
-    },
-    employeeCount: 5,
-    status: "active",
-    createdAt: "10/01/2024",
-    employees: [
-      { name: "Trần Văn Nam", position: "Trưởng phòng", avatar: "TVN" },
-      { name: "Nguyễn Thị Lan", position: "Phó phòng", avatar: "NTL" },
-      { name: "Lê Minh Tuấn", position: "Chuyên viên", avatar: "LMT" },
-      { name: "Phạm Thị Hoa", position: "Chuyên viên", avatar: "PTH" },
-      { name: "Vũ Đình Khoa", position: "Chuyên viên", avatar: "VĐK" },
-    ],
-  },
-  {
-    id: 3,
-    name: "Phòng Nhân sự",
-    code: "NS",
-    description: "Phụ trách tuyển dụng, đào tạo, phát triển nhân sự và quản lý lao động",
-    manager: {
-      name: "Hoàng Thị Minh",
-      avatar: "HTM",
-      position: "Trưởng phòng",
-    },
-    employeeCount: 4,
-    status: "active",
-    createdAt: "05/01/2024",
-    employees: [
-      { name: "Hoàng Thị Minh", position: "Trưởng phòng", avatar: "HTM" },
-      { name: "Đỗ Văn Hùng", position: "Chuyên viên", avatar: "ĐVH" },
-      { name: "Nguyễn Thị Thu", position: "Chuyên viên", avatar: "NTT" },
-      { name: "Lý Văn Đức", position: "Chuyên viên", avatar: "LVĐ" },
-    ],
-  },
-  {
-    id: 4,
-    name: "Phòng Kinh doanh",
-    code: "KD",
-    description: "Phụ trách phát triển thị trường, bán hàng và chăm sóc khách hàng",
-    manager: {
-      name: "Nguyễn Văn Thành",
-      avatar: "NVT",
-      position: "Trưởng phòng",
-    },
-    employeeCount: 6,
-    status: "active",
-    createdAt: "20/12/2023",
-    employees: [
-      { name: "Nguyễn Văn Thành", position: "Trưởng phòng", avatar: "NVT" },
-      { name: "Trần Thị Linh", position: "Phó phòng", avatar: "TTL" },
-      { name: "Phạm Văn Đạt", position: "Chuyên viên", avatar: "PVĐ" },
-      { name: "Lê Thị Nga", position: "Chuyên viên", avatar: "LTN" },
-      { name: "Vũ Minh Quang", position: "Chuyên viên", avatar: "VMQ" },
-      { name: "Đặng Thị Hương", position: "Chuyên viên", avatar: "ĐTH" },
-    ],
-  },
-]
-
-export default function DepartmentManagement() {
-  const [departments, setDepartments] = useState(initialDepartments)
+export default function DepartmentManagement({ departments, summary, isLoading }: { departments: any[], summary: any, isLoading: boolean }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
@@ -126,19 +35,17 @@ export default function DepartmentManagement() {
       createdAt: new Date().toLocaleDateString("vi-VN"),
       employees: [],
     }
-    setDepartments([...departments, department])
+    // TODO: Gọi API thêm phòng ban ở đây
   }
 
   const handleEditDepartment = (updatedDepartment: any) => {
-    setDepartments(
-      departments.map((dept) => (dept.id === updatedDepartment.id ? { ...dept, ...updatedDepartment } : dept)),
-    )
+    // TODO: Gọi API sửa phòng ban ở đây
     setEditingDepartment(null)
   }
 
   const handleDeleteDepartment = (id: number) => {
     if (confirm("Bạn có chắc chắn muốn xóa phòng ban này?")) {
-      setDepartments(departments.filter((dept) => dept.id !== id))
+      // TODO: Gọi API xóa phòng ban ở đây
     }
   }
 
@@ -151,6 +58,8 @@ export default function DepartmentManagement() {
     setEditingDepartment(department)
     setIsAddModalOpen(true)
   }
+
+  if (isLoading) return <LoadingSpinner />
 
   return (
     <div className="container mx-auto p-6">
@@ -173,7 +82,7 @@ export default function DepartmentManagement() {
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{departments.length}</div>
+            <div className="text-2xl font-bold">{summary?.total_departments ?? departments.length}</div>
             <p className="text-xs text-muted-foreground">Đang hoạt động</p>
           </CardContent>
         </Card>
@@ -183,9 +92,7 @@ export default function DepartmentManagement() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {departments.reduce((total, dept) => total + dept.employeeCount, 0)}
-            </div>
+            <div className="text-2xl font-bold">{summary?.total_employees ?? departments.reduce((total, dept) => total + (dept.employeeCount || 0), 0)}</div>
             <p className="text-xs text-muted-foreground">Trên tất cả phòng ban</p>
           </CardContent>
         </Card>
@@ -195,9 +102,7 @@ export default function DepartmentManagement() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {Math.round(departments.reduce((total, dept) => total + dept.employeeCount, 0) / departments.length)}
-            </div>
+            <div className="text-2xl font-bold">{summary?.avg_employees_per_department ?? (departments.length ? Math.round(departments.reduce((total, dept) => total + (dept.employeeCount || 0), 0) / departments.length) : 0)}</div>
             <p className="text-xs text-muted-foreground">Nhân viên</p>
           </CardContent>
         </Card>
@@ -207,7 +112,7 @@ export default function DepartmentManagement() {
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{Math.max(...departments.map((dept) => dept.employeeCount))}</div>
+            <div className="text-2xl font-bold">{summary?.largest_department?.employee_count ?? Math.max(...departments.map((dept) => dept.employeeCount || 0), 0)}</div>
             <p className="text-xs text-muted-foreground">Nhân viên</p>
           </CardContent>
         </Card>
@@ -248,73 +153,97 @@ export default function DepartmentManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredDepartments.map((department) => (
-                <TableRow key={department.id}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{department.name}</div>
-                      <div className="text-sm text-gray-500 truncate max-w-xs">{department.description}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{department.code}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center">
-                      <Avatar className="h-8 w-8 mr-2">
-                        <AvatarFallback className="bg-blue-100 text-blue-900 text-xs">
-                          {department.manager.avatar}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium text-sm">{department.manager.name}</div>
-                        <div className="text-xs text-gray-500">{department.manager.position}</div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Badge variant="secondary">{department.employeeCount}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      className={
-                        department.status === "active"
-                          ? "bg-green-100 text-green-800 hover:bg-green-100"
-                          : "bg-red-100 text-red-800 hover:bg-red-100"
-                      }
-                    >
-                      {department.status === "active" ? "Hoạt động" : "Tạm dừng"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{department.createdAt}</TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleViewDetail(department)}>
-                          <Eye className="mr-2 h-4 w-4" />
-                          Xem chi tiết
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(department)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Chỉnh sửa
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteDepartment(department.id)}
-                          className="text-red-600"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Xóa
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+              {filteredDepartments.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-gray-500 py-8">
+                    Không có dữ liệu phòng ban
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                filteredDepartments.map((department) => (
+                  <TableRow key={department.id ?? Math.random()}>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{department?.name ?? "—"}</div>
+                        <div className="text-sm text-gray-500 truncate max-w-xs">
+                          {department?.description ?? "—"}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{department?.code ?? "—"}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        <Avatar className="h-8 w-8 mr-2">
+                          <AvatarFallback className="bg-blue-100 text-blue-900 text-xs">
+                            {department?.manager?.avatar ?? "—"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium text-sm">
+                            {department?.manager?.name ?? "—"}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {department?.manager?.position ?? "—"}
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="secondary">
+                        {typeof department?.employeeCount === "number" ? department.employeeCount : "—"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        className={
+                          department?.status === "active"
+                            ? "bg-green-100 text-green-800 hover:bg-green-100"
+                            : "bg-red-100 text-red-800 hover:bg-red-100"
+                        }
+                      >
+                        {department?.status === "active"
+                          ? "Hoạt động"
+                          : department?.status === "inactive"
+                          ? "Tạm dừng"
+                          : "Không xác định"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {department?.createdAt
+                        ? department.createdAt
+                        : "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleViewDetail(department)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            Xem chi tiết
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEdit(department)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Chỉnh sửa
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteDepartment(department.id)}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Xóa
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>
