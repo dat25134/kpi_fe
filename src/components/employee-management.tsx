@@ -29,18 +29,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import AddEmployeeModal from "./add-employee-modal"
 import EmployeeDetailModal from "./employee-detail-modal"
 import { useEmployees } from "@/hooks/useEmployees"
+import { useDepartments } from "@/hooks/useDepartments"
 import LoadingSpinner from "@/components/ui/loading-spinner"
-
-// Danh sách phòng ban (có thể lấy từ API departments)
-const departments = [
-  { id: 1, name: "Phòng Quản trị nền tảng số và VTTT", code: "QTNT" },
-  { id: 2, name: "Phòng Tài chính - Kế toán", code: "TCKT" },
-  { id: 3, name: "Phòng Nhân sự", code: "NS" },
-  { id: 4, name: "Phòng Kinh doanh", code: "KD" },
-]
-
-// Danh sách chức vụ
-const positions = ["Trưởng phòng", "Phó phòng", "Chuyên viên", "Nhân viên"]
+import { POSITIONS, GENDERS } from "@/constants/options"
 
 export default function EmployeeManagement() {
   const {
@@ -58,6 +49,7 @@ export default function EmployeeManagement() {
     changePage,
     clearFilters,
   } = useEmployees()
+  const { data: departments, isLoading: departmentsLoading } = useDepartments()
 
   const [searchTerm, setSearchTerm] = useState("")
   const [departmentFilter, setDepartmentFilter] = useState("")
@@ -93,22 +85,15 @@ export default function EmployeeManagement() {
   }, [searchTerm, departmentFilter, positionFilter, statusFilter, applyFilters])
 
   const handleAddEmployee = async (newEmployee: any) => {
-    try {
-      await addEmployee(newEmployee)
-      setIsAddModalOpen(false)
-    } catch (error) {
-      // Error handling is done in the hook
-    }
+    await addEmployee(newEmployee)
+    setIsAddModalOpen(false)
   }
 
   const handleEditEmployee = async (updatedEmployee: any) => {
-    try {
-      await updateEmployeeById(updatedEmployee.id, updatedEmployee)
-      setIsAddModalOpen(false)
-      setEditingEmployee(null)
-    } catch (error) {
-      // Error handling is done in the hook
-    }
+    // The hook needs id and the rest of the data
+    const { id, ...dataToUpdate } = updatedEmployee
+    await updateEmployeeById(id, dataToUpdate)
+    setIsAddModalOpen(false)
   }
 
   const handleDeleteEmployee = async (id: number) => {
@@ -241,11 +226,12 @@ export default function EmployeeManagement() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tất cả phòng ban</SelectItem>
-                {departments.map((dept) => (
-                  <SelectItem key={dept.id} value={dept.id.toString()}>
-                    {dept.name}
-                  </SelectItem>
-                ))}
+                {departments &&
+                  departments.map((dept: any) => (
+                    <SelectItem key={dept.id} value={dept.id.toString()}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
             <Select value={positionFilter} onValueChange={setPositionFilter}>
@@ -254,9 +240,9 @@ export default function EmployeeManagement() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tất cả chức vụ</SelectItem>
-                {positions.map((position) => (
-                  <SelectItem key={position} value={position}>
-                    {position}
+                {POSITIONS.map((position) => (
+                  <SelectItem key={position.key} value={position.key}>
+                    {position.value}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -438,8 +424,9 @@ export default function EmployeeManagement() {
         onAddEmployee={editingEmployee ? handleEditEmployee : handleAddEmployee}
         editingEmployee={editingEmployee}
         onClose={() => setEditingEmployee(null)}
-        departments={departments}
-        positions={positions}
+        departments={departments || []}
+        positions={POSITIONS}
+        genders={GENDERS}
       />
 
       <EmployeeDetailModal open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen} employee={selectedEmployee} />
