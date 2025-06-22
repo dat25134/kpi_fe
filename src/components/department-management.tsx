@@ -39,7 +39,7 @@ export default function DepartmentManagement({ departments, summary, isLoading }
     mutate("departments")
     mutate("departments-summary")
   }
-
+  console.log(departments)
   const handleEditDepartment = () => {
     mutate("departments")
     mutate("departments-summary")
@@ -210,7 +210,7 @@ export default function DepartmentManagement({ departments, summary, isLoading }
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge variant="secondary">
-                        {typeof department?.employeeCount === "number" ? department.employeeCount : "—"}
+                        {typeof department?.employee_count === "number" ? department.employee_count : "—"}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -229,8 +229,8 @@ export default function DepartmentManagement({ departments, summary, isLoading }
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {department?.createdAt
-                        ? department.createdAt
+                      {department?.created_at
+                        ? department.created_at
                         : "—"}
                     </TableCell>
                     <TableCell className="text-right">
