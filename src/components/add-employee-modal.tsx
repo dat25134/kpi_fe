@@ -25,15 +25,19 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ValidationError } from "@/services/employee"
+import { toast } from "sonner"
+import { formatVietnamesePhoneNumber, formatVND } from "@/lib/utils"
 
 type AddEmployeeModalProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onAddEmployee: (employee: any) => void
+  onAddEmployee: (employee: any) => Promise<any>
   editingEmployee?: any
   onClose: () => void
   departments: any[]
-  positions: string[]
+  positions: readonly { key: string; value: string }[]
+  genders: readonly { key: string; value: string }[]
 }
 
 export default function AddEmployeeModal({
@@ -44,6 +48,7 @@ export default function AddEmployeeModal({
   onClose,
   departments,
   positions,
+  genders,
 }: AddEmployeeModalProps) {
   const [formData, setFormData] = useState({
     name: "",
@@ -60,6 +65,7 @@ export default function AddEmployeeModal({
     experience: "",
     skills: "",
   })
+  const [errors, setErrors] = useState<Record<string, string[]>>({})
 
   useEffect(() => {
     if (editingEmployee) {
@@ -81,15 +87,19 @@ export default function AddEmployeeModal({
     } else {
       resetForm()
     }
+    setErrors({}) // Clear errors when employee changes
   }, [editingEmployee])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setErrors({})
 
     const selectedDepartment = departments.find((dept) => dept.id.toString() === formData.departmentId)
-    if (!selectedDepartment) return
+    if (!selectedDepartment) {
+      setErrors({ departmentId: ["Vui lòng chọn phòng ban."] })
+      return
+    }
 
-    // Tạo avatar từ tên
     const nameParts = formData.name.split(" ")
     const avatar =
       nameParts.length >= 2
@@ -100,22 +110,33 @@ export default function AddEmployeeModal({
       ...formData,
       avatar,
       department: selectedDepartment,
-      salary: Number.parseInt(formData.salary),
+      salary: Number.parseInt(formData.salary.replace(/\D/g, '')) || 0,
+      phone: formData.phone.replace(/\D/g, ''),
       skills: formData.skills
         .split(",")
         .map((skill) => skill.trim())
         .filter((skill) => skill),
     }
 
-    if (editingEmployee) {
-      onAddEmployee({ ...editingEmployee, ...employeeData })
-    } else {
-      onAddEmployee(employeeData)
-    }
+    try {
+      if (editingEmployee) {
+        await onAddEmployee({ ...editingEmployee, ...employeeData })
+      } else {
+        await onAddEmployee(employeeData)
+      }
 
-    resetForm()
-    onOpenChange(false)
-    onClose()
+      resetForm()
+      onOpenChange(false)
+      onClose()
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        setErrors(error.errors)
+        toast.error("Thông tin không hợp lệ, vui lòng kiểm tra lại.")
+      } else {
+        console.error(error)
+        toast.error("Đã có lỗi xảy ra. Vui lòng thử lại.")
+      }
+    }
   }
 
   const resetForm = () => {
@@ -134,6 +155,7 @@ export default function AddEmployeeModal({
       experience: "",
       skills: "",
     })
+    setErrors({})
   }
 
   const handleClose = () => {
@@ -144,6 +166,14 @@ export default function AddEmployeeModal({
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+    // Clear error for the field being edited
+    if (errors[field]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev }
+        delete newErrors[field]
+        return newErrors
+      })
+    }
   }
 
   return (
@@ -163,9 +193,10 @@ export default function AddEmployeeModal({
               <TabsTrigger value="detail">Chi tiết</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="basic" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
+            <TabsContent value="basic" className="pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                {/* Name */}
+                <div className="space-y-2">
                   <Label htmlFor="name">Họ và tên *</Label>
                   <Input
                     id="name"
@@ -174,8 +205,13 @@ export default function AddEmployeeModal({
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     required
                   />
+                  <div className="min-h-[1.25rem]">
+                    {errors.name && <p className="text-sm text-red-500">{errors.name[0]}</p>}
+                  </div>
                 </div>
-                <div className="grid gap-2">
+
+                {/* Email */}
+                <div className="space-y-2">
                   <Label htmlFor="email">Email *</Label>
                   <Input
                     id="email"
@@ -185,43 +221,59 @@ export default function AddEmployeeModal({
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     required
                   />
+                  <div className="min-h-[1.25rem]">
+                    {errors.email && <p className="text-sm text-red-500">{errors.email[0]}</p>}
+                  </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
+                {/* Phone */}
+                <div className="space-y-2">
                   <Label htmlFor="phone">Số điện thoại *</Label>
                   <Input
                     id="phone"
                     placeholder="Nhập số điện thoại"
                     value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
+                    onChange={(e) => {
+                      const formatted = formatVietnamesePhoneNumber(e.target.value)
+                      handleInputChange("phone", formatted)
+                    }}
                     required
+                    maxLength={13}
                   />
+                  <div className="min-h-[1.25rem]">
+                    {errors.phone && <p className="text-sm text-red-500">{errors.phone[0]}</p>}
+                  </div>
                 </div>
-                <div className="grid gap-2">
+
+                {/* Gender */}
+                <div className="space-y-2">
                   <Label htmlFor="gender">Giới tính</Label>
                   <Select value={formData.gender} onValueChange={(value) => handleInputChange("gender", value)}>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Chọn giới tính" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Nam">Nam</SelectItem>
-                      <SelectItem value="Nữ">Nữ</SelectItem>
+                      {genders.map((gender: any) => (
+                        <SelectItem key={gender.key} value={gender.key}>
+                          {gender.value}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
+                  <div className="min-h-[1.25rem]">
+                    {errors.gender && <p className="text-sm text-red-500">{errors.gender[0]}</p>}
+                  </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
+                {/* Department */}
+                <div className="space-y-2">
                   <Label htmlFor="department">Phòng ban *</Label>
                   <Select
                     value={formData.departmentId}
                     onValueChange={(value) => handleInputChange("departmentId", value)}
                     required
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Chọn phòng ban" />
                     </SelectTrigger>
                     <SelectContent>
@@ -235,46 +287,61 @@ export default function AddEmployeeModal({
                       </SelectGroup>
                     </SelectContent>
                   </Select>
+                  <div className="min-h-[1.25rem]">
+                    {errors.departmentId && <p className="text-sm text-red-500">{errors.departmentId[0]}</p>}
+                  </div>
                 </div>
-                <div className="grid gap-2">
+
+                {/* Position */}
+                <div className="space-y-2">
                   <Label htmlFor="position">Chức vụ *</Label>
                   <Select
                     value={formData.position}
                     onValueChange={(value) => handleInputChange("position", value)}
                     required
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Chọn chức vụ" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
                         <SelectLabel>Danh sách chức vụ</SelectLabel>
                         {positions.map((position) => (
-                          <SelectItem key={position} value={position}>
-                            {position}
+                          <SelectItem key={position.key} value={position.key}>
+                            {position.value}
                           </SelectItem>
                         ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
+                  <div className="min-h-[1.25rem]">
+                    {errors.position && <p className="text-sm text-red-500">{errors.position[0]}</p>}
+                  </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
+                {/* Salary */}
+                <div className="space-y-2">
                   <Label htmlFor="salary">Lương (VNĐ)</Label>
                   <Input
                     id="salary"
-                    type="number"
+                    type="text"
                     placeholder="Nhập mức lương"
                     value={formData.salary}
-                    onChange={(e) => handleInputChange("salary", e.target.value)}
+                    onChange={(e) => {
+                      const formatted = formatVND(e.target.value)
+                      handleInputChange("salary", formatted)
+                    }}
                   />
+                  <div className="min-h-[1.25rem]">
+                    {errors.salary && <p className="text-sm text-red-500">{errors.salary[0]}</p>}
+                  </div>
                 </div>
-                <div className="grid gap-2">
+
+                {/* Status */}
+                <div className="space-y-2">
                   <Label htmlFor="status">Trạng thái</Label>
                   <Select value={formData.status} onValueChange={(value) => handleInputChange("status", value)}>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Chọn trạng thái" />
                     </SelectTrigger>
                     <SelectContent>
@@ -282,11 +349,14 @@ export default function AddEmployeeModal({
                       <SelectItem value="inactive">Tạm nghỉ</SelectItem>
                     </SelectContent>
                   </Select>
+                  <div className="min-h-[1.25rem]">
+                    {errors.status && <p className="text-sm text-red-500">{errors.status[0]}</p>}
+                  </div>
                 </div>
               </div>
             </TabsContent>
 
-            <TabsContent value="detail" className="space-y-4">
+            <TabsContent value="detail" className="space-y-4 pt-4">
               <div className="grid gap-2">
                 <Label htmlFor="birthDate">Ngày sinh</Label>
                 <Input
@@ -295,6 +365,7 @@ export default function AddEmployeeModal({
                   value={formData.birthDate}
                   onChange={(e) => handleInputChange("birthDate", e.target.value)}
                 />
+                {errors.birthDate && <p className="text-sm text-red-500 mt-1">{errors.birthDate[0]}</p>}
               </div>
 
               <div className="grid gap-2">
@@ -306,6 +377,7 @@ export default function AddEmployeeModal({
                   onChange={(e) => handleInputChange("address", e.target.value)}
                   className="min-h-[60px]"
                 />
+                {errors.address && <p className="text-sm text-red-500 mt-1">{errors.address[0]}</p>}
               </div>
 
               <div className="grid gap-2">
@@ -316,6 +388,7 @@ export default function AddEmployeeModal({
                   value={formData.education}
                   onChange={(e) => handleInputChange("education", e.target.value)}
                 />
+                {errors.education && <p className="text-sm text-red-500 mt-1">{errors.education[0]}</p>}
               </div>
 
               <div className="grid gap-2">
@@ -326,6 +399,7 @@ export default function AddEmployeeModal({
                   value={formData.experience}
                   onChange={(e) => handleInputChange("experience", e.target.value)}
                 />
+                {errors.experience && <p className="text-sm text-red-500 mt-1">{errors.experience[0]}</p>}
               </div>
 
               <div className="grid gap-2">
@@ -338,11 +412,12 @@ export default function AddEmployeeModal({
                   className="min-h-[80px]"
                 />
                 <p className="text-xs text-gray-500">VD: JavaScript, React, Node.js, Python</p>
+                {errors.skills && <p className="text-sm text-red-500 mt-1">{errors.skills[0]}</p>}
               </div>
             </TabsContent>
           </Tabs>
 
-          <DialogFooter className="mt-6">
+          <DialogFooter className="mt-6 pt-4 border-t">
             <Button type="button" variant="outline" onClick={handleClose}>
               Hủy
             </Button>

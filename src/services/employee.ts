@@ -1,6 +1,7 @@
 import api from './api';
 import { API_CONFIG, API_ENDPOINTS } from '@/config/api';
 import { getAuthToken } from './auth';
+import { isAxiosError } from 'axios';
 
 
 const getConfig = () => {
@@ -41,6 +42,14 @@ export interface Employee {
     role: string;
     status: string;
   }>;
+}
+
+// Custom error for validation
+export class ValidationError extends Error {
+  constructor(public errors: Record<string, string[]>) {
+    super('Validation Error');
+    this.name = 'ValidationError';
+  }
 }
 
 // Types cho Employee Summary
@@ -139,6 +148,9 @@ export async function createEmployee(employeeData: Omit<Employee, 'id' | 'joinDa
     const response = await api.post(API_ENDPOINTS.EMPLOYEES.CREATE, employeeData, getConfig());
     return response.data.data;
   } catch (error) {
+    if (isAxiosError(error) && error.response?.status === 422) {
+      throw new ValidationError(error.response.data.errors);
+    }
     console.error('Error creating employee:', error);
     throw error;
   }
@@ -152,6 +164,9 @@ export async function updateEmployee(id: number, employeeData: Partial<Employee>
     const response = await api.put(API_ENDPOINTS.EMPLOYEES.UPDATE(id), employeeData, getConfig());
     return response.data.data;
   } catch (error) {
+    if (isAxiosError(error) && error.response?.status === 422) {
+      throw new ValidationError(error.response.data.errors);
+    }
     console.error('Error updating employee:', error);
     throw error;
   }

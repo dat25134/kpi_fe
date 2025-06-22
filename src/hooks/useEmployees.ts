@@ -6,6 +6,7 @@ import {
   updateEmployee, 
   deleteEmployee,
   fetchEmployeeDetail,
+  ValidationError,
   type Employee,
   type EmployeeSummary,
   type EmployeeFilters,
@@ -28,6 +29,9 @@ export function useEmployees() {
     page: 1,
     limit: 10,
   });
+  const [refetchIndex, setRefetchIndex] = useState(0);
+
+  const refetch = () => setRefetchIndex(prev => prev + 1);
 
   // Fetch employee summary
   const loadSummary = useCallback(async () => {
@@ -59,21 +63,22 @@ export function useEmployees() {
       }
     };
     loadEmployees();
-  }, [JSON.stringify(filters)]); // Deep compare filters object
+  }, [JSON.stringify(filters), refetchIndex]);
 
   // Add new employee
   const addEmployee = useCallback(async (employeeData: Omit<Employee, 'id' | 'joinDate' | 'projects'>) => {
     try {
       setLoading(true);
       const newEmployee = await createEmployee(employeeData);
-      // Reload summary and list
       loadSummary();
-      setFilters(f => ({ ...f, page: 1 })); // Go to first page to see new employee
+      refetch();
       toast.success('Thêm nhân viên thành công');
       return newEmployee;
     } catch (error) {
       console.error('Error adding employee:', error);
-      toast.error('Không thể thêm nhân viên');
+      if (!(error instanceof ValidationError)) {
+        toast.error('Không thể thêm nhân viên');
+      }
       throw error;
     } finally {
       setLoading(false);
@@ -84,17 +89,15 @@ export function useEmployees() {
   const updateEmployeeById = useCallback(async (id: number, employeeData: Partial<Employee>) => {
     try {
       setLoading(true);
-      const updatedEmployee = await updateEmployee(id, employeeData);
-      setEmployees(prev => 
-        prev.map(emp => emp.id === id ? updatedEmployee : emp)
-      );
-      // Potentially reload summary if status/department changes
+      await updateEmployee(id, employeeData);
       loadSummary();
+      refetch();
       toast.success('Cập nhật nhân viên thành công');
-      return updatedEmployee;
     } catch (error) {
       console.error('Error updating employee:', error);
-      toast.error('Không thể cập nhật nhân viên');
+      if (!(error instanceof ValidationError)) {
+        toast.error('Không thể cập nhật nhân viên');
+      }
       throw error;
     } finally {
       setLoading(false);
@@ -106,10 +109,8 @@ export function useEmployees() {
     try {
       setLoading(true);
       await deleteEmployee(id);
-      setEmployees(prev => prev.filter(emp => emp.id !== id));
-       // Reload summary and potentially list
       loadSummary();
-      setFilters(f => ({...f}));
+      refetch();
       toast.success('Xóa nhân viên thành công');
     } catch (error) {
       console.error('Error deleting employee:', error);
