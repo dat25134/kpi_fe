@@ -7,6 +7,7 @@ export const API_ENDPOINTS = {
     REFRESH_TOKEN: `${API_URL}/refresh-token`,
     DEPARTMENT: `${API_URL}/departments`,
     DEPARTMENT_SUMMARY: `${API_URL}/departments/summary`,
+    DEPARTMENT_CREATE: `${API_URL}/departments/`,
   },
   USER: {
     USER_INFO: `${API_URL}/user/info`,

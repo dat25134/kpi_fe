@@ -68,7 +68,7 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
                   <label className="text-sm font-medium text-gray-500">Ngày thành lập</label>
                   <p className="text-sm flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
-                    {department.createdAt}
+                    {department.created_at}
                   </p>
                 </div>
               </div>
@@ -81,25 +81,29 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
               <CardTitle className="text-lg">Trưởng phòng</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center space-x-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarFallback className="bg-blue-100 text-blue-900">{department.manager.avatar}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <h3 className="font-medium">{department.manager.name}</h3>
-                  <p className="text-sm text-gray-500">{department.manager.position}</p>
-                  <div className="flex items-center gap-4 mt-2">
-                    <span className="text-xs text-gray-500 flex items-center gap-1">
-                      <Mail className="h-3 w-3" />
-                      {department.manager.name.toLowerCase().replace(/\s+/g, ".")}@company.com
-                    </span>
-                    <span className="text-xs text-gray-500 flex items-center gap-1">
-                      <Phone className="h-3 w-3" />
-                      +84 123 456 789
-                    </span>
+              {department.manager ? (
+                <div className="flex items-center space-x-4">
+                  <Avatar className="h-12 w-12">
+                    <AvatarFallback className="bg-blue-100 text-blue-900">{department.manager.avatar}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <h3 className="font-medium">{department.manager.name}</h3>
+                    <p className="text-sm text-gray-500">{department.manager.position}</p>
+                    <div className="flex items-center gap-4 mt-2">
+                      <span className="text-xs text-gray-500 flex items-center gap-1">
+                        <Mail className="h-3 w-3" />
+                        {department.manager.name.toLowerCase().replace(/\s+/g, ".")}@company.com
+                      </span>
+                      <span className="text-xs text-gray-500 flex items-center gap-1">
+                        <Phone className="h-3 w-3" />
+                        +84 123 456 789
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <p className="text-sm text-gray-500">Chưa có thông tin trưởng phòng.</p>
+              )}
             </CardContent>
           </Card>
 
@@ -114,21 +118,26 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
             <CardContent>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <div className="text-2xl font-bold text-blue-600">{department.employeeCount}</div>
+                  <div className="text-2xl font-bold text-blue-600">{department.employeeCount || 0}</div>
                   <div className="text-sm text-gray-500">Tổng nhân viên</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-green-600">
-                    {department.employees?.filter(
-                      (emp) => emp.position === "Trưởng phòng" || emp.position === "Phó phòng",
-                    ).length || 1}
+                    {department.employees
+                      ? department.employees.filter(
+                          (emp: any) => emp.position === "Trưởng phòng" || emp.position === "Phó phòng",
+                        ).length
+                      : department.manager
+                        ? 1
+                        : 0}
                   </div>
                   <div className="text-sm text-gray-500">Quản lý</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-orange-600">
-                    {department.employees?.filter((emp) => emp.position === "Chuyên viên").length ||
-                      department.employeeCount - 1}
+                    {department.employees
+                      ? department.employees.filter((emp: any) => emp.position === "Chuyên viên").length
+                      : (department.employeeCount || 0) - (department.manager ? 1 : 0)}
                   </div>
                   <div className="text-sm text-gray-500">Chuyên viên</div>
                 </div>
@@ -140,34 +149,40 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Danh sách nhân viên</CardTitle>
-              <CardDescription>{department.employeeCount} nhân viên trong phòng ban</CardDescription>
+              <CardDescription>{department.employeeCount || 0} nhân viên trong phòng ban</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {department.employees?.map((employee: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-gray-100 text-gray-600 text-xs">{employee.avatar}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium text-sm">{employee.name}</p>
-                        <p className="text-xs text-gray-500">{employee.position}</p>
+                {department.employees && department.employees.length > 0 ? (
+                  department.employees.map((employee: any, index: number) => (
+                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-gray-100 text-gray-600 text-xs">
+                            {employee.avatar}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium text-sm">{employee.name}</p>
+                          <p className="text-xs text-gray-500">{employee.position}</p>
+                        </div>
                       </div>
+                      <Badge
+                        variant={
+                          employee.position === "Trưởng phòng"
+                            ? "default"
+                            : employee.position === "Phó phòng"
+                              ? "secondary"
+                              : "outline"
+                        }
+                      >
+                        {employee.position}
+                      </Badge>
                     </div>
-                    <Badge
-                      variant={
-                        employee.position === "Trưởng phòng"
-                          ? "default"
-                          : employee.position === "Phó phòng"
-                            ? "secondary"
-                            : "outline"
-                      }
-                    >
-                      {employee.position}
-                    </Badge>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <div className="text-center text-gray-500 py-4">Chưa có thông tin nhân viên.</div>
+                )}
               </div>
             </CardContent>
           </Card>
