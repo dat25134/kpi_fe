@@ -12,13 +12,20 @@ import AddDepartmentModal from "./add-department-modal"
 import DepartmentDetailModal from "./department-detail-modal"
 import { useState } from "react"
 import LoadingSpinner from "@/components/ui/loading-spinner"
+import { useSWRConfig } from "swr"
+import { deleteDepartment } from "@/services/department"
+import ConfirmDeleteModal from "./confirm-delete-modal"
+import { toast } from "sonner"
 
 export default function DepartmentManagement({ departments, summary, isLoading }: { departments: any[], summary: any, isLoading: boolean }) {
+  const { mutate } = useSWRConfig()
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [selectedDepartment, setSelectedDepartment] = useState<any>(null)
   const [editingDepartment, setEditingDepartment] = useState<any>(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [departmentToDelete, setDepartmentToDelete] = useState<number | null>(null)
 
   const filteredDepartments = departments.filter(
     (dept) =>
@@ -27,25 +34,36 @@ export default function DepartmentManagement({ departments, summary, isLoading }
   )
 
   const handleAddDepartment = (newDepartment: any) => {
-    const department = {
-      ...newDepartment,
-      id: Math.floor(Math.random() * 1000),
-      employeeCount: 0,
-      status: "active",
-      createdAt: new Date().toLocaleDateString("vi-VN"),
-      employees: [],
-    }
-    // TODO: Gọi API thêm phòng ban ở đây
+    // Không cần thêm thủ công vì SWR sẽ tự động cập nhật
+    // sau khi gọi mutate
+    mutate("departments")
+    mutate("departments-summary")
   }
 
-  const handleEditDepartment = (updatedDepartment: any) => {
-    // TODO: Gọi API sửa phòng ban ở đây
+  const handleEditDepartment = () => {
+    mutate("departments")
+    mutate("departments-summary")
     setEditingDepartment(null)
   }
 
-  const handleDeleteDepartment = (id: number) => {
-    if (confirm("Bạn có chắc chắn muốn xóa phòng ban này?")) {
-      // TODO: Gọi API xóa phòng ban ở đây
+  const handleDeleteRequest = (id: number) => {
+    setDepartmentToDelete(id)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!departmentToDelete) return
+    try {
+      await deleteDepartment(departmentToDelete)
+      toast.success("Xóa phòng ban thành công!")
+      mutate("departments")
+      mutate("departments-summary")
+    } catch (error) {
+      console.error("Failed to delete department", error)
+      toast.error("Xóa phòng ban thất bại. Vui lòng thử lại.")
+    } finally {
+      setIsDeleteModalOpen(false)
+      setDepartmentToDelete(null)
     }
   }
 
@@ -227,16 +245,13 @@ export default function DepartmentManagement({ departments, summary, isLoading }
                             <Eye className="mr-2 h-4 w-4" />
                             Xem chi tiết
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleEdit(department)}>
+                          <DropdownMenuItem onSelect={() => handleEdit(department)}>
                             <Edit className="mr-2 h-4 w-4" />
-                            Chỉnh sửa
+                            <span>Sửa</span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDeleteDepartment(department.id)}
-                            className="text-red-600"
-                          >
+                          <DropdownMenuItem onSelect={() => handleDeleteRequest(department.id)} className="text-destructive">
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Xóa
+                            <span>Xóa</span>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -252,16 +267,30 @@ export default function DepartmentManagement({ departments, summary, isLoading }
       {/* Modals */}
       <AddDepartmentModal
         open={isAddModalOpen}
-        onOpenChange={setIsAddModalOpen}
-        onAddDepartment={editingDepartment ? handleEditDepartment : handleAddDepartment}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setEditingDepartment(null)
+          }
+          setIsAddModalOpen(isOpen)
+        }}
+        onClose={() => setIsAddModalOpen(false)}
+        onAddDepartment={handleAddDepartment}
+        onEditDepartment={handleEditDepartment}
         editingDepartment={editingDepartment}
-        onClose={() => setEditingDepartment(null)}
       />
 
       <DepartmentDetailModal
         open={isDetailModalOpen}
         onOpenChange={setIsDetailModalOpen}
         department={selectedDepartment}
+      />
+
+      <ConfirmDeleteModal
+        open={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        onConfirm={handleConfirmDelete}
+        title="Xác nhận xóa phòng ban"
+        description="Bạn có chắc chắn muốn xóa phòng ban này không? Hành động này không thể được hoàn tác."
       />
     </div>
   )
