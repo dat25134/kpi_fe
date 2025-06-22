@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -22,160 +22,16 @@ import {
   Building2,
   UserCheck,
   UserX,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import AddEmployeeModal from "./add-employee-modal"
 import EmployeeDetailModal from "./employee-detail-modal"
+import { useEmployees } from "@/hooks/useEmployees"
+import LoadingSpinner from "@/components/ui/loading-spinner"
 
-// Dữ liệu mẫu nhân viên
-const initialEmployees = [
-  {
-    id: 1,
-    name: "Phạm Ngọc Vinh",
-    avatar: "PNV",
-    email: "pham.ngoc.vinh@company.com",
-    phone: "+84 123 456 789",
-    position: "Trưởng phòng",
-    department: {
-      id: 1,
-      name: "Phòng Quản trị nền tảng số và VTTT",
-      code: "QTNT",
-    },
-    status: "active",
-    joinDate: "15/01/2020",
-    salary: 25000000,
-    address: "123 Đường ABC, Quận 1, TP.HCM",
-    birthDate: "15/05/1985",
-    gender: "Nam",
-    education: "Thạc sĩ Công nghệ thông tin",
-    experience: "8 năm",
-    skills: ["JavaScript", "React", "Node.js", "Python", "SQL"],
-    projects: [
-      { name: "Hệ thống KPI", role: "Project Manager", status: "Đang thực hiện" },
-      { name: "Ứng dụng Tây Ninh Smart", role: "Tech Lead", status: "Hoàn thành" },
-    ],
-  },
-  {
-    id: 2,
-    name: "Phan Vinh Khang",
-    avatar: "PVK",
-    email: "phan.vinh.khang@company.com",
-    phone: "+84 987 654 321",
-    position: "Chuyên viên",
-    department: {
-      id: 1,
-      name: "Phòng Quản trị nền tảng số và VTTT",
-      code: "QTNT",
-    },
-    status: "active",
-    joinDate: "10/03/2021",
-    salary: 18000000,
-    address: "456 Đường DEF, Quận 3, TP.HCM",
-    birthDate: "20/08/1992",
-    gender: "Nam",
-    education: "Cử nhân Công nghệ thông tin",
-    experience: "4 năm",
-    skills: ["Vue.js", "Laravel", "MySQL", "Docker"],
-    projects: [
-      { name: "Website công ty", role: "Frontend Developer", status: "Hoàn thành" },
-      { name: "Hệ thống CRM", role: "Full-stack Developer", status: "Đang thực hiện" },
-    ],
-  },
-  {
-    id: 3,
-    name: "Lê Hữu Lợi",
-    avatar: "LHL",
-    email: "le.huu.loi@company.com",
-    phone: "+84 555 123 456",
-    position: "Chuyên viên",
-    department: {
-      id: 1,
-      name: "Phòng Quản trị nền tảng số và VTTT",
-      code: "QTNT",
-    },
-    status: "active",
-    joinDate: "05/07/2022",
-    salary: 16000000,
-    address: "789 Đường GHI, Quận 7, TP.HCM",
-    birthDate: "12/12/1994",
-    gender: "Nam",
-    education: "Cử nhân Khoa học máy tính",
-    experience: "3 năm",
-    skills: ["Python", "Django", "PostgreSQL", "Redis"],
-    projects: [{ name: "API Gateway", role: "Backend Developer", status: "Đang thực hiện" }],
-  },
-  {
-    id: 4,
-    name: "Đặng Trần Như Hảo",
-    avatar: "ĐTNH",
-    email: "dang.tran.nhu.hao@company.com",
-    phone: "+84 777 888 999",
-    position: "Chuyên viên",
-    department: {
-      id: 1,
-      name: "Phòng Quản trị nền tảng số và VTTT",
-      code: "QTNT",
-    },
-    status: "active",
-    joinDate: "20/11/2021",
-    salary: 17000000,
-    address: "321 Đường JKL, Quận 5, TP.HCM",
-    birthDate: "08/03/1993",
-    gender: "Nữ",
-    education: "Cử nhân Hệ thống thông tin",
-    experience: "3.5 năm",
-    skills: ["Angular", "Spring Boot", "Oracle", "Jenkins"],
-    projects: [{ name: "Hệ thống báo cáo", role: "Frontend Developer", status: "Hoàn thành" }],
-  },
-  {
-    id: 5,
-    name: "Trần Văn Nam",
-    avatar: "TVN",
-    email: "tran.van.nam@company.com",
-    phone: "+84 333 444 555",
-    position: "Trưởng phòng",
-    department: {
-      id: 2,
-      name: "Phòng Tài chính - Kế toán",
-      code: "TCKT",
-    },
-    status: "active",
-    joinDate: "01/01/2019",
-    salary: 28000000,
-    address: "654 Đường MNO, Quận 2, TP.HCM",
-    birthDate: "25/07/1980",
-    gender: "Nam",
-    education: "Thạc sĩ Tài chính - Ngân hàng",
-    experience: "12 năm",
-    skills: ["Excel", "SAP", "Financial Analysis", "Budgeting"],
-    projects: [{ name: "Hệ thống ERP", role: "Business Analyst", status: "Đang thực hiện" }],
-  },
-  {
-    id: 6,
-    name: "Hoàng Thị Minh",
-    avatar: "HTM",
-    email: "hoang.thi.minh@company.com",
-    phone: "+84 666 777 888",
-    position: "Trưởng phòng",
-    department: {
-      id: 3,
-      name: "Phòng Nhân sự",
-      code: "NS",
-    },
-    status: "active",
-    joinDate: "15/06/2018",
-    salary: 26000000,
-    address: "987 Đường PQR, Quận 4, TP.HCM",
-    birthDate: "10/11/1982",
-    gender: "Nữ",
-    education: "Thạc sĩ Quản trị nhân lực",
-    experience: "10 năm",
-    skills: ["HR Management", "Recruitment", "Training", "Performance Management"],
-    projects: [{ name: "Hệ thống quản lý nhân sự", role: "Product Owner", status: "Hoàn thành" }],
-  },
-]
-
-// Danh sách phòng ban
+// Danh sách phòng ban (có thể lấy từ API departments)
 const departments = [
   { id: 1, name: "Phòng Quản trị nền tảng số và VTTT", code: "QTNT" },
   { id: 2, name: "Phòng Tài chính - Kế toán", code: "TCKT" },
@@ -187,7 +43,22 @@ const departments = [
 const positions = ["Trưởng phòng", "Phó phòng", "Chuyên viên", "Nhân viên"]
 
 export default function EmployeeManagement() {
-  const [employees, setEmployees] = useState(initialEmployees)
+  const {
+    employees,
+    summary,
+    loading,
+    summaryLoading,
+    pagination,
+    filters,
+    addEmployee,
+    updateEmployeeById,
+    removeEmployee,
+    getEmployeeDetail,
+    applyFilters,
+    changePage,
+    clearFilters,
+  } = useEmployees()
+
   const [searchTerm, setSearchTerm] = useState("")
   const [departmentFilter, setDepartmentFilter] = useState("")
   const [positionFilter, setPositionFilter] = useState("")
@@ -197,42 +68,67 @@ export default function EmployeeManagement() {
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null)
   const [editingEmployee, setEditingEmployee] = useState<any>(null)
 
-  const filteredEmployees = employees.filter((emp) => {
-    const matchesSearch =
-      emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.phone.includes(searchTerm)
-    const matchesDepartment = !departmentFilter || emp.department.id.toString() === departmentFilter
-    const matchesPosition = !positionFilter || emp.position === positionFilter
-    const matchesStatus = !statusFilter || emp.status === statusFilter
+  // Apply filters when search/filter values change
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const newFilters: any = {}
+      
+      if (searchTerm) {
+        newFilters.search = searchTerm
+      }
+      if (departmentFilter && departmentFilter !== "all") {
+        newFilters.departmentId = parseInt(departmentFilter)
+      }
+      if (positionFilter && positionFilter !== "all") {
+        newFilters.position = positionFilter
+      }
+      if (statusFilter && statusFilter !== "all") {
+        newFilters.status = statusFilter
+      }
+      
+      applyFilters(newFilters)
+    }, 500) // Debounce search
 
-    return matchesSearch && matchesDepartment && matchesPosition && matchesStatus
-  })
+    return () => clearTimeout(timeoutId)
+  }, [searchTerm, departmentFilter, positionFilter, statusFilter, applyFilters])
 
-  const handleAddEmployee = (newEmployee: any) => {
-    const employee = {
-      ...newEmployee,
-      id: Math.floor(Math.random() * 1000),
-      joinDate: new Date().toLocaleDateString("vi-VN"),
-      projects: [],
+  const handleAddEmployee = async (newEmployee: any) => {
+    try {
+      await addEmployee(newEmployee)
+      setIsAddModalOpen(false)
+    } catch (error) {
+      // Error handling is done in the hook
     }
-    setEmployees([...employees, employee])
   }
 
-  const handleEditEmployee = (updatedEmployee: any) => {
-    setEmployees(employees.map((emp) => (emp.id === updatedEmployee.id ? { ...emp, ...updatedEmployee } : emp)))
-    setEditingEmployee(null)
+  const handleEditEmployee = async (updatedEmployee: any) => {
+    try {
+      await updateEmployeeById(updatedEmployee.id, updatedEmployee)
+      setIsAddModalOpen(false)
+      setEditingEmployee(null)
+    } catch (error) {
+      // Error handling is done in the hook
+    }
   }
 
-  const handleDeleteEmployee = (id: number) => {
+  const handleDeleteEmployee = async (id: number) => {
     if (confirm("Bạn có chắc chắn muốn xóa nhân viên này?")) {
-      setEmployees(employees.filter((emp) => emp.id !== id))
+      try {
+        await removeEmployee(id)
+      } catch (error) {
+        // Error handling is done in the hook
+      }
     }
   }
 
-  const handleViewDetail = (employee: any) => {
-    setSelectedEmployee(employee)
-    setIsDetailModalOpen(true)
+  const handleViewDetail = async (employee: any) => {
+    try {
+      const detailedEmployee = await getEmployeeDetail(employee.id)
+      setSelectedEmployee(detailedEmployee)
+      setIsDetailModalOpen(true)
+    } catch (error) {
+      // Error handling is done in the hook
+    }
   }
 
   const handleEdit = (employee: any) => {
@@ -240,18 +136,28 @@ export default function EmployeeManagement() {
     setIsAddModalOpen(true)
   }
 
-  const clearFilters = () => {
+  const handleClearFilters = () => {
     setSearchTerm("")
     setDepartmentFilter("")
     setPositionFilter("")
     setStatusFilter("")
+    clearFilters()
   }
 
-  // Thống kê
-  const totalEmployees = employees.length
-  const activeEmployees = employees.filter((emp) => emp.status === "active").length
-  const inactiveEmployees = employees.filter((emp) => emp.status === "inactive").length
-  const averageSalary = Math.round(employees.reduce((sum, emp) => sum + emp.salary, 0) / employees.length)
+  const handlePageChange = (page: number) => {
+    changePage(page)
+  }
+
+  // Loading states
+  if (summaryLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <LoadingSpinner />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto p-6">
@@ -274,7 +180,7 @@ export default function EmployeeManagement() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalEmployees}</div>
+            <div className="text-2xl font-bold">{summary?.totalEmployees || 0}</div>
             <p className="text-xs text-muted-foreground">Tất cả nhân viên</p>
           </CardContent>
         </Card>
@@ -284,7 +190,7 @@ export default function EmployeeManagement() {
             <UserCheck className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{activeEmployees}</div>
+            <div className="text-2xl font-bold text-green-600">{summary?.activeEmployees || 0}</div>
             <p className="text-xs text-muted-foreground">Nhân viên hoạt động</p>
           </CardContent>
         </Card>
@@ -294,7 +200,7 @@ export default function EmployeeManagement() {
             <UserX className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{inactiveEmployees}</div>
+            <div className="text-2xl font-bold text-red-600">{summary?.inactiveEmployees || 0}</div>
             <p className="text-xs text-muted-foreground">Nhân viên tạm nghỉ</p>
           </CardContent>
         </Card>
@@ -304,7 +210,7 @@ export default function EmployeeManagement() {
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{averageSalary.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{(summary?.averageSalary || 0).toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">VNĐ/tháng</p>
           </CardContent>
         </Card>
@@ -365,7 +271,7 @@ export default function EmployeeManagement() {
                 <SelectItem value="inactive">Tạm nghỉ</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={clearFilters}>
+            <Button variant="outline" onClick={handleClearFilters}>
               Xóa bộ lọc
             </Button>
           </div>
@@ -377,108 +283,151 @@ export default function EmployeeManagement() {
         <CardHeader>
           <CardTitle>Danh sách nhân viên</CardTitle>
           <CardDescription>
-            Hiển thị {filteredEmployees.length} trên {employees.length} nhân viên
+            Hiển thị {employees.length} trên {pagination.totalItems} nhân viên
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nhân viên</TableHead>
-                <TableHead>Liên hệ</TableHead>
-                <TableHead>Phòng ban</TableHead>
-                <TableHead>Chức vụ</TableHead>
-                <TableHead>Trạng thái</TableHead>
-                <TableHead>Ngày vào</TableHead>
-                <TableHead className="text-right">Thao tác</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredEmployees.map((employee) => (
-                <TableRow key={employee.id}>
-                  <TableCell>
-                    <div className="flex items-center space-x-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-blue-100 text-blue-900 text-sm">{employee.avatar}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">{employee.name}</div>
-                        <div className="text-sm text-gray-500">ID: {employee.id}</div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="flex items-center text-sm">
-                        <Mail className="h-3 w-3 mr-1 text-gray-400" />
-                        {employee.email}
-                      </div>
-                      <div className="flex items-center text-sm">
-                        <Phone className="h-3 w-3 mr-1 text-gray-400" />
-                        {employee.phone}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium text-sm">{employee.department.name}</div>
-                      <Badge variant="outline" className="text-xs">
-                        {employee.department.code}
-                      </Badge>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        employee.position === "Trưởng phòng"
-                          ? "default"
-                          : employee.position === "Phó phòng"
-                            ? "secondary"
-                            : "outline"
-                      }
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <LoadingSpinner />
+            </div>
+          ) : employees.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Users className="h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Không tìm thấy nhân viên</h3>
+              <p className="text-gray-500">Không có nhân viên nào phù hợp với bộ lọc hiện tại.</p>
+            </div>
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nhân viên</TableHead>
+                    <TableHead>Liên hệ</TableHead>
+                    <TableHead>Phòng ban</TableHead>
+                    <TableHead>Chức vụ</TableHead>
+                    <TableHead>Trạng thái</TableHead>
+                    <TableHead>Ngày vào</TableHead>
+                    <TableHead className="text-right">Thao tác</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {employees.map((employee) => (
+                    <TableRow key={employee.id}>
+                      <TableCell>
+                        <div className="flex items-center space-x-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarFallback className="bg-blue-100 text-blue-900 text-sm">{employee.avatar}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="font-medium">{employee.name}</div>
+                            <div className="text-sm text-gray-500">ID: {employee.id}</div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center text-sm">
+                            <Mail className="h-3 w-3 mr-1 text-gray-400" />
+                            {employee.email}
+                          </div>
+                          <div className="flex items-center text-sm">
+                            <Phone className="h-3 w-3 mr-1 text-gray-400" />
+                            {employee.phone}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium text-sm">{employee.department.name}</div>
+                          <Badge variant="outline" className="text-xs">
+                            {employee.department.code}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            employee.position === "Trưởng phòng"
+                              ? "default"
+                              : employee.position === "Phó phòng"
+                                ? "secondary"
+                                : "outline"
+                          }
+                        >
+                          {employee.position}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={
+                            employee.status === "active"
+                              ? "bg-green-100 text-green-800 hover:bg-green-100"
+                              : "bg-red-100 text-red-800 hover:bg-red-100"
+                          }
+                        >
+                          {employee.status === "active" ? "Đang làm việc" : "Tạm nghỉ"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{employee.joinDate}</TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleViewDetail(employee)}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Xem chi tiết
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEdit(employee)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Chỉnh sửa
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeleteEmployee(employee.id)} className="text-red-600">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Xóa
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              {/* Pagination */}
+              {pagination.totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                  <div className="text-sm text-gray-700">
+                    Trang {pagination.currentPage} của {pagination.totalPages}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(pagination.currentPage - 1)}
+                      disabled={pagination.currentPage <= 1}
                     >
-                      {employee.position}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      className={
-                        employee.status === "active"
-                          ? "bg-green-100 text-green-800 hover:bg-green-100"
-                          : "bg-red-100 text-red-800 hover:bg-red-100"
-                      }
+                      <ChevronLeft className="h-4 w-4" />
+                      Trước
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(pagination.currentPage + 1)}
+                      disabled={pagination.currentPage >= pagination.totalPages}
                     >
-                      {employee.status === "active" ? "Đang làm việc" : "Tạm nghỉ"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{employee.joinDate}</TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleViewDetail(employee)}>
-                          <Eye className="mr-2 h-4 w-4" />
-                          Xem chi tiết
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(employee)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Chỉnh sửa
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDeleteEmployee(employee.id)} className="text-red-600">
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Xóa
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                      Sau
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </CardContent>
       </Card>
 
