@@ -14,6 +14,14 @@ export const API_ENDPOINTS = {
     PROFILE: `${API_URL}/user/profile`,
     UPDATE_PROFILE: `${API_URL}/user/profile`,
   },
+  EMPLOYEES: {
+    LIST: `${API_URL}/employees`,
+    SUMMARY: `${API_URL}/employees/summary`,
+    CREATE: `${API_URL}/employees`,
+    UPDATE: (id: number) => `${API_URL}/employees/${id}`,
+    DELETE: (id: number) => `${API_URL}/employees/${id}`,
+    DETAIL: (id: number) => `${API_URL}/employees/${id}`,
+  },
   // Thêm các nhóm API khác ở đây
 } as const;
 
