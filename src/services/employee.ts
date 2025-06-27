@@ -1,7 +1,8 @@
-import api from './api';
 import { API_CONFIG, API_ENDPOINTS } from '@/config/api';
 import { getAuthToken } from './auth';
 import { isAxiosError } from 'axios';
+import apiClient from "./apiClient";
+import { handleApiError } from "./errorHandler";
 
 
 const getConfig = () => {
@@ -98,11 +99,10 @@ export interface EmployeeFilters {
  */
 export async function fetchEmployeeSummary(): Promise<EmployeeSummary> {
   try {
-    const response = await api.get(API_ENDPOINTS.EMPLOYEES.SUMMARY, getConfig());
+    const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.SUMMARY, getConfig());
     return response.data.data;
   } catch (error) {
-    console.error('Error fetching employee summary:', error);
-    throw error;
+    throw handleApiError(error);
   }
 }
 
@@ -132,11 +132,10 @@ export async function fetchEmployees(filters: EmployeeFilters = {}): Promise<Emp
       params.append('limit', filters.limit.toString());
     }
 
-    const response = await api.get(`${API_ENDPOINTS.EMPLOYEES.LIST}?${params.toString()}`, getConfig());
+    const response = await apiClient.get(`${API_ENDPOINTS.EMPLOYEES.LIST}?${params.toString()}`, getConfig());
     return response.data.data;
   } catch (error) {
-    console.error('Error fetching employees:', error);
-    throw error;
+    throw handleApiError(error);
   }
 }
 
@@ -145,7 +144,7 @@ export async function fetchEmployees(filters: EmployeeFilters = {}): Promise<Emp
  */
 export async function createEmployee(employeeData: Omit<Employee, 'id' | 'joinDate' | 'projects'>): Promise<Employee> {
   try {
-    const response = await api.post(API_ENDPOINTS.EMPLOYEES.CREATE, employeeData, getConfig());
+    const response = await apiClient.post(API_ENDPOINTS.EMPLOYEES.CREATE, employeeData, getConfig());
     return response.data.data;
   } catch (error) {
     if (isAxiosError(error) && error.response?.status === 422) {
@@ -161,7 +160,7 @@ export async function createEmployee(employeeData: Omit<Employee, 'id' | 'joinDa
  */
 export async function updateEmployee(id: number, employeeData: Partial<Employee>): Promise<Employee> {
   try {
-    const response = await api.put(API_ENDPOINTS.EMPLOYEES.UPDATE(id), employeeData, getConfig());
+    const response = await apiClient.put(API_ENDPOINTS.EMPLOYEES.UPDATE(id), employeeData, getConfig());
     return response.data.data;
   } catch (error) {
     if (isAxiosError(error) && error.response?.status === 422) {
@@ -177,7 +176,7 @@ export async function updateEmployee(id: number, employeeData: Partial<Employee>
  */
 export async function deleteEmployee(id: number): Promise<void> {
   try {
-    await api.delete(API_ENDPOINTS.EMPLOYEES.DELETE(id), getConfig());
+    await apiClient.delete(API_ENDPOINTS.EMPLOYEES.DELETE(id), getConfig());
   } catch (error) {
     console.error('Error deleting employee:', error);
     throw error;
@@ -189,7 +188,7 @@ export async function deleteEmployee(id: number): Promise<void> {
  */
 export async function fetchEmployeeDetail(id: number): Promise<Employee> {
   try {
-    const response = await api.get(API_ENDPOINTS.EMPLOYEES.DETAIL(id), getConfig());
+    const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.DETAIL(id), getConfig());
     return response.data.data;
   } catch (error) {
     console.error('Error fetching employee detail:', error);

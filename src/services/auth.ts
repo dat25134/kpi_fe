@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from '@/config/api';
-import api from './api';
+import apiClient from "./apiClient";
+import { handleApiError } from "./errorHandler";
 
 export interface LoginResponse {
   token: string;
@@ -10,17 +11,14 @@ export interface LoginResponse {
   };
 }
 
-export const login = async (email: string, password: string): Promise<LoginResponse> => {
+export async function login(email: string, password: string): Promise<any> {
   try {
-    const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, {
-      email,
-      password,
-    });
+    const response = await apiClient.post(API_ENDPOINTS.AUTH.LOGIN, { email, password });
     return response.data;
   } catch (error) {
-    throw error;
+    throw handleApiError(error);
   }
-};
+}
 
 export const setAuthToken = (token: string) => {
   if (token) {
