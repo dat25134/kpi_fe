@@ -3,6 +3,7 @@ import { getAuthToken } from './auth';
 import { isAxiosError } from 'axios';
 import apiClient from "./apiClient";
 import { handleApiError } from "./errorHandler";
+import type { Employee, EmployeeSummary, EmployeeListResponse, EmployeeFilters } from '@/types/employee';
 
 
 const getConfig = () => {
@@ -16,80 +17,12 @@ const getConfig = () => {
   };
 }
 
-// Types cho Employee
-export interface Employee {
-  id: number;
-  name: string;
-  avatar: string;
-  email: string;
-  phone: string;
-  position: string;
-  department: {
-    id: number;
-    name: string;
-    code: string;
-  };
-  status: 'active' | 'inactive';
-  joinDate: string;
-  salary: number;
-  address: string;
-  birthDate: string;
-  gender: 'Nam' | 'Nữ';
-  education: string;
-  experience: string;
-  skills: string[];
-  projects: Array<{
-    name: string;
-    role: string;
-    status: string;
-  }>;
-}
-
 // Custom error for validation
 export class ValidationError extends Error {
   constructor(public errors: Record<string, string[]>) {
     super('Validation Error');
     this.name = 'ValidationError';
   }
-}
-
-// Types cho Employee Summary
-export interface EmployeeSummary {
-  totalEmployees: number;
-  activeEmployees: number;
-  inactiveEmployees: number;
-  averageSalary: number;
-  departmentStats: Array<{
-    departmentId: number;
-    departmentName: string;
-    departmentCode: string;
-    employeeCount: number;
-  }>;
-  positionStats: Array<{
-    position: string;
-    count: number;
-  }>;
-}
-
-// Types cho Employee List Response
-export interface EmployeeListResponse {
-  employees: Employee[];
-  pagination: {
-    currentPage: number;
-    totalPages: number;
-    totalItems: number;
-    itemsPerPage: number;
-  };
-}
-
-// Types cho Employee Filters
-export interface EmployeeFilters {
-  search?: string;
-  departmentId?: number;
-  position?: string;
-  status?: 'active' | 'inactive';
-  page?: number;
-  limit?: number;
 }
 
 // API Functions

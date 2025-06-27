@@ -1,15 +1,7 @@
 import { API_ENDPOINTS } from '@/config/api';
 import apiClient from "./apiClient";
 import { handleApiError } from "./errorHandler";
-
-export interface LoginResponse {
-  token: string;
-  user: {
-    id: number;
-    email: string;
-    // Add other user fields as needed
-  };
-}
+import type { LoginResponse } from '@/types/auth';
 
 export async function login(email: string, password: string): Promise<any> {
   try {

@@ -26,8 +26,7 @@ import {
   ChevronRight,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import AddEmployeeModal from "./add-employee-modal"
-import EmployeeDetailModal from "./employee-detail-modal"
+import dynamic from "next/dynamic"
 import { useEmployees } from "@/hooks/useEmployees"
 import { useDepartments } from "@/hooks/useDepartments"
 import LoadingSpinner from "@/components/ui/loading-spinner"
@@ -35,7 +34,10 @@ import { POSITIONS, GENDERS } from "@/constants/options"
 import { getPositionValue, formatVND } from "@/lib/utils"
 import ConfirmDeleteModal from "../shared/confirm-delete-modal"
 import { toast } from "sonner"
-import EmployeeTable from "./EmployeeTable"
+const EmployeeTable = dynamic(() => import("./EmployeeTable"), { ssr: false })
+
+const AddEmployeeModal = dynamic(() => import("./add-employee-modal"), { ssr: false })
+const EmployeeDetailModal = dynamic(() => import("./employee-detail-modal"), { ssr: false })
 
 export default function EmployeeManagement() {
   const {

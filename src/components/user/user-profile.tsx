@@ -24,11 +24,12 @@ import {
   Award,
   FolderOpen,
 } from "lucide-react"
-import UserProfilePersonalInfo from "./UserProfilePersonalInfo"
-import UserProfileDetailInfo from "./UserProfileDetailInfo"
-import UserProfileWorkInfo from "./UserProfileWorkInfo"
-import UserProfileSkills from "./UserProfileSkills"
-import UserProfileProjects from "./UserProfileProjects"
+import dynamic from "next/dynamic"
+const UserProfilePersonalInfo = dynamic(() => import("./UserProfilePersonalInfo"), { ssr: false })
+const UserProfileDetailInfo = dynamic(() => import("./UserProfileDetailInfo"), { ssr: false })
+const UserProfileWorkInfo = dynamic(() => import("./UserProfileWorkInfo"), { ssr: false })
+const UserProfileSkills = dynamic(() => import("./UserProfileSkills"), { ssr: false })
+const UserProfileProjects = dynamic(() => import("./UserProfileProjects"), { ssr: false })
 
 export default function UserProfile({ userProfile }: { userProfile: any }) {
   const [isEditing, setIsEditing] = useState(false)
