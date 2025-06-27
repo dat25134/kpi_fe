@@ -16,6 +16,7 @@ import { useSWRConfig } from "swr"
 import { deleteDepartment } from "@/services/department"
 import ConfirmDeleteModal from "./confirm-delete-modal"
 import { toast } from "sonner"
+import { getPositionValue } from "@/lib/utils"
 
 export default function DepartmentManagement({ departments, summary, isLoading }: { departments: any[], summary: any, isLoading: boolean }) {
   const { mutate } = useSWRConfig()
@@ -203,7 +204,7 @@ export default function DepartmentManagement({ departments, summary, isLoading }
                             {department?.manager?.name ?? "—"}
                           </div>
                           <div className="text-xs text-gray-500">
-                            {department?.manager?.position ?? "—"}
+                            {department?.manager?.position ? getPositionValue(department.manager.position) : "—"}
                           </div>
                         </div>
                       </div>

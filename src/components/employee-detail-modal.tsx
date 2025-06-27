@@ -19,6 +19,7 @@ import {
   Award,
   FolderOpen,
 } from "lucide-react"
+import { getPositionValue, formatVND } from "@/lib/utils"
 
 type EmployeeDetailModalProps = {
   open: boolean
@@ -49,7 +50,7 @@ export default function EmployeeDetailModal({ open, onOpenChange, employee }: Em
                 </Avatar>
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold">{employee.name}</h2>
-                  <p className="text-lg text-gray-600">{employee.position}</p>
+                  <p className="text-lg text-gray-600">{getPositionValue(employee.position)}</p>
                   <div className="flex items-center gap-2 mt-2">
                     <Badge variant="outline" className="flex items-center gap-1">
                       <Building2 className="h-3 w-3" />
@@ -162,14 +163,14 @@ export default function EmployeeDetailModal({ open, onOpenChange, employee }: Em
                       <span className="text-sm text-gray-500">Chức vụ:</span>
                       <Badge
                         variant={
-                          employee.position === "Trưởng phòng"
+                          employee.position === "director"
                             ? "default"
-                            : employee.position === "Phó phòng"
-                              ? "secondary"
-                              : "outline"
+                            : employee.position === "manager"
+                            ? "secondary"
+                            : "outline"
                         }
                       >
-                        {employee.position}
+                        {getPositionValue(employee.position)}
                       </Badge>
                     </div>
                     <div className="flex justify-between">
@@ -193,7 +194,7 @@ export default function EmployeeDetailModal({ open, onOpenChange, employee }: Em
                   <CardContent className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-500">Lương cơ bản:</span>
-                      <span className="text-sm font-medium text-green-600">{employee.salary.toLocaleString()} VNĐ</span>
+                      <span className="text-sm font-medium text-green-600">{formatVND(employee.salary.toString())} VNĐ</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-500">Trạng thái:</span>
