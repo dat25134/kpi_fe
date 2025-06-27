@@ -24,6 +24,11 @@ import {
   Award,
   FolderOpen,
 } from "lucide-react"
+import UserProfilePersonalInfo from "./UserProfilePersonalInfo"
+import UserProfileDetailInfo from "./UserProfileDetailInfo"
+import UserProfileWorkInfo from "./UserProfileWorkInfo"
+import UserProfileSkills from "./UserProfileSkills"
+import UserProfileProjects from "./UserProfileProjects"
 
 export default function UserProfile({ userProfile }: { userProfile: any }) {
   const [isEditing, setIsEditing] = useState(false)
@@ -131,68 +136,12 @@ export default function UserProfile({ userProfile }: { userProfile: any }) {
                 <CardTitle className="text-lg">Thông tin liên hệ</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Họ và tên</Label>
-                  {isEditing ? (
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange("name", e.target.value)}
-                    />
-                  ) : (
-                    <div className="flex items-center gap-3">
-                      <User className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm">{userProfile?.name}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  {isEditing ? (
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                    />
-                  ) : (
-                    <div className="flex items-center gap-3">
-                      <Mail className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm">{userProfile?.email}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Số điện thoại</Label>
-                  {isEditing ? (
-                    <Input
-                      id="phone"
-                      value={formData.phone}
-                      onChange={(e) => handleInputChange("phone", e.target.value)}
-                    />
-                  ) : (
-                    <div className="flex items-center gap-3">
-                      <Phone className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm">{userProfile?.phone}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="address">Địa chỉ</Label>
-                  {isEditing ? (
-                    <Textarea
-                      id="address"
-                      value={formData.address}
-                      onChange={(e) => handleInputChange("address", e.target.value)}
-                      className="min-h-[60px]"
-                    />
-                  ) : (
-                    <div className="flex items-start gap-3">
-                      <MapPin className="h-4 w-4 text-gray-400 mt-0.5" />
-                      <span className="text-sm">{userProfile?.address}</span>
-                    </div>
-                  )}
-                </div>
+                <UserProfilePersonalInfo
+                  isEditing={isEditing}
+                  formData={formData}
+                  userProfile={userProfile}
+                  handleInputChange={handleInputChange}
+                />
               </CardContent>
             </Card>
 
@@ -201,25 +150,7 @@ export default function UserProfile({ userProfile }: { userProfile: any }) {
                 <CardTitle className="text-lg">Thông tin cá nhân</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Ngày sinh:</span>
-                  <span className="text-sm font-medium">{userProfile?.birthDate}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Giới tính:</span>
-                  <span className="text-sm font-medium">{userProfile?.gender}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Ngày vào làm:</span>
-                  <span className="text-sm font-medium flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {userProfile?.joinDate}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Kinh nghiệm:</span>
-                  <span className="text-sm font-medium">{userProfile?.experience}</span>
-                </div>
+                <UserProfileDetailInfo userProfile={userProfile} />
               </CardContent>
             </Card>
           </div>
@@ -257,32 +188,7 @@ export default function UserProfile({ userProfile }: { userProfile: any }) {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Chức vụ:</span>
-                    <Badge variant="default">{userProfile?.position}</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Phòng ban:</span>
-                    <span className="text-sm font-medium">{userProfile?.department?.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Mã phòng:</span>
-                    <Badge variant="outline">{userProfile?.department?.code}</Badge>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Trạng thái:</span>
-                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Đang làm việc</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Kinh nghiệm:</span>
-                    <span className="text-sm font-medium">{userProfile?.experience}</span>
-                  </div>
-                </div>
-              </div>
+              <UserProfileWorkInfo userProfile={userProfile} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -297,26 +203,12 @@ export default function UserProfile({ userProfile }: { userProfile: any }) {
               <CardDescription>Danh sách các kỹ năng và công nghệ thành thạo</CardDescription>
             </CardHeader>
             <CardContent>
-              {isEditing ? (
-                <div className="space-y-2">
-                  <Label htmlFor="skills">Kỹ năng (cách nhau bởi dấu phẩy)</Label>
-                  <Textarea
-                    id="skills"
-                    value={formData.skills}
-                    onChange={(e) => handleInputChange("skills", e.target.value)}
-                    className="min-h-[100px]"
-                    placeholder="VD: JavaScript, React, Node.js, Python"
-                  />
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {userProfile?.skills?.map((skill: string, index: number) => (
-                    <Badge key={index} variant="secondary" className="px-3 py-1">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              )}
+              <UserProfileSkills
+                isEditing={isEditing}
+                formData={formData}
+                userProfile={userProfile}
+                handleInputChange={handleInputChange}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -331,17 +223,7 @@ export default function UserProfile({ userProfile }: { userProfile: any }) {
               <CardDescription>Danh sách các dự án đang tham gia hoặc đã hoàn thành</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {userProfile?.projects?.map((project: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <h4 className="font-medium">{project.name}</h4>
-                      <p className="text-sm text-gray-500">Vai trò: {project.role}</p>
-                    </div>
-                    <Badge variant={project.status === "Hoàn thành" ? "default" : "secondary"}>{project.status}</Badge>
-                  </div>
-                ))}
-              </div>
+              <UserProfileProjects userProfile={userProfile} />
             </CardContent>
           </Card>
         </TabsContent>
