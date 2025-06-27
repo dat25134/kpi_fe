@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Building2, Calendar, Mail, Phone, Users } from "lucide-react"
+import { getPositionValue } from "@/lib/utils"
 
 type DepartmentDetailModalProps = {
   open: boolean
@@ -88,7 +89,7 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
                   </Avatar>
                   <div className="flex-1">
                     <h3 className="font-medium">{department.manager.name}</h3>
-                    <p className="text-sm text-gray-500">{department.manager.position}</p>
+                    <p className="text-sm text-gray-500">{getPositionValue(department.manager.position)}</p>
                     <div className="flex items-center gap-4 mt-2">
                       <span className="text-xs text-gray-500 flex items-center gap-1">
                         <Mail className="h-3 w-3" />
@@ -125,7 +126,9 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
                   <div className="text-2xl font-bold text-green-600">
                     {department.employees
                       ? department.employees.filter(
-                          (emp: any) => emp.position === "Trưởng phòng" || emp.position === "Phó phòng",
+                          (emp: any) =>
+                            emp.position === "director" ||
+                            emp.position === "manager"
                         ).length
                       : department.manager
                         ? 1
@@ -136,7 +139,7 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
                 <div>
                   <div className="text-2xl font-bold text-orange-600">
                     {department.employees
-                      ? department.employees.filter((emp: any) => emp.position === "Chuyên viên").length
+                      ? department.employees.filter((emp: any) => emp.position === "specialist").length
                       : (department.employeeCount || 0) - (department.manager ? 1 : 0)}
                   </div>
                   <div className="text-sm text-gray-500">Chuyên viên</div>
@@ -164,19 +167,19 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
                         </Avatar>
                         <div>
                           <p className="font-medium text-sm">{employee.name}</p>
-                          <p className="text-xs text-gray-500">{employee.position}</p>
+                          <p className="text-xs text-gray-500">{getPositionValue(employee.position)}</p>
                         </div>
                       </div>
                       <Badge
                         variant={
-                          employee.position === "Trưởng phòng"
+                          employee.position === "director"
                             ? "default"
-                            : employee.position === "Phó phòng"
-                              ? "secondary"
-                              : "outline"
+                            : employee.position === "manager"
+                            ? "secondary"
+                            : "outline"
                         }
                       >
-                        {employee.position}
+                        {getPositionValue(employee.position)}
                       </Badge>
                     </div>
                   ))
