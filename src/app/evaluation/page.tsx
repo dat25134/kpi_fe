@@ -1,5 +1,5 @@
-import MainHeader from "@/components/main-header"
-import EvaluationForm from "@/components/evaluation-form"
+import MainHeader from "@/components/shared/main-header"
+import EvaluationForm from "@/components/evaluation/evaluation-form"
 
 export default function EvaluationPage() {
   return (

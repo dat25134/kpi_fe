@@ -1,5 +1,5 @@
-import MainHeader from "@/components/main-header"
-import UserSettings from "@/components/user-settings"
+import MainHeader from "@/components/shared/main-header"
+import UserSettings from "@/components/user/user-settings"
 
 export default function SettingsPage() {
   return (

@@ -1,5 +1,5 @@
-import MainHeader from "@/components/main-header"
-import TaskManagement from "@/components/task-management"
+import MainHeader from "@/components/shared/main-header"
+import TaskManagement from "@/components/task/task-management"
 
 export default function DashboardPage() {
   return (

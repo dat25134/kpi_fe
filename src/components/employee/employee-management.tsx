@@ -33,7 +33,7 @@ import { useDepartments } from "@/hooks/useDepartments"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { POSITIONS, GENDERS } from "@/constants/options"
 import { getPositionValue, formatVND } from "@/lib/utils"
-import ConfirmDeleteModal from "./confirm-delete-modal"
+import ConfirmDeleteModal from "../shared/confirm-delete-modal"
 import { toast } from "sonner"
 import EmployeeTable from "./EmployeeTable"
 

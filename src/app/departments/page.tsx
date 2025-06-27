@@ -1,8 +1,8 @@
 "use client"
 
-import MainHeader from "@/components/main-header"
-import DepartmentManagement from "@/components/department-management"
-import WithRoleGuard from "@/components/with-role-guard"
+import MainHeader from "@/components/shared/main-header"
+import DepartmentManagement from "@/components/department/department-management"
+import WithRoleGuard from "@/components/shared/with-role-guard"
 import { useDepartments, useDepartmentSummary } from "@/hooks/useDepartments"
 
 export default function DepartmentsPage() {

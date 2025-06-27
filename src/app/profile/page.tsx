@@ -1,8 +1,8 @@
 'use client'
 
-import MainHeader from "@/components/main-header"
+import MainHeader from "@/components/shared/main-header"
 import LoadingSpinner from "@/components/ui/loading-spinner";
-import UserProfile from "@/components/user-profile"
+import UserProfile from "@/components/user/user-profile"
 import { useUserProfile } from "@/hooks/useUser"
 
 export default function ProfilePage() {

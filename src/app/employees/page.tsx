@@ -1,8 +1,8 @@
 "use client"
 
-import MainHeader from "@/components/main-header"
-import EmployeeManagement from "@/components/employee-management"
-import WithRoleGuard from "@/components/with-role-guard"
+import MainHeader from "@/components/shared/main-header"
+import EmployeeManagement from "@/components/employee/employee-management"
+import WithRoleGuard from "@/components/shared/with-role-guard"
 
 export default function EmployeesPage() {
   return (
