@@ -11,7 +11,6 @@ import {
   Mail,
   Phone,
   MapPin,
-  Calendar,
   GraduationCap,
   Briefcase,
   Building2,

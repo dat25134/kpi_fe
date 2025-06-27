@@ -4,26 +4,11 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Calendar,
-  GraduationCap,
-  Briefcase,
-  Building2,
-  Edit,
-  Save,
-  X,
-  Award,
-  FolderOpen,
-} from "lucide-react"
+import { Edit, Save, X, Award, FolderOpen, GraduationCap, Briefcase, Building2 } from "lucide-react"
 import dynamic from "next/dynamic"
 const UserProfilePersonalInfo = dynamic(() => import("./UserProfilePersonalInfo"), { ssr: false })
 const UserProfileDetailInfo = dynamic(() => import("./UserProfileDetailInfo"), { ssr: false })

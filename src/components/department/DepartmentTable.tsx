@@ -1,10 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
-import { getPositionValue } from "@/lib/utils";
 import React from "react";
 
 interface DepartmentTableProps {
@@ -47,21 +44,16 @@ export default function DepartmentTable({ departments, onViewDetail, onEdit, onD
                 </div>
               </TableCell>
               <TableCell>
-                <Badge variant="outline">{department?.code ?? "—"}</Badge>
+                {department?.code ?? "—"}
               </TableCell>
               <TableCell>
                 <div className="flex items-center">
-                  <Avatar className="h-8 w-8 mr-2">
-                    <AvatarFallback className="bg-blue-100 text-blue-900 text-xs">
-                      {department?.manager?.avatar ?? "—"}
-                    </AvatarFallback>
-                  </Avatar>
                   <div>
                     <div className="font-medium text-sm">
                       {department?.manager?.name ?? "—"}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {department?.manager?.position ? getPositionValue(department.manager.position) : "—"}
+                      {department?.manager?.position ? department.manager.position : "—"}
                     </div>
                   </div>
                 </div>

@@ -1,12 +1,9 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Building2, Calendar, Mail, Phone, Users } from "lucide-react"
-import { getPositionValue } from "@/lib/utils"
+import { Building2 } from "lucide-react"
 
 type DepartmentDetailModalProps = {
   open: boolean
@@ -42,7 +39,7 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
                 <div>
                   <label className="text-sm font-medium text-gray-500">Mã phòng</label>
                   <p className="text-sm">
-                    <Badge variant="outline">{department.code}</Badge>
+                    {department.code}
                   </p>
                 </div>
               </div>
@@ -54,21 +51,12 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
                 <div>
                   <label className="text-sm font-medium text-gray-500">Trạng thái</label>
                   <p className="text-sm">
-                    <Badge
-                      className={
-                        department.status === "active"
-                          ? "bg-green-100 text-green-800 hover:bg-green-100"
-                          : "bg-red-100 text-red-800 hover:bg-red-100"
-                      }
-                    >
-                      {department.status === "active" ? "Hoạt động" : "Tạm dừng"}
-                    </Badge>
+                    {department.status === "active" ? "Hoạt động" : "Tạm dừng"}
                   </p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Ngày thành lập</label>
                   <p className="text-sm flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
                     {department.created_at}
                   </p>
                 </div>
@@ -84,19 +72,14 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
             <CardContent>
               {department.manager ? (
                 <div className="flex items-center space-x-4">
-                  <Avatar className="h-12 w-12">
-                    <AvatarFallback className="bg-blue-100 text-blue-900">{department.manager.avatar}</AvatarFallback>
-                  </Avatar>
                   <div className="flex-1">
                     <h3 className="font-medium">{department.manager.name}</h3>
-                    <p className="text-sm text-gray-500">{getPositionValue(department.manager.position)}</p>
+                    <p className="text-sm text-gray-500">{department.manager.position}</p>
                     <div className="flex items-center gap-4 mt-2">
                       <span className="text-xs text-gray-500 flex items-center gap-1">
-                        <Mail className="h-3 w-3" />
                         {department.manager.name.toLowerCase().replace(/\s+/g, ".")}@company.com
                       </span>
                       <span className="text-xs text-gray-500 flex items-center gap-1">
-                        <Phone className="h-3 w-3" />
                         +84 123 456 789
                       </span>
                     </div>
@@ -112,7 +95,6 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <Users className="h-5 w-5" />
                 Thống kê nhân sự
               </CardTitle>
             </CardHeader>
@@ -160,27 +142,30 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
                   department.employees.map((employee: any, index: number) => (
                     <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex items-center space-x-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-gray-100 text-gray-600 text-xs">
-                            {employee.avatar}
-                          </AvatarFallback>
-                        </Avatar>
                         <div>
                           <p className="font-medium text-sm">{employee.name}</p>
-                          <p className="text-xs text-gray-500">{getPositionValue(employee.position)}</p>
+                          <p className="text-xs text-gray-500">{employee.position}</p>
                         </div>
                       </div>
-                      <Badge
-                        variant={
-                          employee.position === "director"
-                            ? "default"
-                            : employee.position === "manager"
-                            ? "secondary"
-                            : "outline"
-                        }
-                      >
-                        {getPositionValue(employee.position)}
-                      </Badge>
+                      <div>
+                        {employee.position === "director" || employee.position === "manager" ? (
+                          <Badge
+                            variant={
+                              employee.position === "director"
+                                ? "default"
+                                : "secondary"
+                            }
+                          >
+                            {employee.position}
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                          >
+                            {employee.position}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   ))
                 ) : (

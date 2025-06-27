@@ -3,37 +3,17 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  Users,
-  Edit,
-  Eye,
-  MoreHorizontal,
-  Plus,
-  Search,
-  Trash2,
-  Filter,
-  Mail,
-  Phone,
-  Building2,
-  UserCheck,
-  UserX,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Plus, UserCheck, UserX, Users, ChevronLeft, ChevronRight } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useEmployees } from "@/hooks/useEmployees"
 import { useDepartments } from "@/hooks/useDepartments"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { POSITIONS, GENDERS } from "@/constants/options"
-import { getPositionValue, formatVND } from "@/lib/utils"
+import { formatVND } from "@/lib/utils"
 import ConfirmDeleteModal from "../shared/confirm-delete-modal"
 import { toast } from "sonner"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 const EmployeeTable = dynamic(() => import("./EmployeeTable"), { ssr: false })
 
 const AddEmployeeModal = dynamic(() => import("./add-employee-modal"), { ssr: false })
@@ -209,7 +189,7 @@ export default function EmployeeManagement() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Lương TB</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold truncate" title={formatVND((summary?.averageSalary || 0).toString())}>{formatVND((summary?.averageSalary || 0).toString())}</div>
@@ -222,14 +202,14 @@ export default function EmployeeManagement() {
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
+            <Users className="h-5 w-5" />
             Bộ lọc và tìm kiếm
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="Tìm kiếm nhân viên..."
                 value={searchTerm}

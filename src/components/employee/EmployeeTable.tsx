@@ -1,10 +1,9 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Phone, Mail, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
+import { Phone, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import React from "react";
 import { getPositionValue } from "@/lib/utils";
 
 interface EmployeeTableProps {
@@ -59,7 +58,6 @@ export default function EmployeeTable({ employees, loading, onViewDetail, onEdit
                     <span>{employee.phone}</span>
                   </div>
                   <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                    <Mail className="h-4 w-4" />
                     <span>{employee.address}</span>
                   </div>
                 </TableCell>

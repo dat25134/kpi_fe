@@ -2,12 +2,8 @@
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Building2, Edit, Eye, MoreHorizontal, Plus, Search, Trash2, Users } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Building2, Plus, Search, Users } from "lucide-react"
 import dynamic from "next/dynamic"
 const AddDepartmentModal = dynamic(() => import("./add-department-modal"), { ssr: false })
 const DepartmentDetailModal = dynamic(() => import("./department-detail-modal"), { ssr: false })
@@ -17,7 +13,6 @@ import { useSWRConfig } from "swr"
 import { deleteDepartment } from "@/services/department"
 import ConfirmDeleteModal from "../shared/confirm-delete-modal"
 import { toast } from "sonner"
-import { getPositionValue } from "@/lib/utils"
 const DepartmentTable = dynamic(() => import("./DepartmentTable"), { ssr: false })
 
 export default function DepartmentManagement({ departments, summary, isLoading }: { departments: any[], summary: any, isLoading: boolean }) {

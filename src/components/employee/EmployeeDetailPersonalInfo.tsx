@@ -1,5 +1,4 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Mail, Phone, MapPin, Calendar } from "lucide-react";
 import React from "react";
 
 interface EmployeeDetailPersonalInfoProps {
