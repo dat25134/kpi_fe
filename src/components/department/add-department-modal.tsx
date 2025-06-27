@@ -25,6 +25,8 @@ import {
   updateDepartment,
 } from "@/services/department"
 import { toast } from "sonner"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 
 // Dữ liệu mẫu cho trưởng phòng
 const managers = [
@@ -133,7 +135,7 @@ export default function AddDepartmentModal({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <DialogHeader>
             <DialogTitle>{editingDepartment ? "Chỉnh sửa phòng ban" : "Thêm mới phòng ban"}</DialogTitle>
             <DialogDescription>
@@ -155,13 +157,12 @@ export default function AddDepartmentModal({
               <label htmlFor="name" className="text-sm font-medium leading-6 text-gray-900">
                 Tên phòng ban
               </label>
-              <input
+              <Input
                 id="name"
                 placeholder="Nhập tên phòng ban"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className={`${errors.name ? 'border-red-300' : 'border-gray-300'} block w-full rounded-md py-1.5 text-gray-900 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6`}
-                required
+                className={`${errors.name ? 'border-red-300' : 'border-gray-300'}`}
               />
               {errors.name && <p className="text-sm text-red-600">{errors.name[0]}</p>}
             </div>
@@ -169,13 +170,12 @@ export default function AddDepartmentModal({
               <label htmlFor="code" className="text-sm font-medium leading-6 text-gray-900">
                 Mã phòng ban
               </label>
-              <input
+              <Input
                 id="code"
                 placeholder="Nhập mã phòng ban (VD: QTNT)"
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
-                className={`${errors.code ? 'border-red-300' : 'border-gray-300'} block w-full rounded-md py-1.5 text-gray-900 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6`}
-                required
+                className={`${errors.code ? 'border-red-300' : 'border-gray-300'}`}
               />
               {errors.code && <p className="text-sm text-red-600">{errors.code[0]}</p>}
             </div>
@@ -183,13 +183,12 @@ export default function AddDepartmentModal({
               <label htmlFor="description" className="text-sm font-medium leading-6 text-gray-900">
                 Mô tả
               </label>
-              <textarea
+              <Textarea
                 id="description"
                 placeholder="Nhập mô tả chức năng nhiệm vụ của phòng ban"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className={`${errors.description ? 'border-red-300' : 'border-gray-300'} block w-full rounded-md py-1.5 text-gray-900 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6`}
-                required
+                className={`${errors.description ? 'border-red-300' : 'border-gray-300'} resize-none`}
               />
               {errors.description && <p className="text-sm text-red-600">{errors.description[0]}</p>}
             </div>
@@ -197,8 +196,8 @@ export default function AddDepartmentModal({
               <label htmlFor="manager" className="text-sm font-medium leading-6 text-gray-900">
                 Trưởng phòng
               </label>
-              <Select value={managerId} onValueChange={setManagerId} required>
-                <SelectTrigger className={`${errors.manager_id ? 'border-red-300' : 'border-gray-300'} w-full`}>
+              <Select value={managerId} onValueChange={setManagerId}>
+                <SelectTrigger className={`w-full focus:border-blue-500 focus:ring-2 focus:ring-inset focus:ring-blue-500 ${errors.manager_id ? 'border-red-300' : 'border-gray-300'}`}>
                   <SelectValue placeholder="Chọn trưởng phòng" />
                 </SelectTrigger>
                 <SelectContent className="w-full">
@@ -223,8 +222,8 @@ export default function AddDepartmentModal({
               <label htmlFor="status" className="text-sm font-medium leading-6 text-gray-900">
                 Trạng thái
               </label>
-              <Select value={status} onValueChange={setStatus} required>
-                <SelectTrigger className={`${errors.status ? 'border-red-300' : 'border-gray-300'} w-full`}>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger className={`w-full focus:border-blue-500 focus:ring-2 focus:ring-inset focus:ring-blue-500 ${errors.status ? 'border-red-300' : 'border-gray-300'}`}>
                   <SelectValue placeholder="Chọn trạng thái" />
                 </SelectTrigger>
                 <SelectContent className="w-full">

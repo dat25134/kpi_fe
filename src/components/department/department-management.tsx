@@ -37,7 +37,7 @@ export default function DepartmentManagement({ departments, summary, isLoading }
     mutate("departments")
     mutate("departments-summary")
   }
-  console.log(departments)
+
   const handleEditDepartment = () => {
     mutate("departments")
     mutate("departments-summary")

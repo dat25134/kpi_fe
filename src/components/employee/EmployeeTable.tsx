@@ -5,6 +5,8 @@ import { Phone, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import React from "react";
 import { getPositionValue } from "@/lib/utils";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 interface EmployeeTableProps {
   employees: any[];
