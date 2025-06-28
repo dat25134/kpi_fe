@@ -11,7 +11,6 @@ import {
   Mail,
   Phone,
   MapPin,
-  Calendar,
   GraduationCap,
   Briefcase,
   Building2,
@@ -20,6 +19,7 @@ import {
   FolderOpen,
 } from "lucide-react"
 import { getPositionValue, formatVND } from "@/lib/utils"
+import EmployeeDetailPersonalInfo from "./EmployeeDetailPersonalInfo"
 
 type EmployeeDetailModalProps = {
   open: boolean
@@ -105,28 +105,7 @@ export default function EmployeeDetailModal({ open, onOpenChange, employee }: Em
                   </CardContent>
                 </Card>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Thông tin cá nhân</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-500">Ngày sinh:</span>
-                      <span className="text-sm font-medium">{employee.birthDate}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-500">Giới tính:</span>
-                      <span className="text-sm font-medium">{employee.gender}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-500">Ngày vào làm:</span>
-                      <span className="text-sm font-medium flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {employee.joinDate}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
+                <EmployeeDetailPersonalInfo employee={employee} />
               </div>
 
               <Card>

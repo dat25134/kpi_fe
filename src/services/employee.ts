@@ -1,7 +1,9 @@
-import api from './api';
 import { API_CONFIG, API_ENDPOINTS } from '@/config/api';
 import { getAuthToken } from './auth';
 import { isAxiosError } from 'axios';
+import apiClient from "./apiClient";
+import { handleApiError } from "./errorHandler";
+import type { Employee, EmployeeSummary, EmployeeListResponse, EmployeeFilters } from '@/types/employee';
 
 
 const getConfig = () => {
@@ -15,80 +17,12 @@ const getConfig = () => {
   };
 }
 
-// Types cho Employee
-export interface Employee {
-  id: number;
-  name: string;
-  avatar: string;
-  email: string;
-  phone: string;
-  position: string;
-  department: {
-    id: number;
-    name: string;
-    code: string;
-  };
-  status: 'active' | 'inactive';
-  joinDate: string;
-  salary: number;
-  address: string;
-  birthDate: string;
-  gender: 'Nam' | 'Nữ';
-  education: string;
-  experience: string;
-  skills: string[];
-  projects: Array<{
-    name: string;
-    role: string;
-    status: string;
-  }>;
-}
-
 // Custom error for validation
 export class ValidationError extends Error {
   constructor(public errors: Record<string, string[]>) {
     super('Validation Error');
     this.name = 'ValidationError';
   }
-}
-
-// Types cho Employee Summary
-export interface EmployeeSummary {
-  totalEmployees: number;
-  activeEmployees: number;
-  inactiveEmployees: number;
-  averageSalary: number;
-  departmentStats: Array<{
-    departmentId: number;
-    departmentName: string;
-    departmentCode: string;
-    employeeCount: number;
-  }>;
-  positionStats: Array<{
-    position: string;
-    count: number;
-  }>;
-}
-
-// Types cho Employee List Response
-export interface EmployeeListResponse {
-  employees: Employee[];
-  pagination: {
-    currentPage: number;
-    totalPages: number;
-    totalItems: number;
-    itemsPerPage: number;
-  };
-}
-
-// Types cho Employee Filters
-export interface EmployeeFilters {
-  search?: string;
-  departmentId?: number;
-  position?: string;
-  status?: 'active' | 'inactive';
-  page?: number;
-  limit?: number;
 }
 
 // API Functions
@@ -98,11 +32,10 @@ export interface EmployeeFilters {
  */
 export async function fetchEmployeeSummary(): Promise<EmployeeSummary> {
   try {
-    const response = await api.get(API_ENDPOINTS.EMPLOYEES.SUMMARY, getConfig());
+    const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.SUMMARY, getConfig());
     return response.data.data;
   } catch (error) {
-    console.error('Error fetching employee summary:', error);
-    throw error;
+    throw handleApiError(error);
   }
 }
 
@@ -132,11 +65,10 @@ export async function fetchEmployees(filters: EmployeeFilters = {}): Promise<Emp
       params.append('limit', filters.limit.toString());
     }
 
-    const response = await api.get(`${API_ENDPOINTS.EMPLOYEES.LIST}?${params.toString()}`, getConfig());
+    const response = await apiClient.get(`${API_ENDPOINTS.EMPLOYEES.LIST}?${params.toString()}`, getConfig());
     return response.data.data;
   } catch (error) {
-    console.error('Error fetching employees:', error);
-    throw error;
+    throw handleApiError(error);
   }
 }
 
@@ -145,7 +77,7 @@ export async function fetchEmployees(filters: EmployeeFilters = {}): Promise<Emp
  */
 export async function createEmployee(employeeData: Omit<Employee, 'id' | 'joinDate' | 'projects'>): Promise<Employee> {
   try {
-    const response = await api.post(API_ENDPOINTS.EMPLOYEES.CREATE, employeeData, getConfig());
+    const response = await apiClient.post(API_ENDPOINTS.EMPLOYEES.CREATE, employeeData, getConfig());
     return response.data.data;
   } catch (error) {
     if (isAxiosError(error) && error.response?.status === 422) {
@@ -161,7 +93,7 @@ export async function createEmployee(employeeData: Omit<Employee, 'id' | 'joinDa
  */
 export async function updateEmployee(id: number, employeeData: Partial<Employee>): Promise<Employee> {
   try {
-    const response = await api.put(API_ENDPOINTS.EMPLOYEES.UPDATE(id), employeeData, getConfig());
+    const response = await apiClient.put(API_ENDPOINTS.EMPLOYEES.UPDATE(id), employeeData, getConfig());
     return response.data.data;
   } catch (error) {
     if (isAxiosError(error) && error.response?.status === 422) {
@@ -177,7 +109,7 @@ export async function updateEmployee(id: number, employeeData: Partial<Employee>
  */
 export async function deleteEmployee(id: number): Promise<void> {
   try {
-    await api.delete(API_ENDPOINTS.EMPLOYEES.DELETE(id), getConfig());
+    await apiClient.delete(API_ENDPOINTS.EMPLOYEES.DELETE(id), getConfig());
   } catch (error) {
     console.error('Error deleting employee:', error);
     throw error;
@@ -189,7 +121,7 @@ export async function deleteEmployee(id: number): Promise<void> {
  */
 export async function fetchEmployeeDetail(id: number): Promise<Employee> {
   try {
-    const response = await api.get(API_ENDPOINTS.EMPLOYEES.DETAIL(id), getConfig());
+    const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.DETAIL(id), getConfig());
     return response.data.data;
   } catch (error) {
     console.error('Error fetching employee detail:', error);

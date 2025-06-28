@@ -1,19 +1,23 @@
-'use client'
+import MainHeader from "@/components/shared/main-header"
+import UserProfile from "@/components/user/user-profile"
 
-import MainHeader from "@/components/main-header"
-import LoadingSpinner from "@/components/ui/loading-spinner";
-import UserProfile from "@/components/user-profile"
-import { useUserProfile } from "@/hooks/useUser"
+export const metadata = {
+  title: "Hồ sơ cá nhân | KPI",
+  description: "Xem và chỉnh sửa thông tin cá nhân, hồ sơ nhân viên.",
+  keywords: ["hồ sơ", "cá nhân", "nhân viên", "KPI"],
+  openGraph: {
+    title: "Hồ sơ cá nhân | KPI",
+    description: "Xem và chỉnh sửa thông tin cá nhân, hồ sơ nhân viên.",
+    type: "website"
+  }
+};
 
 export default function ProfilePage() {
-  const { userProfile, isLoading, isError } = useUserProfile();
-  if (isLoading) return <LoadingSpinner />;
-  if (isError) return <div>Error loading user profile</div>;
   return (
     <div className="flex min-h-[calc(100vh-100px)] flex-col">
       <MainHeader />
       <div className="flex-1">
-        <UserProfile userProfile={userProfile}/>
+        <UserProfile />
       </div>
     </div>
   )

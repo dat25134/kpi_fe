@@ -1,12 +1,7 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import {
   Dialog,
   DialogContent,
@@ -29,10 +24,9 @@ import {
   DepartmentPayload,
   updateDepartment,
 } from "@/services/department"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertTriangle } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 
 // Dữ liệu mẫu cho trưởng phòng
 const managers = [
@@ -141,7 +135,7 @@ export default function AddDepartmentModal({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <DialogHeader>
             <DialogTitle>{editingDepartment ? "Chỉnh sửa phòng ban" : "Thêm mới phòng ban"}</DialogTitle>
             <DialogDescription>
@@ -149,53 +143,61 @@ export default function AddDepartmentModal({
             </DialogDescription>
           </DialogHeader>
           {errors.general && (
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Lỗi</AlertTitle>
-              <AlertDescription>{errors.general[0]}</AlertDescription>
-            </Alert>
+            <div className="flex items-center space-x-4">
+              <div className="flex-shrink-0 h-6 w-6">
+                <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-4.5v8.25c0 .621-.504 1.125-1.125 1.225A9.753 9.753 0 0021.75 21H3.75A2.25 2.25 0 011.5 18.75V12zm15 0c0 .105.02.21.06.306.06H18.75a.75.75 0 00.75-.75z" />
+                </svg>
+              </div>
+              <div className="text-sm text-red-600">{errors.general[0]}</div>
+            </div>
           )}
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Tên phòng ban</Label>
+              <label htmlFor="name" className="text-sm font-medium leading-6 text-gray-900">
+                Tên phòng ban
+              </label>
               <Input
                 id="name"
                 placeholder="Nhập tên phòng ban"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className={cn({ "border-destructive": errors.name })}
-                required
+                className={`${errors.name ? 'border-red-300' : 'border-gray-300'}`}
               />
-              {errors.name && <p className="text-sm text-destructive">{errors.name[0]}</p>}
+              {errors.name && <p className="text-sm text-red-600">{errors.name[0]}</p>}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="code">Mã phòng ban</Label>
+              <label htmlFor="code" className="text-sm font-medium leading-6 text-gray-900">
+                Mã phòng ban
+              </label>
               <Input
                 id="code"
                 placeholder="Nhập mã phòng ban (VD: QTNT)"
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
-                className={cn({ "border-destructive": errors.code })}
-                required
+                className={`${errors.code ? 'border-red-300' : 'border-gray-300'}`}
               />
-              {errors.code && <p className="text-sm text-destructive">{errors.code[0]}</p>}
+              {errors.code && <p className="text-sm text-red-600">{errors.code[0]}</p>}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description">Mô tả</Label>
+              <label htmlFor="description" className="text-sm font-medium leading-6 text-gray-900">
+                Mô tả
+              </label>
               <Textarea
                 id="description"
                 placeholder="Nhập mô tả chức năng nhiệm vụ của phòng ban"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className={cn("min-h-[80px] resize-none", { "border-destructive": errors.description })}
-                required
+                className={`${errors.description ? 'border-red-300' : 'border-gray-300'} resize-none`}
               />
-              {errors.description && <p className="text-sm text-destructive">{errors.description[0]}</p>}
+              {errors.description && <p className="text-sm text-red-600">{errors.description[0]}</p>}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="manager">Trưởng phòng</Label>
-              <Select value={managerId} onValueChange={setManagerId} required>
-                <SelectTrigger className={cn("w-full", { "border-destructive": errors.manager_id })}>
+              <label htmlFor="manager" className="text-sm font-medium leading-6 text-gray-900">
+                Trưởng phòng
+              </label>
+              <Select value={managerId} onValueChange={setManagerId}>
+                <SelectTrigger className={`w-full focus:border-blue-500 focus:ring-2 focus:ring-inset focus:ring-blue-500 ${errors.manager_id ? 'border-red-300' : 'border-gray-300'}`}>
                   <SelectValue placeholder="Chọn trưởng phòng" />
                 </SelectTrigger>
                 <SelectContent className="w-full">
@@ -214,12 +216,14 @@ export default function AddDepartmentModal({
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              {errors.manager_id && <p className="text-sm text-destructive">{errors.manager_id[0]}</p>}
+              {errors.manager_id && <p className="text-sm text-red-600">{errors.manager_id[0]}</p>}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="status">Trạng thái</Label>
-              <Select value={status} onValueChange={setStatus} required>
-                <SelectTrigger className={cn("w-full", { "border-destructive": errors.status })}>
+              <label htmlFor="status" className="text-sm font-medium leading-6 text-gray-900">
+                Trạng thái
+              </label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger className={`w-full focus:border-blue-500 focus:ring-2 focus:ring-inset focus:ring-blue-500 ${errors.status ? 'border-red-300' : 'border-gray-300'}`}>
                   <SelectValue placeholder="Chọn trạng thái" />
                 </SelectTrigger>
                 <SelectContent className="w-full">
@@ -230,7 +234,7 @@ export default function AddDepartmentModal({
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              {errors.status && <p className="text-sm text-destructive">{errors.status[0]}</p>}
+              {errors.status && <p className="text-sm text-red-600">{errors.status[0]}</p>}
             </div>
           </div>
           <DialogFooter>

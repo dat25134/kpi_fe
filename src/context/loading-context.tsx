@@ -2,12 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-
-interface LoadingContextType {
-  isLoading: boolean;
-  showLoading: () => void;
-  hideLoading: () => void;
-}
+import type { LoadingContextType } from '@/types/loading';
 
 const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 

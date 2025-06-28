@@ -8,6 +8,7 @@ import { ArrowLeft, Home, RefreshCw, Settings, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import React from "react"
 
 // Dữ liệu mẫu
 const evaluations = [
@@ -213,8 +214,8 @@ export default function EvaluationForm() {
                 </TableHeader>
                 <TableBody>
                   {evaluations.map((group, groupIndex) => (
-                    <>
-                      <TableRow key={`group-${groupIndex}`} className="bg-gray-50">
+                    <React.Fragment key={`group-${groupIndex}`}>
+                      <TableRow className="bg-gray-50">
                         <TableCell colSpan={5} className="font-medium">
                           {group.month} ({group.count} phiếu)
                         </TableCell>
@@ -250,7 +251,7 @@ export default function EvaluationForm() {
                           </TableCell>
                         </TableRow>
                       ))}
-                    </>
+                    </React.Fragment>
                   ))}
                 </TableBody>
               </Table>

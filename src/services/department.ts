@@ -1,6 +1,7 @@
 import { API_CONFIG, API_ENDPOINTS } from '@/config/api';
-import api from './api';
 import { getAuthToken } from './auth';
+import apiClient from "./apiClient";
+import { handleApiError } from "./errorHandler";
 
 const getConfig = () => {
     const token = getAuthToken();
@@ -13,18 +14,22 @@ const getConfig = () => {
     };
 }
 
-export async function fetchDepartments() {
-  const response = await api.get(API_ENDPOINTS.AUTH.DEPARTMENT, getConfig());
-  return response.data.data;
+export async function fetchDepartments(): Promise<any> {
+  try {
+    const response = await apiClient.get(API_ENDPOINTS.AUTH.DEPARTMENT, getConfig());
+    return response.data.data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
 }
 
 export async function fetchDepartmentsSummary() {
-  const response = await api.get(API_ENDPOINTS.AUTH.DEPARTMENT_SUMMARY, getConfig());
+  const response = await apiClient.get(API_ENDPOINTS.AUTH.DEPARTMENT_SUMMARY, getConfig());
   return response.data.data;
 }
 
 export const getDepartments = async (params: any) => {
-  const response = await api.get(API_ENDPOINTS.AUTH.DEPARTMENT, getConfig());
+  const response = await apiClient.get(API_ENDPOINTS.AUTH.DEPARTMENT, getConfig());
   return response.data;
 };
 
@@ -37,18 +42,18 @@ export type DepartmentPayload = {
 };
 
 export const createDepartment = async (departmentData: DepartmentPayload) => {
-  const response = await api.post(API_ENDPOINTS.AUTH.DEPARTMENT_CREATE, departmentData, getConfig());
+  const response = await apiClient.post(API_ENDPOINTS.AUTH.DEPARTMENT_CREATE, departmentData, getConfig());
   return response.data;
 };
 
 export const updateDepartment = async (id: number, departmentData: Partial<DepartmentPayload>) => {
   const endpoint = `${API_ENDPOINTS.AUTH.DEPARTMENT}/${id}`;
-  const response = await api.put(endpoint, departmentData, getConfig());
+  const response = await apiClient.put(endpoint, departmentData, getConfig());
   return response.data;
 };
 
 export const deleteDepartment = async (id: number) => {
   const endpoint = `${API_ENDPOINTS.AUTH.DEPARTMENT}/${id}`;
-  const response = await api.delete(endpoint, getConfig());
+  const response = await apiClient.delete(endpoint, getConfig());
   return response.data;
 };

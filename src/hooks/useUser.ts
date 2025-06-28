@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { fetchUserInfo, fetchUserProfile } from "@/services/api";
+import { fetchUserInfo, fetchUserProfile } from "@/services/user";
 
 export function useUser() {
   const { data, error, isLoading } = useSWR("user-info", fetchUserInfo);

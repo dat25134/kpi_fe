@@ -3,38 +3,21 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  Users,
-  Edit,
-  Eye,
-  MoreHorizontal,
-  Plus,
-  Search,
-  Trash2,
-  Filter,
-  Mail,
-  Phone,
-  Building2,
-  UserCheck,
-  UserX,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import AddEmployeeModal from "./add-employee-modal"
-import EmployeeDetailModal from "./employee-detail-modal"
+import { Plus, UserCheck, UserX, Users, ChevronLeft, ChevronRight } from "lucide-react"
+import dynamic from "next/dynamic"
 import { useEmployees } from "@/hooks/useEmployees"
 import { useDepartments } from "@/hooks/useDepartments"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { POSITIONS, GENDERS } from "@/constants/options"
-import { getPositionValue, formatVND } from "@/lib/utils"
-import ConfirmDeleteModal from "./confirm-delete-modal"
+import { formatVND } from "@/lib/utils"
+import ConfirmDeleteModal from "../shared/confirm-delete-modal"
 import { toast } from "sonner"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+const EmployeeTable = dynamic(() => import("./EmployeeTable"), { ssr: false })
+
+const AddEmployeeModal = dynamic(() => import("./add-employee-modal"), { ssr: false })
+const EmployeeDetailModal = dynamic(() => import("./employee-detail-modal"), { ssr: false })
 
 export default function EmployeeManagement() {
   const {
@@ -206,7 +189,7 @@ export default function EmployeeManagement() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Lương TB</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold truncate" title={formatVND((summary?.averageSalary || 0).toString())}>{formatVND((summary?.averageSalary || 0).toString())}</div>
@@ -219,14 +202,14 @@ export default function EmployeeManagement() {
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
+            <Users className="h-5 w-5" />
             Bộ lọc và tìm kiếm
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="Tìm kiếm nhân viên..."
                 value={searchTerm}
@@ -299,95 +282,13 @@ export default function EmployeeManagement() {
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nhân viên</TableHead>
-                      <TableHead>Chức vụ</TableHead>
-                      <TableHead>Liên hệ</TableHead>
-                      <TableHead>Trạng thái</TableHead>
-                      <TableHead className="text-right">Hành động</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {loading ? (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center">
-                          <LoadingSpinner />
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      employees.map((employee: any) => (
-                        <TableRow key={employee.id}>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <Avatar className="h-10 w-10">
-                                <AvatarFallback>{employee.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                              </Avatar>
-                              <div className="ml-4">
-                                <div className="font-medium">{employee.name}</div>
-                                <div className="text-sm text-muted-foreground">{employee.email}</div>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="font-medium">{getPositionValue(employee.position)}</div>
-                            <div className="text-sm text-muted-foreground">{employee.department?.name}</div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Phone className="h-4 w-4 text-muted-foreground" />
-                              <span>{employee.phone}</span>
-                            </div>
-                            <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                              <Mail className="h-4 w-4" />
-                              <span>{employee.address}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={employee.status === "active" ? "default" : "destructive"}
-                              className={
-                                employee.status === "active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                              }
-                            >
-                              {employee.status === "active" ? "Đang làm việc" : "Tạm nghỉ"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                  <span className="sr-only">Open menu</span>
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleViewDetail(employee)}>
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  <span>Xem chi tiết</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleEdit(employee)}>
-                                  <Edit className="mr-2 h-4 w-4" />
-                                  <span>Chỉnh sửa</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleDeleteRequest(employee.id)}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  <span>Xóa</span>
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+              <EmployeeTable
+                employees={employees}
+                loading={loading}
+                onViewDetail={handleViewDetail}
+                onEdit={handleEdit}
+                onDelete={handleDeleteRequest}
+              />
 
               {/* Phân trang */}
               {pagination && pagination.totalPages > 1 && (

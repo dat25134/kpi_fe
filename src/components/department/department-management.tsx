@@ -2,23 +2,21 @@
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Building2, Edit, Eye, MoreHorizontal, Plus, Search, Trash2, Users } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import AddDepartmentModal from "./add-department-modal"
-import DepartmentDetailModal from "./department-detail-modal"
+import { Building2, Plus, Search, Users } from "lucide-react"
+import dynamic from "next/dynamic"
+const AddDepartmentModal = dynamic(() => import("./add-department-modal"), { ssr: false })
+const DepartmentDetailModal = dynamic(() => import("./department-detail-modal"), { ssr: false })
 import { useState } from "react"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { useSWRConfig } from "swr"
 import { deleteDepartment } from "@/services/department"
-import ConfirmDeleteModal from "./confirm-delete-modal"
+import ConfirmDeleteModal from "../shared/confirm-delete-modal"
 import { toast } from "sonner"
-import { getPositionValue } from "@/lib/utils"
+import { useDepartments, useDepartmentSummary } from "@/hooks/useDepartments"
+const DepartmentTable = dynamic(() => import("./DepartmentTable"), { ssr: false })
 
-export default function DepartmentManagement({ departments, summary, isLoading }: { departments: any[], summary: any, isLoading: boolean }) {
+export default function DepartmentManagement() {
   const { mutate } = useSWRConfig()
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -28,8 +26,12 @@ export default function DepartmentManagement({ departments, summary, isLoading }
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [departmentToDelete, setDepartmentToDelete] = useState<number | null>(null)
 
+  const { data: departments = [], isLoading: loadingDepartments } = useDepartments();
+  const { data: summary, isLoading: loadingSummary } = useDepartmentSummary();
+  const isLoading = loadingDepartments || loadingSummary;
+
   const filteredDepartments = departments.filter(
-    (dept) =>
+    (dept: any) =>
       dept.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dept.code.toLowerCase().includes(searchTerm.toLowerCase()),
   )
@@ -40,7 +42,7 @@ export default function DepartmentManagement({ departments, summary, isLoading }
     mutate("departments")
     mutate("departments-summary")
   }
-  console.log(departments)
+
   const handleEditDepartment = () => {
     mutate("departments")
     mutate("departments-summary")
@@ -111,7 +113,7 @@ export default function DepartmentManagement({ departments, summary, isLoading }
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary?.total_employees ?? departments.reduce((total, dept) => total + (dept.employeeCount || 0), 0)}</div>
+            <div className="text-2xl font-bold">{summary?.total_employees ?? departments.reduce((total: number, dept: any) => total + (dept.employeeCount || 0), 0)}</div>
             <p className="text-xs text-muted-foreground">Trên tất cả phòng ban</p>
           </CardContent>
         </Card>
@@ -121,7 +123,7 @@ export default function DepartmentManagement({ departments, summary, isLoading }
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary?.avg_employees_per_department ?? (departments.length ? Math.round(departments.reduce((total, dept) => total + (dept.employeeCount || 0), 0) / departments.length) : 0)}</div>
+            <div className="text-2xl font-bold">{summary?.avg_employees_per_department ?? (departments.length ? Math.round(departments.reduce((total: number, dept: any) => total + (dept.employeeCount || 0), 0) / departments.length) : 0)}</div>
             <p className="text-xs text-muted-foreground">Nhân viên</p>
           </CardContent>
         </Card>
@@ -131,7 +133,7 @@ export default function DepartmentManagement({ departments, summary, isLoading }
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary?.largest_department?.employee_count ?? Math.max(...departments.map((dept) => dept.employeeCount || 0), 0)}</div>
+            <div className="text-2xl font-bold">{summary?.largest_department?.employee_count ?? Math.max(...departments.map((dept: any) => dept.employeeCount || 0), 0)}</div>
             <p className="text-xs text-muted-foreground">Nhân viên</p>
           </CardContent>
         </Card>
@@ -159,109 +161,12 @@ export default function DepartmentManagement({ departments, summary, isLoading }
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Tên phòng ban</TableHead>
-                <TableHead>Mã phòng</TableHead>
-                <TableHead>Trưởng phòng</TableHead>
-                <TableHead className="text-center">Số nhân viên</TableHead>
-                <TableHead>Trạng thái</TableHead>
-                <TableHead>Ngày tạo</TableHead>
-                <TableHead className="text-right">Thao tác</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredDepartments.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center text-gray-500 py-8">
-                    Không có dữ liệu phòng ban
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredDepartments.map((department) => (
-                  <TableRow key={department.id ?? Math.random()}>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{department?.name ?? "—"}</div>
-                        <div className="text-sm text-gray-500 truncate max-w-xs">
-                          {department?.description ?? "—"}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{department?.code ?? "—"}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Avatar className="h-8 w-8 mr-2">
-                          <AvatarFallback className="bg-blue-100 text-blue-900 text-xs">
-                            {department?.manager?.avatar ?? "—"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium text-sm">
-                            {department?.manager?.name ?? "—"}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {department?.manager?.position ? getPositionValue(department.manager.position) : "—"}
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant="secondary">
-                        {typeof department?.employee_count === "number" ? department.employee_count : "—"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        className={
-                          department?.status === "active"
-                            ? "bg-green-100 text-green-800 hover:bg-green-100"
-                            : "bg-red-100 text-red-800 hover:bg-red-100"
-                        }
-                      >
-                        {department?.status === "active"
-                          ? "Hoạt động"
-                          : department?.status === "inactive"
-                          ? "Tạm dừng"
-                          : "Không xác định"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {department?.created_at
-                        ? department.created_at
-                        : "—"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleViewDetail(department)}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            Xem chi tiết
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onSelect={() => handleEdit(department)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            <span>Sửa</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onSelect={() => handleDeleteRequest(department.id)} className="text-destructive">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            <span>Xóa</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <DepartmentTable
+            departments={filteredDepartments}
+            onViewDetail={handleViewDetail}
+            onEdit={handleEdit}
+            onDelete={handleDeleteRequest}
+          />
         </CardContent>
       </Card>
 
