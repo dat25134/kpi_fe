@@ -7,12 +7,11 @@ import {
   deleteEmployee,
   fetchEmployeeDetail,
   ValidationError,
-  type Employee,
-  type EmployeeSummary,
-  type EmployeeFilters,
-  type EmployeeListResponse
+  fetchDirectorEmployees
 } from '@/services/employee';
+import type { Employee, EmployeeSummary, EmployeeFilters, EmployeeListResponse } from '@/types/employee';
 import { toast } from 'sonner';
+import useSWR from 'swr';
 
 export function useEmployees() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -173,5 +172,14 @@ export function useEmployees() {
     applyFilters,
     changePage,
     clearFilters,
+  };
+}
+
+export function useDirectors() {
+  const { data, error, isLoading } = useSWR("directors", fetchDirectorEmployees);
+  return {
+    data: data || [],
+    isLoading,
+    isError: error,
   };
 } 

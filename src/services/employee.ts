@@ -83,7 +83,7 @@ export async function createEmployee(employeeData: Omit<Employee, 'id' | 'joinDa
     if (isAxiosError(error) && error.response?.status === 422) {
       throw new ValidationError(error.response.data.errors);
     }
-    console.error('Error creating employee:', error);
+    console.error('Lỗi tạo nhân viên:', error);
     throw error;
   }
 }
@@ -99,7 +99,7 @@ export async function updateEmployee(id: number, employeeData: Partial<Employee>
     if (isAxiosError(error) && error.response?.status === 422) {
       throw new ValidationError(error.response.data.errors);
     }
-    console.error('Error updating employee:', error);
+    console.error('Lỗi cập nhật nhân viên:', error);
     throw error;
   }
 }
@@ -111,7 +111,7 @@ export async function deleteEmployee(id: number): Promise<void> {
   try {
     await apiClient.delete(API_ENDPOINTS.EMPLOYEES.DELETE(id), getConfig());
   } catch (error) {
-    console.error('Error deleting employee:', error);
+    console.error('Lỗi xóa nhân viên:', error);
     throw error;
   }
 }
@@ -124,7 +124,20 @@ export async function fetchEmployeeDetail(id: number): Promise<Employee> {
     const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.DETAIL(id), getConfig());
     return response.data.data;
   } catch (error) {
-    console.error('Error fetching employee detail:', error);
+    console.error('Lỗi lấy chi tiết nhân viên:', error);
     throw error;
   }
 } 
+
+/**
+ * Lấy danh sách nhân viên có vai trò là trưởng phòng
+ */
+export async function fetchDirectorEmployees(): Promise<Employee[]> {
+  try {
+    const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.DIRECTOR, getConfig());
+    return response.data.data;
+  } catch (error) {
+    console.error('Lỗi lấy danh sách trưởng phòng:', error);
+    throw error;
+  }
+}

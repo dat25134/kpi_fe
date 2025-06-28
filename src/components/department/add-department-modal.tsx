@@ -24,19 +24,10 @@ import {
   DepartmentPayload,
   updateDepartment,
 } from "@/services/department"
+import { useDirectors } from "@/hooks/useEmployees"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-
-// Dữ liệu mẫu cho trưởng phòng
-const managers = [
-  { id: 1, value: "pnv", label: "Phạm Ngọc Vinh", avatar: "PNV" },
-  { id: 2, value: "tvn", label: "Trần Văn Nam", avatar: "TVN" },
-  { id: 3, value: "htm", label: "Hoàng Thị Minh", avatar: "HTM" },
-  { id: 4, value: "nvt", label: "Nguyễn Văn Thành", avatar: "NVT" },
-  { id: 5, value: "ltm", label: "Lê Thị Mai", avatar: "LTM" },
-  { id: 6, value: "pvd", label: "Phạm Văn Đức", avatar: "PVĐ" },
-]
 
 type AddDepartmentModalProps = {
   open: boolean
@@ -61,6 +52,9 @@ export default function AddDepartmentModal({
   const [managerId, setManagerId] = useState<string | undefined>()
   const [status, setStatus] = useState("active")
   const [errors, setErrors] = useState<Record<string, string[]>>({})
+  
+  // Sử dụng SWR hook để fetch danh sách trưởng phòng
+  const { data: managers, isLoading: loadingManagers } = useDirectors()
 
   useEffect(() => {
     if (editingDepartment) {
@@ -198,21 +192,31 @@ export default function AddDepartmentModal({
               </label>
               <Select value={managerId} onValueChange={setManagerId}>
                 <SelectTrigger className={`w-full focus:border-blue-500 focus:ring-2 focus:ring-inset focus:ring-blue-500 ${errors.manager_id ? 'border-red-300' : 'border-gray-300'}`}>
-                  <SelectValue placeholder="Chọn trưởng phòng" />
+                  <SelectValue placeholder={loadingManagers ? "Đang tải..." : "Chọn trưởng phòng"} />
                 </SelectTrigger>
                 <SelectContent className="w-full">
                   <SelectGroup>
-                    <SelectLabel>Danh sách nhân viên</SelectLabel>
-                    {managers.map((manager) => (
-                      <SelectItem key={manager.id} value={manager.id.toString()}>
-                        <div className="flex items-center w-full">
-                          <div className="h-6 w-6 rounded-full bg-gray-200 text-gray-600 text-xs flex items-center justify-center mr-2">
-                            {manager.avatar}
-                          </div>
-                          {manager.label}
-                        </div>
+                    <SelectLabel>Danh sách trưởng phòng</SelectLabel>
+                    {loadingManagers ? (
+                      <SelectItem value="" disabled>
+                        Đang tải danh sách...
                       </SelectItem>
-                    ))}
+                    ) : managers.length === 0 ? (
+                      <SelectItem value="" disabled>
+                        Không có trưởng phòng nào
+                      </SelectItem>
+                    ) : (
+                      managers.map((manager) => (
+                        <SelectItem key={manager.id} value={manager.id.toString()}>
+                          <div className="flex items-center w-full">
+                            <div className="h-6 w-6 rounded-full bg-gray-200 text-gray-600 text-xs flex items-center justify-center mr-2">
+                              {manager.name ? manager.name.split(' ').map((n: string) => n[0]).join('').toUpperCase() : 'N/A'}
+                            </div>
+                            {manager.name}
+                          </div>
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectGroup>
                 </SelectContent>
               </Select>
