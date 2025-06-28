@@ -25,5 +25,5 @@ export async function fetchUserProfile() {
     },
   };
   const response = await apiClient.get(API_ENDPOINTS.USER.PROFILE, config);
-  return response.data.data;
+  return response.data;
 } 
