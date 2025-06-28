@@ -21,6 +21,7 @@ export const API_ENDPOINTS = {
     UPDATE: (id: number) => `${API_URL}/employees/${id}`,
     DELETE: (id: number) => `${API_URL}/employees/${id}`,
     DETAIL: (id: number) => `${API_URL}/employees/${id}`,
+    DIRECTOR: `${API_URL}/employees/director`,
   },
   // Thêm các nhóm API khác ở đây
 } as const;
