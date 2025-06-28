@@ -20,10 +20,7 @@ const UserProfileProjects = dynamic(() => import("./UserProfileProjects"), { ssr
 
 export default function UserProfile() {
   const { userProfile, isLoading, isError } = useUserProfile();
-  if (isLoading) return <LoadingSpinner />;
-  if (isError) return <div>Error loading user profile</div>;
-
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: userProfile?.name || "",
     email: userProfile?.email || "",
@@ -31,7 +28,10 @@ export default function UserProfile() {
     address: userProfile?.address || "",
     education: userProfile?.education || "",
     skills: userProfile?.skills ? userProfile.skills.join(", ") : "",
-  })
+  });
+
+  if (isLoading) return <LoadingSpinner />;
+  if (isError) return <div>Error loading user profile</div>;
 
   const handleSave = () => {
     // Xử lý lưu thông tin - trong thực tế sẽ gọi API
