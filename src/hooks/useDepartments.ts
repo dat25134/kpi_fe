@@ -1,12 +1,20 @@
 import useSWR from "swr";
-import api from "@/services/api";
-import { API_ENDPOINTS } from "@/config/api";
 import { fetchDepartments, fetchDepartmentsSummary } from "@/services/department";
+import { DepartmentFilters } from "@/types/department";
 
-export function useDepartments() {
-  const { data, error, isLoading } = useSWR("departments", fetchDepartments);
+export function useDepartments(filters: DepartmentFilters = {}) {
+  const { data, error, isLoading } = useSWR(
+    ["departments", filters], 
+    () => fetchDepartments(filters)
+  );
   return {
-    data: data,
+    data: data?.data || [],
+    pagination: data?.pagination || {
+      currentPage: 1,
+      totalPages: 1,
+      totalItems: 0,
+      itemsPerPage: 10,
+    },
     isLoading,
     isError: error,
   };
