@@ -2,6 +2,7 @@ import { API_CONFIG, API_ENDPOINTS } from '@/config/api';
 import { getAuthToken } from './auth';
 import apiClient from "./apiClient";
 import { handleApiError } from "./errorHandler";
+import { DepartmentFilters, DepartmentListResponse } from '@/types/department';
 
 const getConfig = () => {
     const token = getAuthToken();
@@ -14,10 +15,27 @@ const getConfig = () => {
     };
 }
 
-export async function fetchDepartments(): Promise<any> {
+
+
+export async function fetchDepartments(filters: DepartmentFilters = {}): Promise<DepartmentListResponse> {
   try {
-    const response = await apiClient.get(API_ENDPOINTS.AUTH.DEPARTMENT, getConfig());
-    return response.data.data;
+    const params = new URLSearchParams();
+    
+    if (filters.search) {
+      params.append('search', filters.search);
+    }
+    if (filters.status) {
+      params.append('status', filters.status);
+    }
+    if (filters.page) {
+      params.append('page', filters.page.toString());
+    }
+    if (filters.limit) {
+      params.append('limit', filters.limit.toString());
+    }
+
+    const response = await apiClient.get(`${API_ENDPOINTS.AUTH.DEPARTMENT}?${params.toString()}`, getConfig());
+    return response.data;
   } catch (error) {
     throw handleApiError(error);
   }

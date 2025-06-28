@@ -3,11 +3,11 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Building2, Plus, Search, Users } from "lucide-react"
+import { Building2, Plus, Search, Users, ChevronLeft, ChevronRight } from "lucide-react"
 import dynamic from "next/dynamic"
 const AddDepartmentModal = dynamic(() => import("./add-department-modal"), { ssr: false })
 const DepartmentDetailModal = dynamic(() => import("./department-detail-modal"), { ssr: false })
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { useSWRConfig } from "swr"
 import { deleteDepartment } from "@/services/department"
@@ -18,7 +18,9 @@ const DepartmentTable = dynamic(() => import("./DepartmentTable"), { ssr: false 
 
 export default function DepartmentManagement() {
   const { mutate } = useSWRConfig()
+  const [searchInput, setSearchInput] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [selectedDepartment, setSelectedDepartment] = useState<any>(null)
@@ -26,27 +28,40 @@ export default function DepartmentManagement() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [departmentToDelete, setDepartmentToDelete] = useState<number | null>(null)
 
-  const { data: departments = [], isLoading: loadingDepartments } = useDepartments();
+  // Tạo filters object
+  const filters = {
+    page: currentPage,
+    limit: 10,
+    search: searchTerm || undefined,
+  }
+
+  const { data: departments = [], pagination, isLoading: loadingDepartments } = useDepartments(filters);
   const { data: summary, isLoading: loadingSummary } = useDepartmentSummary();
   const isLoading = loadingDepartments || loadingSummary;
 
-  const filteredDepartments = departments.filter(
-    (dept: any) =>
-      dept.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dept.code.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  console.log(departments)
+
+  // Khi bấm nút tìm kiếm
+  const handleSearch = () => {
+    setCurrentPage(1);
+    setSearchTerm(searchInput);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
 
   const handleAddDepartment = (newDepartment: any) => {
     // Không cần thêm thủ công vì SWR sẽ tự động cập nhật
     // sau khi gọi mutate
-    mutate("departments")
+    mutate((key) => Array.isArray(key) && key[0] === "departments");
     mutate("departments-summary")
   }
 
   const handleEditDepartment = () => {
-    mutate("departments")
-    mutate("departments-summary")
-    setEditingDepartment(null)
+    mutate((key) => Array.isArray(key) && key[0] === "departments");
+    mutate("departments-summary");
+    setEditingDepartment(null);
   }
 
   const handleDeleteRequest = (id: number) => {
@@ -59,7 +74,7 @@ export default function DepartmentManagement() {
     try {
       await deleteDepartment(departmentToDelete)
       toast.success("Xóa phòng ban thành công!")
-      mutate("departments")
+      mutate((key) => Array.isArray(key) && key[0] === "departments");
       mutate("departments-summary")
     } catch (error) {
       console.error("Failed to delete department", error)
@@ -145,11 +160,14 @@ export default function DepartmentManagement() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             placeholder="Tìm kiếm phòng ban..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             className="pl-10"
           />
         </div>
+        <Button onClick={handleSearch} className="ml-2">
+          Tìm kiếm
+        </Button>
       </div>
 
       {/* Bảng danh sách phòng ban */}
@@ -157,16 +175,57 @@ export default function DepartmentManagement() {
         <CardHeader>
           <CardTitle>Danh sách phòng ban</CardTitle>
           <CardDescription>
-            Hiển thị {filteredDepartments.length} trên {departments.length} phòng ban
+            Hiển thị {departments.length} trên {pagination?.totalItems ?? departments.length} phòng ban
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <DepartmentTable
-            departments={filteredDepartments}
-            onViewDetail={handleViewDetail}
-            onEdit={handleEdit}
-            onDelete={handleDeleteRequest}
-          />
+          {loadingDepartments ? (
+            <div className="flex items-center justify-center py-8">
+              <LoadingSpinner />
+            </div>
+          ) : departments.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Building2 className="h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Không tìm thấy phòng ban</h3>
+              <p className="text-gray-500">Không có phòng ban nào phù hợp với bộ lọc hiện tại.</p>
+            </div>
+          ) : (
+            <>
+              <DepartmentTable
+                departments={departments}
+                onViewDetail={handleViewDetail}
+                onEdit={handleEdit}
+                onDelete={handleDeleteRequest}
+              />
+
+              {/* Phân trang */}
+              {pagination && pagination.totalPages > 1 && (
+                <div className="flex items-center justify-end space-x-2 py-4">
+                  <span className="text-sm text-muted-foreground">
+                    Trang {pagination.currentPage} / {pagination.totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(pagination.currentPage - 1)}
+                    disabled={pagination.currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Trước
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(pagination.currentPage + 1)}
+                    disabled={pagination.currentPage === pagination.totalPages}
+                  >
+                    Sau
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
         </CardContent>
       </Card>
 
