@@ -100,7 +100,16 @@ export default function UserProfile() {
                   <Building2 className="h-3 w-3" />
                   {userProfile?.department?.name}
                 </Badge>
-                <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Đang làm việc</Badge>
+                <Badge
+                    variant={userProfile?.status === "active" ? "default" : "outline"}
+                    className={
+                      userProfile?.status === "active"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }
+                  >
+                    {userProfile.status === "active" ? "Đang làm việc" : "Tạm nghỉ"}
+                  </Badge>
               </div>
             </div>
             <div className="text-right">
