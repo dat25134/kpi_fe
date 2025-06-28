@@ -1,5 +1,3 @@
-"use client"
-
 import MainHeader from "@/components/shared/main-header"
 import EmployeeManagement from "@/components/employee/employee-management"
 import WithRoleGuard from "@/components/shared/with-role-guard"

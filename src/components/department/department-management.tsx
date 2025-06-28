@@ -13,9 +13,10 @@ import { useSWRConfig } from "swr"
 import { deleteDepartment } from "@/services/department"
 import ConfirmDeleteModal from "../shared/confirm-delete-modal"
 import { toast } from "sonner"
+import { useDepartments, useDepartmentSummary } from "@/hooks/useDepartments"
 const DepartmentTable = dynamic(() => import("./DepartmentTable"), { ssr: false })
 
-export default function DepartmentManagement({ departments, summary, isLoading }: { departments: any[], summary: any, isLoading: boolean }) {
+export default function DepartmentManagement() {
   const { mutate } = useSWRConfig()
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -25,8 +26,12 @@ export default function DepartmentManagement({ departments, summary, isLoading }
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [departmentToDelete, setDepartmentToDelete] = useState<number | null>(null)
 
+  const { data: departments = [], isLoading: loadingDepartments } = useDepartments();
+  const { data: summary, isLoading: loadingSummary } = useDepartmentSummary();
+  const isLoading = loadingDepartments || loadingSummary;
+
   const filteredDepartments = departments.filter(
-    (dept) =>
+    (dept: any) =>
       dept.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dept.code.toLowerCase().includes(searchTerm.toLowerCase()),
   )
@@ -108,7 +113,7 @@ export default function DepartmentManagement({ departments, summary, isLoading }
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary?.total_employees ?? departments.reduce((total, dept) => total + (dept.employeeCount || 0), 0)}</div>
+            <div className="text-2xl font-bold">{summary?.total_employees ?? departments.reduce((total: number, dept: any) => total + (dept.employeeCount || 0), 0)}</div>
             <p className="text-xs text-muted-foreground">Trên tất cả phòng ban</p>
           </CardContent>
         </Card>
@@ -118,7 +123,7 @@ export default function DepartmentManagement({ departments, summary, isLoading }
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary?.avg_employees_per_department ?? (departments.length ? Math.round(departments.reduce((total, dept) => total + (dept.employeeCount || 0), 0) / departments.length) : 0)}</div>
+            <div className="text-2xl font-bold">{summary?.avg_employees_per_department ?? (departments.length ? Math.round(departments.reduce((total: number, dept: any) => total + (dept.employeeCount || 0), 0) / departments.length) : 0)}</div>
             <p className="text-xs text-muted-foreground">Nhân viên</p>
           </CardContent>
         </Card>
@@ -128,7 +133,7 @@ export default function DepartmentManagement({ departments, summary, isLoading }
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary?.largest_department?.employee_count ?? Math.max(...departments.map((dept) => dept.employeeCount || 0), 0)}</div>
+            <div className="text-2xl font-bold">{summary?.largest_department?.employee_count ?? Math.max(...departments.map((dept: any) => dept.employeeCount || 0), 0)}</div>
             <p className="text-xs text-muted-foreground">Nhân viên</p>
           </CardContent>
         </Card>

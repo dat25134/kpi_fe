@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from 'react';
 import { useLoading } from '@/context/loading-context';
-import { initializeLoading } from '@/services/api';
+import { initializeLoading } from '@/services/apiClient';
 
 export default function Home() {
   const { showLoading, hideLoading } = useLoading();

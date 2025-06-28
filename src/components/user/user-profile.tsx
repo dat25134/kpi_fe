@@ -10,13 +10,19 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Edit, Save, X, Award, FolderOpen, GraduationCap, Briefcase, Building2 } from "lucide-react"
 import dynamic from "next/dynamic"
+import { useUserProfile } from "@/hooks/useUser"
+import LoadingSpinner from "@/components/ui/loading-spinner"
 const UserProfilePersonalInfo = dynamic(() => import("./UserProfilePersonalInfo"), { ssr: false })
 const UserProfileDetailInfo = dynamic(() => import("./UserProfileDetailInfo"), { ssr: false })
 const UserProfileWorkInfo = dynamic(() => import("./UserProfileWorkInfo"), { ssr: false })
 const UserProfileSkills = dynamic(() => import("./UserProfileSkills"), { ssr: false })
 const UserProfileProjects = dynamic(() => import("./UserProfileProjects"), { ssr: false })
 
-export default function UserProfile({ userProfile }: { userProfile: any }) {
+export default function UserProfile() {
+  const { userProfile, isLoading, isError } = useUserProfile();
+  if (isLoading) return <LoadingSpinner />;
+  if (isError) return <div>Error loading user profile</div>;
+
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
     name: userProfile?.name || "",
