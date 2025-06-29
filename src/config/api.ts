@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
     DEPARTMENT: `${API_URL}/departments`,
     DEPARTMENT_SUMMARY: `${API_URL}/departments/summary`,
     DEPARTMENT_CREATE: `${API_URL}/departments/`,
+    DEPARTMENT_LIST_SELECT: `${API_URL}/departments/select`
   },
   USER: {
     USER_INFO: `${API_URL}/user/info`,

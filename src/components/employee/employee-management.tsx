@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Plus, UserCheck, UserX, Users, ChevronLeft, ChevronRight } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useEmployees } from "@/hooks/useEmployees"
-import { useDepartments } from "@/hooks/useDepartments"
+import { useDepartments, useDepartmentsListSelect } from "@/hooks/useDepartments"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { POSITIONS, GENDERS } from "@/constants/options"
 import { formatVND } from "@/lib/utils"
@@ -35,7 +35,7 @@ export default function EmployeeManagement() {
     changePage,
     clearFilters,
   } = useEmployees()
-  const { data: departments, isLoading: departmentsLoading } = useDepartments()
+  const { data: departments, isLoading: departmentsLoading } = useDepartmentsListSelect()
 
   const [searchTerm, setSearchTerm] = useState("")
   const [departmentFilter, setDepartmentFilter] = useState("")

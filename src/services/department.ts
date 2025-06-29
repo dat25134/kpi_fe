@@ -75,3 +75,8 @@ export const deleteDepartment = async (id: number) => {
   const response = await apiClient.delete(endpoint, getConfig());
   return response.data;
 };
+
+export const fetchDepartmentsList = async () => {
+  const response = await apiClient.get(API_ENDPOINTS.AUTH.DEPARTMENT_LIST_SELECT, getConfig());
+  return response.data.data;
+}
