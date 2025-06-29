@@ -39,7 +39,7 @@ export default function LoginForm() {
       router.push("/dashboard")
     } catch (error: any) {
       toast.error("Đăng nhập thất bại")
-      setError(error.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại.")
+      setError(error?.message || "Đăng nhập thất bại. Vui lòng thử lại.")
       setIsLoading(false)
     }
   }

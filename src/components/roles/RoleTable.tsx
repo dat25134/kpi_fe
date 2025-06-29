@@ -12,6 +12,7 @@ import {
   MoreHorizontal,
   Trash2,
   GripVertical,
+  Shield,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import type { Role } from "@/types/role"
@@ -22,6 +23,7 @@ interface RoleTableProps {
   onViewDetail: (role: Role) => void
   onEdit: (role: Role) => void
   onDelete: (id: number) => void
+  onManagePermissions: (role: Role) => void
   onDragStart: (e: React.DragEvent, role: Role) => void
   onDragOver: (e: React.DragEvent) => void
   onDrop: (e: React.DragEvent, role: Role) => void
@@ -35,6 +37,7 @@ export default function RoleTable({
   onViewDetail,
   onEdit,
   onDelete,
+  onManagePermissions,
   onDragStart,
   onDragOver,
   onDrop,
@@ -164,6 +167,10 @@ export default function RoleTable({
                   <DropdownMenuItem onClick={() => onEdit(role)}>
                     <Edit className="mr-2 h-4 w-4" />
                     Chỉnh sửa
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onManagePermissions(role)}>
+                    <Shield className="mr-2 h-4 w-4" />
+                    Cấp quyền
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => onDelete(role.id)}

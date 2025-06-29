@@ -14,6 +14,7 @@ import dynamic from "next/dynamic"
 const RoleTable = dynamic(() => import("./RoleTable"), { ssr: false })
 const AddRoleModal = dynamic(() => import("./add-role-modal"), { ssr: false })
 const RoleDetailModal = dynamic(() => import("./role-detail-modal"), { ssr: false })
+const PermissionModal = dynamic(() => import("./permission-modal"), { ssr: false })
 
 export default function RoleManagement() {
   const { data: rolesRaw = [], error, isLoading, addRole, editRole, removeRole, reorder, getRoleDetail } = useRole();
@@ -27,6 +28,7 @@ export default function RoleManagement() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [roleToDelete, setRoleToDelete] = useState<number | null>(null)
   const [draggedItem, setDraggedItem] = useState<Role | null>(null)
+  const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false)
 
   const handleAddRole = async (newRole: any) => {
     try {
@@ -36,6 +38,16 @@ export default function RoleManagement() {
     } catch (error) {
       toast.error("Thêm vai trò thất bại. Vui lòng thử lại.")
     }
+  }
+
+  const handleManagePermissions = (role: any) => {
+    setSelectedRole(role)
+    setIsPermissionModalOpen(true)
+  }
+
+  const handleUpdatePermissions = (roleId: number, updatedPermissions: any[]) => {
+    // Cập nhật local state và trigger re-fetch
+    console.log(roleId, updatedPermissions)
   }
 
   const handleEditRole = async (updatedRole: any) => {
@@ -224,6 +236,7 @@ export default function RoleManagement() {
             onViewDetail={handleViewDetail}
             onEdit={handleEdit}
             onDelete={handleDeleteRequest}
+            onManagePermissions={handleManagePermissions}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
@@ -257,6 +270,13 @@ export default function RoleManagement() {
         onConfirm={handleConfirmDelete}
         title="Xác nhận xóa vai trò"
         description="Bạn có chắc chắn muốn xóa vai trò này? Hành động này không thể hoàn tác và sẽ xóa vĩnh viễn dữ liệu của vai trò."
+      />
+
+      <PermissionModal
+        open={isPermissionModalOpen}
+        onOpenChange={setIsPermissionModalOpen}
+        role={selectedRole}
+        onUpdatePermissions={handleUpdatePermissions}
       />
     </div>
   )
