@@ -4,7 +4,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Phone, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import React from "react";
-import { getPositionColor, getPositionValue, getPositionVariant } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
@@ -52,7 +51,7 @@ export default function EmployeeTable({ employees, loading, onViewDetail, onEdit
                 </TableCell>
                 <TableCell>
                   <div className="font-medium">
-                    <Badge variant={getPositionVariant(employee.position)} className={getPositionColor(employee.position)}>{getPositionValue(employee.position)}</Badge>
+                    <Badge className={`bg-${employee.role?.color}-100 text-${employee.role?.color}-800 hover:bg-${employee.role?.color}-100`}>{employee.role?.displayName}</Badge>
                   </div>
                   <div className="text-sm text-muted-foreground">{employee.department?.name}</div>
                 </TableCell>

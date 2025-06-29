@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Building2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 type DepartmentDetailModalProps = {
   open: boolean
@@ -74,7 +75,7 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
                 <div className="flex items-center space-x-4">
                   <div className="flex-1">
                     <h3 className="font-medium">{department.manager.name}</h3>
-                    <p className="text-sm text-gray-500">{department.manager.position}</p>
+                    <p className="text-sm text-gray-500">{department.manager.role?.displayName}</p>
                     <div className="flex items-center gap-4 mt-2">
                       <span className="text-xs text-gray-500 flex items-center gap-1">
                         {department.manager.name.toLowerCase().replace(/\s+/g, ".")}@company.com
@@ -101,7 +102,7 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
             <CardContent>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <div className="text-2xl font-bold text-blue-600">{department.employeeCount || 0}</div>
+                  <div className="text-2xl font-bold text-blue-600">{department.employee_count || 0}</div>
                   <div className="text-sm text-gray-500">Tổng nhân viên</div>
                 </div>
                 <div>
@@ -109,22 +110,21 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
                     {department.employees
                       ? department.employees.filter(
                           (emp: any) =>
-                            emp.position === "director" ||
-                            emp.position === "manager"
+                            emp.role?.name === "chuyenvien"
                         ).length
                       : department.manager
                         ? 1
                         : 0}
                   </div>
-                  <div className="text-sm text-gray-500">Quản lý</div>
+                  <div className="text-sm text-gray-500">Chuyên viên</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-orange-600">
                     {department.employees
-                      ? department.employees.filter((emp: any) => emp.position === "specialist").length
-                      : (department.employeeCount || 0) - (department.manager ? 1 : 0)}
+                      ? department.employees.filter((emp: any) => emp.role?.name === "nhanvien").length
+                      : (department.employee_count || 0) - (department.chuyenvien ? 1 : 0)}
                   </div>
-                  <div className="text-sm text-gray-500">Chuyên viên</div>
+                  <div className="text-sm text-gray-500">Nhân viên</div>
                 </div>
               </div>
             </CardContent>
@@ -134,7 +134,7 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Danh sách nhân viên</CardTitle>
-              <CardDescription>{department.employeeCount || 0} nhân viên trong phòng ban</CardDescription>
+              <CardDescription>{department.employee_count || 0} nhân viên trong phòng ban</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -144,27 +144,13 @@ export default function DepartmentDetailModal({ open, onOpenChange, department }
                       <div className="flex items-center space-x-3">
                         <div>
                           <p className="font-medium text-sm">{employee.name}</p>
-                          <p className="text-xs text-gray-500">{employee.position}</p>
+                          <p className="text-xs text-gray-500">{employee.role?.displayName}</p>
                         </div>
                       </div>
                       <div>
-                        {employee.position === "director" || employee.position === "manager" ? (
-                          <Badge
-                            variant={
-                              employee.position === "director"
-                                ? "default"
-                                : "secondary"
-                            }
-                          >
-                            {employee.position}
-                          </Badge>
-                        ) : (
-                          <Badge
-                            variant="outline"
-                          >
-                            {employee.position}
-                          </Badge>
-                        )}
+                        <Badge className={`bg-${employee.role?.color}-100 text-${employee.role?.color}-800 hover:bg-${employee.role?.color}-100`}>
+                          {employee.role?.displayName}
+                        </Badge>
                       </div>
                     </div>
                   ))

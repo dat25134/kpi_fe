@@ -39,8 +39,6 @@ export default function DepartmentManagement() {
   const { data: summary, isLoading: loadingSummary } = useDepartmentSummary();
   const isLoading = loadingDepartments || loadingSummary;
 
-  console.log(departments)
-
   // Khi bấm nút tìm kiếm
   const handleSearch = () => {
     setCurrentPage(1);

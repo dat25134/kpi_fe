@@ -6,21 +6,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function getPositionValue(key: string) {
-  const position = POSITIONS.find((p) => p.key === key)
-  return position ? position.value : key
-}
-
-export function getPositionVariant(key: string) {
-  const position = POSITIONS.find((p) => p.key === key)
-  return position ? position.variant : "default"
-}
-
-export function getPositionColor(key: string) {
-  const position = POSITIONS.find((p) => p.key === key)
-  return position ? position.className : "bg-gray-100 text-gray-800 hover:bg-gray-100"
-}
-
 export function formatVietnamesePhoneNumber(input: string): string {
   // Xóa ký tự không phải số
   const digits = input.replace(/\D/g, '');

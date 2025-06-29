@@ -52,8 +52,8 @@ export async function fetchEmployees(filters: EmployeeFilters = {}): Promise<Emp
     if (filters.departmentId) {
       params.append('department_id', filters.departmentId.toString());
     }
-    if (filters.position) {
-      params.append('position', filters.position);
+    if (filters.roleName) {
+      params.append('role_name', filters.roleName);
     }
     if (filters.status) {
       params.append('status', filters.status);
@@ -132,9 +132,9 @@ export async function fetchEmployeeDetail(id: number): Promise<Employee> {
 /**
  * Lấy danh sách nhân viên có vai trò là trưởng phòng
  */
-export async function fetchDirectorEmployees(): Promise<Employee[]> {
+export async function fetchManagerEmployees(): Promise<Employee[]> {
   try {
-    const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.DIRECTOR, getConfig());
+    const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.MANAGER, getConfig());
     return response.data.data;
   } catch (error) {
     console.error('Lỗi lấy danh sách trưởng phòng:', error);

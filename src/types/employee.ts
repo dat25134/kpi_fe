@@ -4,7 +4,12 @@ export interface Employee {
   avatar: string;
   email: string;
   phone: string;
-  position: string;
+  role: {
+    id: number;
+    name: string;
+    displayName: string;
+    color: string;
+  };
   department: {
     id: number;
     name: string;
@@ -15,7 +20,7 @@ export interface Employee {
   salary: number;
   address: string;
   birthDate: string;
-  gender: 'Nam' | 'Nữ';
+  gender: 'male' | 'female' | 'other';
   education: string;
   experience: string;
   skills: string[];
@@ -37,8 +42,9 @@ export interface EmployeeSummary {
     departmentCode: string;
     employeeCount: number;
   }>;
-  positionStats: Array<{
-    position: string;
+  roleStats: Array<{
+    roleId: number;
+    roleName: string;
     count: number;
   }>;
 }
@@ -56,7 +62,7 @@ export interface EmployeeListResponse {
 export interface EmployeeFilters {
   search?: string;
   departmentId?: number;
-  position?: string;
+  roleName?: string;
   status?: 'active' | 'inactive';
   page?: number;
   limit?: number;

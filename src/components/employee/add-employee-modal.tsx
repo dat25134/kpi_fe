@@ -31,7 +31,7 @@ type AddEmployeeModalProps = {
   editingEmployee?: any
   onClose: () => void
   departments: any[]
-  positions: readonly { key: string; value: string }[]
+  roles: any[]
   genders: readonly { key: string; value: string }[]
 }
 
@@ -42,14 +42,14 @@ export default function AddEmployeeModal({
   editingEmployee,
   onClose,
   departments,
-  positions,
+  roles,
   genders,
 }: AddEmployeeModalProps) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
-    position: "",
+    roleName: "",
     departmentId: "",
     status: "active",
     salary: "",
@@ -68,7 +68,7 @@ export default function AddEmployeeModal({
         name: editingEmployee.name,
         email: editingEmployee.email,
         phone: editingEmployee.phone,
-        position: editingEmployee.position,
+        roleName: editingEmployee.role?.name || "",
         departmentId: editingEmployee.department?.id?.toString() || "",
         status: editingEmployee.status,
         salary: formatVND(editingEmployee.salary.toString()),
@@ -95,6 +95,12 @@ export default function AddEmployeeModal({
       return
     }
 
+    const selectedRole = roles.find((role) => role.name === formData.roleName)
+    if (!selectedRole) {
+      setErrors({ roleName: ["Vui lòng chọn chức vụ."] })
+      return
+    }
+
     const nameParts = formData.name.split(" ")
     const avatar =
       nameParts.length >= 2
@@ -105,6 +111,7 @@ export default function AddEmployeeModal({
       ...formData,
       avatar,
       department: selectedDepartment,
+      role: selectedRole,
       salary: Number.parseInt(formData.salary.replace(/\D/g, '')) || 0,
       phone: formData.phone.replace(/\D/g, ''),
       skills: formData.skills
@@ -139,7 +146,7 @@ export default function AddEmployeeModal({
       name: "",
       email: "",
       phone: "",
-      position: "",
+      roleName: "",
       departmentId: "",
       status: "active",
       salary: "",
@@ -186,7 +193,7 @@ export default function AddEmployeeModal({
             formData={formData}
             errors={errors}
             departments={departments}
-            positions={positions}
+            roles={roles}
             genders={genders}
             handleInputChange={handleInputChange}
           />
