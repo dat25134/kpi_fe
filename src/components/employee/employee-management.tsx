@@ -58,14 +58,26 @@ export default function EmployeeManagement() {
       if (searchTerm) {
         newFilters.search = searchTerm
       }
-      if (departmentFilter && departmentFilter !== "all") {
-        newFilters.departmentId = parseInt(departmentFilter)
+      if (departmentFilter) {
+        if (departmentFilter === "all") { 
+          newFilters.departmentId = null
+        } else {
+          newFilters.departmentId = parseInt(departmentFilter)
+        }
       }
-      if (roleFilter && roleFilter !== "all") {
-        newFilters.roleName = roleFilter
+      if (roleFilter) {
+        if (roleFilter === "all") {
+          newFilters.roleName = null
+        } else {
+          newFilters.roleName = roleFilter
+        }
       }
-      if (statusFilter && statusFilter !== "all") {
-        newFilters.status = statusFilter
+      if (statusFilter) {
+        if (statusFilter === "all") {
+          newFilters.status = null
+        } else {
+          newFilters.status = statusFilter
+        }
       }
       
       applyFilters(newFilters)
@@ -220,7 +232,7 @@ export default function EmployeeManagement() {
               />
             </div>
             <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Chọn phòng ban" />
               </SelectTrigger>
               <SelectContent>
@@ -228,13 +240,13 @@ export default function EmployeeManagement() {
                 {departments &&
                   departments.map((dept: any) => (
                     <SelectItem key={dept.id} value={dept.id.toString()}>
-                      {dept.name}
+                      <span className="truncate" title={dept.name}>{dept.name}</span>
                     </SelectItem>
                   ))}
               </SelectContent>
             </Select>
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Chọn chức vụ" />
               </SelectTrigger>
               <SelectContent>
@@ -242,13 +254,13 @@ export default function EmployeeManagement() {
                 {roles &&
                   roles.map((role: any) => (
                     <SelectItem key={role.id} value={role.name}>
-                      {role.displayName}
+                      <span className="truncate" title={role.displayName}>{role.displayName}</span>
                     </SelectItem>
                   ))}
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Chọn trạng thái" />
               </SelectTrigger>
               <SelectContent>
