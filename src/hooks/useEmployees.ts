@@ -67,10 +67,10 @@ export function useEmployees() {
   // Add new employee
   const addEmployee = useCallback(async (employeeData: Omit<Employee, 'id' | 'joinDate' | 'projects'>) => {
     try {
-      setLoading(true);
       const newEmployee = await createEmployee(employeeData);
-      loadSummary();
-      refetch();
+      // Chỉ fetch lại data khi thành công
+      setLoading(true);
+      await Promise.all([loadSummary(), refetch()]);
       toast.success('Thêm nhân viên thành công');
       return newEmployee;
     } catch (error) {
@@ -87,10 +87,10 @@ export function useEmployees() {
   // Update employee
   const updateEmployeeById = useCallback(async (id: number, employeeData: Partial<Employee>) => {
     try {
-      setLoading(true);
       await updateEmployee(id, employeeData);
-      loadSummary();
-      refetch();
+      // Chỉ fetch lại data khi thành công
+      setLoading(true);
+      await Promise.all([loadSummary(), refetch()]);
       toast.success('Cập nhật nhân viên thành công');
     } catch (error) {
       console.error('Error updating employee:', error);

@@ -24,6 +24,7 @@ export interface Employee {
   education: string;
   experience: string;
   skills: string[];
+  cccd: string;
   projects: Array<{
     name: string;
     role: string;
@@ -67,3 +68,13 @@ export interface EmployeeFilters {
   page?: number;
   limit?: number;
 } 
+
+export interface AddEmployeeFormFieldsProps {
+  formData: any;
+  errors: Record<string, string[]>;
+  departments: any[];
+  roles: any[];
+  genders: readonly { key: string; value: string }[];
+  editingEmployee: any;
+  handleInputChange: (field: string, value: string) => void;
+}
