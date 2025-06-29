@@ -12,15 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatVietnamesePhoneNumber, formatVND } from "@/lib/utils";
-
-interface AddEmployeeFormFieldsProps {
-  formData: any;
-  errors: Record<string, string[]>;
-  departments: any[];
-  roles: any[];
-  genders: readonly { key: string; value: string }[];
-  handleInputChange: (field: string, value: string) => void;
-}
+import { AddEmployeeFormFieldsProps } from "@/types/employee";
 
 export default function AddEmployeeFormFields({
   formData,
@@ -28,6 +20,7 @@ export default function AddEmployeeFormFields({
   departments,
   roles,
   genders,
+  editingEmployee,
   handleInputChange,
 }: AddEmployeeFormFieldsProps) {
   return (
@@ -64,9 +57,24 @@ export default function AddEmployeeFormFields({
               value={formData.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
               required
+              disabled={!!editingEmployee}
             />
             <div className="min-h-[1.25rem]">
               {errors.email && <p className="text-sm text-red-500">{errors.email[0]}</p>}
+            </div>
+          </div>
+
+          {/* CCCD */}
+          <div className="space-y-2">
+            <Label htmlFor="cccd">Căn cước công dân</Label>
+            <Input
+              id="cccd"
+              placeholder="Nhập số CCCD"
+              value={formData.cccd}
+              onChange={(e) => handleInputChange("cccd", e.target.value)}
+            />
+            <div className="min-h-[1.25rem]">
+              {errors.cccd && <p className="text-sm text-red-500">{errors.cccd[0]}</p>}
             </div>
           </div>
 
@@ -106,6 +114,20 @@ export default function AddEmployeeFormFields({
             </Select>
             <div className="min-h-[1.25rem]">
               {errors.gender && <p className="text-sm text-red-500">{errors.gender[0]}</p>}
+            </div>
+          </div>
+
+          {/* BirthDate - moved from detail tab */}
+          <div className="space-y-2">
+            <Label htmlFor="birthDate">Ngày sinh</Label>
+            <Input
+              id="birthDate"
+              placeholder="dd/mm/yyyy"
+              value={formData.birthDate}
+              onChange={(e) => handleInputChange("birthDate", e.target.value)}
+            />
+            <div className="min-h-[1.25rem]">
+              {errors.birthDate && <p className="text-sm text-red-500">{errors.birthDate[0]}</p>}
             </div>
           </div>
 
@@ -202,24 +224,13 @@ export default function AddEmployeeFormFields({
 
       <TabsContent value="detail" className="space-y-4 pt-4">
         <div className="grid gap-2">
-          <Label htmlFor="birthDate">Ngày sinh</Label>
-          <Input
-            id="birthDate"
-            placeholder="dd/mm/yyyy"
-            value={formData.birthDate}
-            onChange={(e) => handleInputChange("birthDate", e.target.value)}
-          />
-          {errors.birthDate && <p className="text-sm text-red-500 mt-1">{errors.birthDate[0]}</p>}
-        </div>
-
-        <div className="grid gap-2">
           <Label htmlFor="address">Địa chỉ</Label>
           <Textarea
             id="address"
             placeholder="Nhập địa chỉ"
             value={formData.address}
             onChange={(e) => handleInputChange("address", e.target.value)}
-            className="min-h-[60px]"
+            className="min-h-[60px] resize-none"
           />
           {errors.address && <p className="text-sm text-red-500 mt-1">{errors.address[0]}</p>}
         </div>
@@ -253,7 +264,7 @@ export default function AddEmployeeFormFields({
             placeholder="Nhập các kỹ năng, cách nhau bởi dấu phẩy"
             value={formData.skills}
             onChange={(e) => handleInputChange("skills", e.target.value)}
-            className="min-h-[80px]"
+            className="min-h-[80px] resize-none"
           />
           <p className="text-xs text-gray-500">VD: JavaScript, React, Node.js, Python</p>
           {errors.skills && <p className="text-sm text-red-500 mt-1">{errors.skills[0]}</p>}

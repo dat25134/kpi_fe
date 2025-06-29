@@ -59,6 +59,7 @@ export default function AddEmployeeModal({
     education: "",
     experience: "",
     skills: "",
+    cccd: "",
   })
   const [errors, setErrors] = useState<Record<string, string[]>>({})
 
@@ -78,6 +79,7 @@ export default function AddEmployeeModal({
         education: editingEmployee.education,
         experience: editingEmployee.experience,
         skills: editingEmployee.skills.join(", "),
+        cccd: editingEmployee.cccd || "",
       })
     } else {
       resetForm()
@@ -156,6 +158,7 @@ export default function AddEmployeeModal({
       education: "",
       experience: "",
       skills: "",
+      cccd: "",
     })
     setErrors({})
   }
@@ -195,6 +198,7 @@ export default function AddEmployeeModal({
             departments={departments}
             roles={roles}
             genders={genders}
+            editingEmployee={editingEmployee}
             handleInputChange={handleInputChange}
           />
 
