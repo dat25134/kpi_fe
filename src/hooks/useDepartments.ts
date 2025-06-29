@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { fetchDepartments, fetchDepartmentsSummary } from "@/services/department";
+import { fetchDepartments, fetchDepartmentsList, fetchDepartmentsSummary } from "@/services/department";
 import { DepartmentFilters } from "@/types/department";
 
 export function useDepartments(filters: DepartmentFilters = {}) {
@@ -28,3 +28,13 @@ export function useDepartmentSummary() {
     isError: error,
   };
 } 
+
+export function useDepartmentsListSelect() {
+  const { data, error, isLoading } = useSWR("departments-list", fetchDepartmentsList);
+
+  return {
+    data: data,
+    isLoading,
+    isError: error
+  }
+}

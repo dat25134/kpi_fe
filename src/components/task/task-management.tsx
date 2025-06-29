@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CircleDot, Home, Plus, RefreshCw, Search, Settings, User } from "lucide-react"
+import { CircleDot, Home, Plus, RefreshCw, Search, Settings, User, Calendar as CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import AddTaskModal from "./add-task-modal"
 
@@ -89,9 +89,25 @@ export default function TaskManagement() {
         <div className="col-span-1 md:col-span-1">
           <label className="text-sm font-medium">Thời gian:</label>
           <div className="flex items-center space-x-2">
-            <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            <div className="relative flex items-center w-full">
+              <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="pl-10 block" 
+              />
+            </div>
             <span>-</span>
-            <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+            <div className="relative flex items-center w-full">
+              <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
+              <Input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="pl-10 block"
+              />
+            </div>
           </div>
         </div>
         <div className="col-span-2 md:col-span-1">
