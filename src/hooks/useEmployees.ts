@@ -7,7 +7,7 @@ import {
   deleteEmployee,
   fetchEmployeeDetail,
   ValidationError,
-  fetchDirectorEmployees
+  fetchManagerEmployees
 } from '@/services/employee';
 import type { Employee, EmployeeSummary, EmployeeFilters, EmployeeListResponse } from '@/types/employee';
 import { toast } from 'sonner';
@@ -175,8 +175,8 @@ export function useEmployees() {
   };
 }
 
-export function useDirectors() {
-  const { data, error, isLoading } = useSWR("directors", fetchDirectorEmployees);
+export function useManagers() {
+  const { data, error, isLoading } = useSWR("managers", fetchManagerEmployees);
   return {
     data: data || [],
     isLoading,

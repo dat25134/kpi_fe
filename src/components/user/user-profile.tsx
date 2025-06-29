@@ -94,7 +94,7 @@ export default function UserProfile() {
             </Avatar>
             <div className="flex-1">
               <h2 className="text-2xl font-bold">{userProfile?.name}</h2>
-              <p className="text-lg text-gray-600">{userProfile?.position}</p>
+              <p className="text-lg text-gray-600">{userProfile?.role?.displayName}</p>
               <div className="flex items-center gap-2 mt-2">
                 <Badge variant="outline" className="flex items-center gap-1">
                   <Building2 className="h-3 w-3" />

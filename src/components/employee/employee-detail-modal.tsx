@@ -18,7 +18,7 @@ import {
   Award,
   FolderOpen,
 } from "lucide-react"
-import { getPositionValue, formatVND } from "@/lib/utils"
+import { formatVND } from "@/lib/utils"
 import EmployeeDetailPersonalInfo from "./EmployeeDetailPersonalInfo"
 
 type EmployeeDetailModalProps = {
@@ -50,7 +50,7 @@ export default function EmployeeDetailModal({ open, onOpenChange, employee }: Em
                 </Avatar>
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold">{employee.name}</h2>
-                  <p className="text-lg text-gray-600">{getPositionValue(employee.position)}</p>
+                  <p className="text-lg text-gray-600">{employee.role?.displayName}</p>
                   <div className="flex items-center gap-2 mt-2">
                     <Badge variant="outline" className="flex items-center gap-1">
                       <Building2 className="h-3 w-3" />
@@ -140,17 +140,7 @@ export default function EmployeeDetailModal({ open, onOpenChange, employee }: Em
                   <CardContent className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-500">Chức vụ:</span>
-                      <Badge
-                        variant={
-                          employee.position === "director"
-                            ? "default"
-                            : employee.position === "manager"
-                            ? "secondary"
-                            : "outline"
-                        }
-                      >
-                        {getPositionValue(employee.position)}
-                      </Badge>
+                      <Badge className={`bg-${employee.role?.color}-100 text-${employee.role?.color}-800 hover:bg-${employee.role?.color}-100`}>{employee.role?.displayName}</Badge>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-500">Phòng ban:</span>

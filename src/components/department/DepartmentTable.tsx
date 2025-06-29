@@ -54,7 +54,9 @@ export default function DepartmentTable({ departments, onViewDetail, onEdit, onD
                       {department?.manager?.name ?? "—"}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {department?.manager?.position ? department.manager.position : "—"}
+                      <Badge className={`bg-${department?.manager?.role?.color}-100 text-${department?.manager?.role?.color}-800 hover:bg-${department?.manager?.role?.color}-100`}>
+                        {department?.manager?.role?.displayName ?? "—"}
+                      </Badge>
                     </div>
                   </div>
                 </div>

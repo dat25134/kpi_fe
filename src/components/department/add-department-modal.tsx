@@ -24,7 +24,7 @@ import {
   DepartmentPayload,
   updateDepartment,
 } from "@/services/department"
-import { useDirectors } from "@/hooks/useEmployees"
+import { useManagers } from "@/hooks/useEmployees"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -54,7 +54,7 @@ export default function AddDepartmentModal({
   const [errors, setErrors] = useState<Record<string, string[]>>({})
   
   // Sử dụng SWR hook để fetch danh sách trưởng phòng
-  const { data: managers, isLoading: loadingManagers } = useDirectors()
+  const { data: managers, isLoading: loadingManagers } = useManagers()
 
   useEffect(() => {
     if (editingDepartment) {

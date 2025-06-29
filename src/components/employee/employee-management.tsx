@@ -9,11 +9,12 @@ import dynamic from "next/dynamic"
 import { useEmployees } from "@/hooks/useEmployees"
 import { useDepartments, useDepartmentsListSelect } from "@/hooks/useDepartments"
 import LoadingSpinner from "@/components/ui/loading-spinner"
-import { POSITIONS, GENDERS } from "@/constants/options"
+import { GENDERS } from "@/constants/options"
 import { formatVND } from "@/lib/utils"
 import ConfirmDeleteModal from "../shared/confirm-delete-modal"
 import { toast } from "sonner"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useRolesSelection } from "@/hooks/role"
 const EmployeeTable = dynamic(() => import("./EmployeeTable"), { ssr: false })
 
 const AddEmployeeModal = dynamic(() => import("./add-employee-modal"), { ssr: false })
@@ -36,10 +37,11 @@ export default function EmployeeManagement() {
     clearFilters,
   } = useEmployees()
   const { data: departments, isLoading: departmentsLoading } = useDepartmentsListSelect()
+  const { data: roles, isLoading: rolesLoading } = useRolesSelection()
 
   const [searchTerm, setSearchTerm] = useState("")
   const [departmentFilter, setDepartmentFilter] = useState("")
-  const [positionFilter, setPositionFilter] = useState("")
+  const [roleFilter, setRoleFilter] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
@@ -59,8 +61,8 @@ export default function EmployeeManagement() {
       if (departmentFilter && departmentFilter !== "all") {
         newFilters.departmentId = parseInt(departmentFilter)
       }
-      if (positionFilter && positionFilter !== "all") {
-        newFilters.position = positionFilter
+      if (roleFilter && roleFilter !== "all") {
+        newFilters.roleName = roleFilter
       }
       if (statusFilter && statusFilter !== "all") {
         newFilters.status = statusFilter
@@ -70,7 +72,7 @@ export default function EmployeeManagement() {
     }, 500) // Debounce search
 
     return () => clearTimeout(timeoutId)
-  }, [searchTerm, departmentFilter, positionFilter, statusFilter, applyFilters])
+  }, [searchTerm, departmentFilter, roleFilter, statusFilter, applyFilters])
 
   const handleAddEmployee = async (newEmployee: any) => {
     await addEmployee(newEmployee)
@@ -121,7 +123,7 @@ export default function EmployeeManagement() {
   const handleClearFilters = () => {
     setSearchTerm("")
     setDepartmentFilter("")
-    setPositionFilter("")
+    setRoleFilter("")
     setStatusFilter("")
     clearFilters()
   }
@@ -231,17 +233,18 @@ export default function EmployeeManagement() {
                   ))}
               </SelectContent>
             </Select>
-            <Select value={positionFilter} onValueChange={setPositionFilter}>
+            <Select value={roleFilter} onValueChange={setRoleFilter}>
               <SelectTrigger>
                 <SelectValue placeholder="Chọn chức vụ" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tất cả chức vụ</SelectItem>
-                {POSITIONS.map((position) => (
-                  <SelectItem key={position.key} value={position.key}>
-                    {position.value}
-                  </SelectItem>
-                ))}
+                {roles &&
+                  roles.map((role: any) => (
+                    <SelectItem key={role.id} value={role.name}>
+                      {role.displayName}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -332,7 +335,7 @@ export default function EmployeeManagement() {
           setEditingEmployee(null)
         }}
         departments={departments || []}
-        positions={POSITIONS}
+        roles={roles || []}
         genders={GENDERS}
       />
       {selectedEmployee && (

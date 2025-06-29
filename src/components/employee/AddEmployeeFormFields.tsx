@@ -17,7 +17,7 @@ interface AddEmployeeFormFieldsProps {
   formData: any;
   errors: Record<string, string[]>;
   departments: any[];
-  positions: readonly { key: string; value: string }[];
+  roles: any[];
   genders: readonly { key: string; value: string }[];
   handleInputChange: (field: string, value: string) => void;
 }
@@ -26,7 +26,7 @@ export default function AddEmployeeFormFields({
   formData,
   errors,
   departments,
-  positions,
+  roles,
   genders,
   handleInputChange,
 }: AddEmployeeFormFieldsProps) {
@@ -136,12 +136,12 @@ export default function AddEmployeeFormFields({
             </div>
           </div>
 
-          {/* Position */}
+          {/* Role */}
           <div className="space-y-2">
-            <Label htmlFor="position">Chức vụ *</Label>
+            <Label htmlFor="role">Chức vụ *</Label>
             <Select
-              value={formData.position}
-              onValueChange={(value) => handleInputChange("position", value)}
+              value={formData.roleName}
+              onValueChange={(value) => handleInputChange("roleName", value)}
               required
             >
               <SelectTrigger className="w-full">
@@ -150,16 +150,16 @@ export default function AddEmployeeFormFields({
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Danh sách chức vụ</SelectLabel>
-                  {positions.map((position) => (
-                    <SelectItem key={position.key} value={position.key}>
-                      {position.value}
+                  {roles.map((role) => (
+                    <SelectItem key={role.id} value={role.name}>
+                      {role.displayName}
                     </SelectItem>
                   ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
             <div className="min-h-[1.25rem]">
-              {errors.position && <p className="text-sm text-red-500">{errors.position[0]}</p>}
+              {errors.roleName && <p className="text-sm text-red-500">{errors.roleName[0]}</p>}
             </div>
           </div>
 

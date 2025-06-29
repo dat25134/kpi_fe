@@ -1,7 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import React from "react";
-import { getPositionColor, getPositionValue, getPositionVariant } from "@/lib/utils";
 
 interface UserProfileWorkInfoProps {
   userProfile: any;
@@ -20,7 +19,7 @@ export default function UserProfileWorkInfo({ userProfile }: UserProfileWorkInfo
           <div className="space-y-3">
             <div className="flex justify-between">
               <span className="text-sm text-gray-500">Chức vụ:</span>
-              <Badge variant={getPositionVariant(userProfile?.position)} className={getPositionColor(userProfile?.position)}>{userProfile?.position ? getPositionValue(userProfile?.position) : "-"}</Badge>
+              <Badge className={`bg-${userProfile?.role?.color}-100 text-${userProfile?.role?.color}-800 hover:bg-${userProfile?.role?.color}-100`}>{userProfile?.role?.displayName}</Badge>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-gray-500">Phòng ban:</span>
