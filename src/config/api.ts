@@ -26,6 +26,13 @@ export const API_ENDPOINTS = {
   },
 
   ROLES: {
+    LIST: `${API_URL}/roles`,
+    SUMMARY: `${API_URL}/roles/summary`,
+    CREATE: `${API_URL}/roles`,
+    UPDATE: (id: number) => `${API_URL}/roles/${id}`,
+    DELETE: (id: number) => `${API_URL}/roles/${id}`,
+    DETAIL: (id: number) => `${API_URL}/roles/${id}`,
+    REORDER: `${API_URL}/roles/reorder`,
     SELECTION: `${API_URL}/roles/selection`,
   },
   // Thêm các nhóm API khác ở đây

@@ -83,6 +83,20 @@ export default function MainHeader() {
               </Button>
             </Link>
           )}
+          {user?.role === "admin" && (
+            <Link href="/roles">
+              <Button
+                variant={pathname === "/roles" ? "secondary" : "ghost"}
+                className={cn(
+                  "h-9 px-3 text-xs md:text-sm",
+                  pathname === "/roles" ? "bg-blue-600 text-white hover:bg-blue-700" : "text-white hover:bg-blue-800",
+                )}
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Quản lý vai trò
+              </Button>
+            </Link>
+          )}
 
           <Link href="/evaluation">
             <Button
