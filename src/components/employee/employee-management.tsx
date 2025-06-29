@@ -14,7 +14,7 @@ import { formatVND } from "@/lib/utils"
 import ConfirmDeleteModal from "../shared/confirm-delete-modal"
 import { toast } from "sonner"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useRolesSelection } from "@/hooks/role"
+import { useRolesSelection } from "@/hooks/useRole"
 const EmployeeTable = dynamic(() => import("./EmployeeTable"), { ssr: false })
 
 const AddEmployeeModal = dynamic(() => import("./add-employee-modal"), { ssr: false })
