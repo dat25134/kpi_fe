@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Bell, FileText, LayoutDashboard, Building2, Users } from "lucide-react"
+import { Bell, FileText, LayoutDashboard, Building2, Users, Menu } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -17,11 +17,14 @@ import {
 import { setAuthToken } from "@/services/auth"
 import { useUser } from "@/hooks/useUser"
 import { toast } from "sonner"
+import { useState } from "react"
+import MobileSidebar from "./mobile-sidebar"
 
 export default function MainHeader() {
   const pathname = usePathname()
   const router = useRouter()
   const { user, isLoading } = useUser();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     setAuthToken("")
@@ -31,15 +34,25 @@ export default function MainHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-[#0f172a] text-white">
-      <div className="flex h-14 items-center px-4">
-        <div className="flex items-center mr-4">
+      <div className="flex flex-wrap md:flex-nowrap h-auto items-center px-2 md:px-4">
+        <div className="flex items-center mr-2 md:mr-4 mb-2 md:mb-0">
           <div className="w-8 h-8 bg-orange-600 rounded-md flex items-center justify-center mr-2">
             <span className="text-white font-bold text-sm">T</span>
           </div>
-          <span className="font-bold text-sm md:text-base">HỆ THỐNG GIÁM SÁT CÔNG VIỆC</span>
+          <span className="font-bold text-xs md:text-base whitespace-nowrap">HỆ THỐNG GIÁM SÁT CÔNG VIỆC</span>
         </div>
 
-        <nav className="flex items-center space-x-1 ml-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-white md:hidden ml-auto"
+          onClick={() => setMobileMenuOpen(true)}
+          aria-label="Mở menu"
+        >
+          <Menu className="h-6 w-6" />
+        </Button>
+
+        <nav className="hidden md:flex items-center space-x-1 ml-0 md:ml-4 w-full md:w-auto flex-wrap">
           <Link href="/dashboard">
             <Button
               variant={pathname === "/dashboard" ? "secondary" : "ghost"}
@@ -49,7 +62,7 @@ export default function MainHeader() {
               )}
             >
               <LayoutDashboard className="h-4 w-4 mr-2" />
-              Quản lý công việc
+              <span className="hidden xl:inline">Quản lý công việc</span>
             </Button>
           </Link>
 
@@ -65,7 +78,7 @@ export default function MainHeader() {
                 )}
               >
                 <Building2 className="h-4 w-4 mr-2" />
-                Quản lý phòng ban
+                <span className="hidden xl:inline">Quản lý phòng ban</span>
               </Button>
             </Link>
           )}
@@ -79,7 +92,7 @@ export default function MainHeader() {
                 )}
               >
                 <Users className="h-4 w-4 mr-2" />
-                Quản lý nhân viên
+                <span className="hidden xl:inline">Quản lý nhân viên</span>
               </Button>
             </Link>
           )}
@@ -93,7 +106,7 @@ export default function MainHeader() {
                 )}
               >
                 <Users className="h-4 w-4 mr-2" />
-                Quản lý vai trò
+                <span className="hidden xl:inline">Quản lý vai trò</span>
               </Button>
             </Link>
           )}
@@ -109,12 +122,12 @@ export default function MainHeader() {
               )}
             >
               <FileText className="h-4 w-4 mr-2" />
-              Phiếu đánh giá
+              <span className="hidden xl:inline">Phiếu đánh giá</span>
             </Button>
           </Link>
         </nav>
 
-        <div className="ml-auto flex items-center space-x-4">
+        <div className="hidden md:flex ml-auto items-center space-x-4 mt-2 md:mt-0">
           <Button variant="ghost" size="icon" className="text-white">
             <Bell className="h-5 w-5" />
           </Button>
@@ -146,6 +159,17 @@ export default function MainHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+
+        {/* Mobile sidebar menu (Sheet/Drawer) */}
+        <MobileSidebar
+          mobileMenuOpen={mobileMenuOpen}
+          setMobileMenuOpen={setMobileMenuOpen}
+          user={user}
+          isLoading={isLoading}
+          pathname={pathname}
+          router={router}
+          handleLogout={handleLogout}
+        />
       </div>
     </header>
   )
