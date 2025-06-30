@@ -19,7 +19,6 @@ import { Label } from "@/components/ui/label"
 import {
   Shield,
   Users,
-  DollarSign,
   FileText,
   Settings,
   Search,
@@ -30,71 +29,17 @@ import {
   ClipboardCheck,
 } from "lucide-react"
 import { PermissionModalProps } from "@/types/permission"
-// Danh sách tất cả quyền hạn có thể có trong hệ thống
-const allPermissions = [
-  // Quản lý nhân sự
-  { id: 1, name: "Xem danh sách nhân viên", module: "HR", category: "Xem", description: "Xem thông tin cơ bản của nhân viên" },
-  { id: 2, name: "Thêm nhân viên mới", module: "HR", category: "Thêm", description: "Tạo hồ sơ nhân viên mới" },
-  { id: 3, name: "Chỉnh sửa thông tin nhân viên", module: "HR", category: "Sửa", description: "Cập nhật thông tin nhân viên" },
-  { id: 4, name: "Xóa nhân viên", module: "HR", category: "Xóa", description: "Xóa hồ sơ nhân viên khỏi hệ thống" },
-  { id: 5, name: "Quản lý chức vụ", module: "HR", category: "Quản lý", description: "Phân công và thay đổi chức vụ" },
+import { usePermissions } from "@/hooks/usePermission"
+import { useModules } from "@/hooks/useModule"
 
-  // Quản lý phòng ban
-  { id: 6, name: "Xem danh sách phòng ban", module: "Department", category: "Xem", description: "Xem thông tin các phòng ban" },
-  { id: 7, name: "Thêm phòng ban mới", module: "Department", category: "Thêm", description: "Tạo phòng ban mới" },
-  { id: 8, name: "Chỉnh sửa thông tin phòng ban", module: "Department", category: "Sửa", description: "Cập nhật thông tin phòng ban" },
-  { id: 9, name: "Xóa phòng ban", module: "Department", category: "Xóa", description: "Xóa phòng ban khỏi hệ thống" },
-  { id: 10, name: "Phân công trưởng phòng", module: "Department", category: "Phân công", description: "Chỉ định trưởng phòng" },
-
-  // Quản lý dự án/công việc
-  { id: 11, name: "Xem danh sách dự án/công việc", module: "Project", category: "Xem", description: "Xem thông tin các dự án/công việc" },
-  { id: 12, name: "Tạo dự án/công việc mới", module: "Project", category: "Thêm", description: "Khởi tạo dự án/công việc mới" },
-  { id: 13, name: "Chỉnh sửa dự án/công việc", module: "Project", category: "Sửa", description: "Cập nhật thông tin dự án/công việc" },
-  { id: 14, name: "Xóa dự án/công việc", module: "Project", category: "Xóa", description: "Xóa dự án/công việc khỏi hệ thống" },
-  { id: 15, name: "Phân công nhiệm vụ", module: "Project", category: "Phân công", description: "Giao việc cho thành viên" },
-  { id: 16, name: "Theo dõi tiến độ", module: "Project", category: "Theo dõi", description: "Giám sát tiến độ thực hiện" },
-  { id: 17, name: "Đóng dự án", module: "Project", category: "Quản lý", description: "Kết thúc và đánh giá dự án" },
-
-  // Đánh giá
-  { id: 18, name: "Xem phiếu đánh giá", module: "Evaluation", category: "Xem", description: "Xem phiếu đánh giá nhân viên" },
-  { id: 19, name: "Tạo phiếu đánh giá", module: "Evaluation", category: "Tạo", description: "Tạo phiếu đánh giá mới" },
-  { id: 20, name: "Duyệt phiếu đánh giá", module: "Evaluation", category: "Duyệt", description: "Duyệt phiếu đánh giá nhân viên" },
-
-  // Hệ thống
-  { id: 21, name: "Cấp quyền người dùng", module: "System", category: "Cấp quyền", description: "Phân quyền cho người dùng khác" },
-  { id: 22, name: "Xem log hệ thống", module: "System", category: "Xem", description: "Truy cập nhật ký hệ thống" },
-
-  // Báo cáo
-  { id: 23, name: "Xem báo cáo KPI", module: "Report", category: "Xem", description: "Truy cập báo cáo hiệu suất" },
-  { id: 24, name: "Xuất báo cáo", module: "Report", category: "Xuất", description: "Xuất báo cáo ra file" },
-]
-
-const moduleIcons = {
-  HR: Users,
-  Department: Building2,
-  Project: FileText,
-  Evaluation: ClipboardCheck,
-  System: Settings,
-  Report: FileText,
+// Tạo ánh xạ tên icon sang component
+const iconMap: Record<string, any> = {
+  Users,
+  Building2,
+  FileText,
+  ClipboardCheck,
+  Settings,
 }
-
-const moduleColors = {
-  HR: "bg-blue-100 text-blue-800",
-  Department: "bg-cyan-100 text-cyan-800",
-  Project: "bg-purple-100 text-purple-800",
-  Evaluation: "bg-pink-100 text-pink-800",
-  System: "bg-red-100 text-red-800",
-  Report: "bg-orange-100 text-orange-800",
-}
-
-const moduleDisplayNames: Record<string, string> = {
-  HR: "Quản lý Nhân sự",
-  Department: "Phòng ban",
-  Project: "Quản lý Dự án/Công việc",
-  Evaluation: "Đánh giá",
-  System: "Hệ thống",
-  Report: "Báo cáo",
-};
 
 export default function PermissionModal({
   open,
@@ -105,11 +50,29 @@ export default function PermissionModal({
   const [permissions, setPermissions] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedModule, setSelectedModule] = useState("all")
+  // Danh sách tất cả quyền hạn có thể có trong hệ thống
+  const { permissions: allPermissions } = usePermissions()
+  const { modules: allModules } = useModules()
+
+  const moduleIcons = allModules.reduce((acc: Record<string, any>, module: any) => {
+    acc[module.name] = module.icon
+    return acc
+  }, {})
+
+  const moduleDisplayNames = allModules.reduce((acc: Record<string, any>, module: any) => {
+    acc[module.name] = module.display_name
+    return acc
+  }, {})
+
+  const moduleColors = allModules.reduce((acc: Record<string, any>, module: any) => {
+    acc[module.name] = module.color
+    return acc
+  }, {})
 
   useEffect(() => {
     if (role) {
       // Khởi tạo permissions với tất cả quyền có thể có
-      const rolePermissions = allPermissions.map((perm) => {
+      const rolePermissions = allPermissions.map((perm: any) => {
         const existingPerm = role.permissions?.find((p: any) => p.id === perm.id)
         return {
           ...perm,
@@ -165,7 +128,7 @@ export default function PermissionModal({
   const grantedCount = permissions.filter((p) => p.granted).length
   const totalCount = permissions.length
 
-  const modules = [...new Set(allPermissions.map((p) => p.module))]
+  const modules = [...new Set(allPermissions.map((p: any) => p.module))]
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -220,7 +183,7 @@ export default function PermissionModal({
           <div className="flex items-center justify-between mb-3">
             <TabsList className="flex w-full h-9">
               <TabsTrigger value="all" className="text-xs">Tất cả</TabsTrigger>
-              {modules.map((module) => (
+              {modules.map((module: any) => (
                 <TabsTrigger key={module} value={module} className="text-xs">
                   {moduleDisplayNames[module] || module}
                 </TabsTrigger>
@@ -258,7 +221,12 @@ export default function PermissionModal({
                 <Card key={module} className="border-0 shadow-sm">
                   <CardHeader className="pb-2 pt-3 px-4">
                     <CardTitle className="text-base flex items-center gap-2">
-                      <ModuleIcon className="h-4 w-4" />
+                      {/* Lấy icon từ modulePermissions[0]?.icon hoặc module (nếu có) */}
+                      {(() => {
+                        const iconName = modulePermissions[0]?.icon || module;
+                        const IconComponent = iconMap[iconName] || FileText;
+                        return <IconComponent className="h-4 w-4" />;
+                      })()}
                       {moduleDisplayNames[module] || module}
                       <Badge className={`text-xs ${moduleColors[module as keyof typeof moduleColors] || 'bg-gray-100 text-gray-800'}`}>
                         {modulePermissions.length} quyền
