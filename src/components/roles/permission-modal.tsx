@@ -71,17 +71,17 @@ export default function PermissionModal({
 
   useEffect(() => {
     if (role) {
-      // Khởi tạo permissions với tất cả quyền có thể có
-      const rolePermissions = allPermissions.map((perm: any) => {
-        const existingPerm = role.permissions?.find((p: any) => p.id === perm.id)
-        return {
-          ...perm,
-          granted: existingPerm ? existingPerm.granted : false,
-        }
-      })
-      setPermissions(rolePermissions)
+      // Nếu role.permissions là mảng id: [1,3,5]
+      const grantedIds = Array.isArray(role.permissions)
+        ? role.permissions.map((p: any) => (typeof p === 'object' ? p.id : p))
+        : [];
+      const rolePermissions = allPermissions.map((perm: any) => ({
+        ...perm,
+        granted: grantedIds.includes(perm.id),
+      }));
+      setPermissions(rolePermissions);
     }
-  }, [role])
+  }, [role, allPermissions]);
 
   if (!role) return null
 
@@ -90,8 +90,9 @@ export default function PermissionModal({
   }
 
   const handleSave = () => {
-    onUpdatePermissions(role.id, permissions)
-    onOpenChange(false)
+      const role_id = role.id
+      const permission_ids = permissions.filter((p: any) => p.granted).map((p: any) => p.id)
+    onUpdatePermissions(role.id, permission_ids)
   }
 
   const handleSelectAll = (module: string) => {

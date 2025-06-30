@@ -10,6 +10,10 @@ import ConfirmDeleteModal from "../shared/confirm-delete-modal"
 import { toast } from "sonner"
 import type { Role } from "@/types/role"
 import dynamic from "next/dynamic"
+import { useSyncPermissions } from "@/hooks/usePermission"
+import { syncPermissions } from "@/services/permission"
+import { mutate } from "swr"
+import { API_ENDPOINTS } from "@/config/api"
 
 const RoleTable = dynamic(() => import("./RoleTable"), { ssr: false })
 const AddRoleModal = dynamic(() => import("./add-role-modal"), { ssr: false })
@@ -45,9 +49,15 @@ export default function RoleManagement() {
     setIsPermissionModalOpen(true)
   }
 
-  const handleUpdatePermissions = (roleId: number, updatedPermissions: any[]) => {
-    // Cập nhật local state và trigger re-fetch
-    console.log(roleId, updatedPermissions)
+  const handleUpdatePermissions = async (roleId: number, permission_ids: number[]) => {
+    try {
+      await syncPermissions(roleId, permission_ids)
+      mutate(API_ENDPOINTS.ROLES.LIST)
+      setIsPermissionModalOpen(false)
+      toast.success("Cập nhật quyền hạn thành công!")
+    } catch (error) {
+      toast.error("Cập nhật quyền hạn thất bại. Vui lòng thử lại.")
+    }
   }
 
   const handleEditRole = async (updatedRole: any) => {
