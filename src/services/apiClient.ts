@@ -14,6 +14,7 @@ let loadingCount = 0;
 let loadingTimeout: NodeJS.Timeout | null = null;
 let showLoadingFn: (() => void) | null = null;
 let hideLoadingFn: (() => void) | null = null;
+let isAuthRedirecting = false;
 
 export const initializeLoading = (show: () => void, hide: () => void) => {
   showLoadingFn = show;
@@ -74,10 +75,16 @@ apiClient.interceptors.response.use(
   },
   (error) => {
     hideLoading();
-    if (error.response && (error.response.status === 401 || error.response.status === 419)) {
-      setAuthToken("");
-      toast.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
-      window.location.href = "/login";
+    if (
+      error.response &&
+      (error.response.status === 401 || error.response.status === 419)
+    ) {
+      if (!isAuthRedirecting) {
+        isAuthRedirecting = true;
+        setAuthToken("");
+        toast.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
+        window.dispatchEvent(new Event("auth-expired"));
+      }
     }
     return Promise.reject(error);
   }
