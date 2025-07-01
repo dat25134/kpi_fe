@@ -9,8 +9,8 @@ import {
   fetchManagerEmployees
 } from '@/services/employee';
 import type { Employee, EmployeeSummary, EmployeeFilters, EmployeeListResponse } from '@/types/employee';
-import { toast } from 'sonner';
 import useSWR from 'swr';
+import { syncEmployeePermissions } from '@/services/permission';
 
 export function useEmployees() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -100,6 +100,11 @@ export function useEmployees() {
     });
   }, []);
 
+  const updateEmployeePermissions = useCallback(async (employeeId: number, permissionIds: number[]) => {
+    await syncEmployeePermissions(employeeId, permissionIds);
+    refetch();
+  }, [refetch]);
+
   // Load initial summary
   useEffect(() => {
     loadSummary();
@@ -123,6 +128,7 @@ export function useEmployees() {
     changePage,
     clearFilters,
     setLoading,
+    updateEmployeePermissions,
   };
 }
 

@@ -27,3 +27,12 @@ export async function syncPermissions(roleId: number, permission_ids: number[]) 
   const response = await apiClient.post(API_ENDPOINTS.PERMISSIONS.SYNC, payload, getConfig());
   return response.data.data;
 }
+
+export async function syncEmployeePermissions(employeeId: number, permission_ids: number[]) {
+  const payload = {
+    employee_id: employeeId,
+    permission_ids: permission_ids
+  }
+  const response = await apiClient.post(API_ENDPOINTS.PERMISSIONS.SYNC_PERMISSION_BY_EMPLOYEE, payload, getConfig());
+  return response.data.data;
+}

@@ -16,6 +16,8 @@ import { toast } from "sonner"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRolesSelection } from "@/hooks/useRole"
 import { getErrorMessage } from "@/services/errorHandler"
+import { syncEmployeePermissions } from "@/services/permission"
+const PermissionModal = dynamic(() => import("../roles/permission-modal"), { ssr: false })
 const EmployeeTable = dynamic(() => import("./EmployeeTable"), { ssr: false })
 
 const AddEmployeeModal = dynamic(() => import("./add-employee-modal"), { ssr: false })
@@ -37,6 +39,7 @@ export default function EmployeeManagement() {
     changePage,
     clearFilters,
     setLoading,
+    updateEmployeePermissions
   } = useEmployees()
   const { data: departments, isLoading: departmentsLoading } = useDepartmentsListSelect()
   const { data: roles, isLoading: rolesLoading } = useRolesSelection()
@@ -51,6 +54,8 @@ export default function EmployeeManagement() {
   const [editingEmployee, setEditingEmployee] = useState<any>(null)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [employeeToDelete, setEmployeeToDelete] = useState<number | null>(null)
+  const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false)
+  const [selectedEmployeeForPermission, setSelectedEmployeeForPermission] = useState<any>(null)
 
   // Apply filters when search/filter values change
   useEffect(() => {
@@ -145,6 +150,23 @@ export default function EmployeeManagement() {
 
   const handlePageChange = (page: number) => {
     changePage(page)
+  }
+
+  const handleManagePermissions = (employee: any) => {
+    setSelectedEmployeeForPermission(employee)
+    setIsPermissionModalOpen(true)
+  }
+
+  const handleUpdateEmployeePermissions = async (employeeId: number, permission_ids: number[]) => {
+    try {
+      await updateEmployeePermissions(employeeId, permission_ids)
+      toast.success("Cập nhật quyền hạn cho nhân viên thành công!")
+    } catch (error) {
+      toast.error(getErrorMessage(error))
+    } finally {
+      setIsPermissionModalOpen(false)
+      setSelectedEmployeeForPermission(null)
+    }
   }
 
   // Loading states
@@ -306,6 +328,7 @@ export default function EmployeeManagement() {
                 onViewDetail={handleViewDetail}
                 onEdit={handleEdit}
                 onDelete={handleDeleteRequest}
+                onManagePermissions={handleManagePermissions}
               />
 
               {/* Phân trang */}
@@ -366,6 +389,12 @@ export default function EmployeeManagement() {
         onConfirm={handleConfirmDelete}
         title="Xác nhận xóa nhân viên"
         description="Bạn có chắc chắn muốn xóa nhân viên này? Hành động này không thể hoàn tác và sẽ xóa vĩnh viễn dữ liệu của nhân viên."
+      />
+      <PermissionModal
+        open={isPermissionModalOpen}
+        onOpenChange={setIsPermissionModalOpen}
+        role={selectedEmployeeForPermission}
+        onUpdatePermissions={handleUpdateEmployeePermissions}
       />
     </div>
   )

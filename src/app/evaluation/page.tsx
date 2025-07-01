@@ -16,8 +16,10 @@ export default function EvaluationPage() {
   return (
     <div className="flex min-h-[calc(100vh-100px)] flex-col">
       <MainHeader />
-      <div className="flex-1">
-        <EvaluationForm />
+      <div className="flex-1 flex flex-col items-center px-2 md:px-6 py-2 md:py-4 w-full">
+        <div className="w-full">
+          <EvaluationForm />
+        </div>
       </div>
     </div>
   )
