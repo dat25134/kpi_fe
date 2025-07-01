@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import React from "react"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -20,4 +21,14 @@ export function formatVND(input: string): string {
   if (!digits) return '';
   // Thêm dấu chấm phân tách hàng nghìn
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+export function extractTextFromReactNode(node: React.ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(extractTextFromReactNode).join(" ");
+  if (React.isValidElement(node)) {
+    const element = node as React.ReactElement<any, any>;
+    return extractTextFromReactNode(element.props.children);
+  }
+  return "";
 }

@@ -28,10 +28,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, Check, ChevronsUpDown } from "lucide-react"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
-import { cn } from "@/lib/utils"
+import { cn, extractTextFromReactNode } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Input } from "../ui/input"
+import { Select as AntdSelect } from "antd"
 
 // Dữ liệu mẫu cho người phối hợp
 const collaborators = [
@@ -56,9 +57,20 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskM
   const [weight, setWeight] = useState("4")
   const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>([])
   const [comboboxOpen, setComboboxOpen] = useState(false)
+  const [assigner, setAssigner] = useState("")
+  const [mainHandler, setMainHandler] = useState("")
+  const [mainHandlerError, setMainHandlerError] = useState("")
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validate mainHandler
+    if (!mainHandler) {
+      setMainHandlerError("Vui lòng chọn người xử lý chính")
+      return
+    } else {
+      setMainHandlerError("")
+    }
 
     // Tạo task mới
     const newTask = {
@@ -73,6 +85,8 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskM
       count: Number.parseInt(weight),
       deadline: deadline ? format(deadline, "dd/MM/yyyy") : "",
       createdAt: format(new Date(), "dd/MM/yyyy"),
+      assigner,
+      mainHandler,
     }
 
     onAddTask(newTask)
@@ -86,6 +100,9 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskM
     setPriority("")
     setWeight("4")
     setSelectedCollaborators([])
+    setAssigner("")
+    setMainHandler("")
+    setMainHandlerError("")
   }
 
   const toggleCollaborator = (value: string) => {
@@ -93,6 +110,18 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskM
       current.includes(value) ? current.filter((item) => item !== value) : [...current, value],
     )
   }
+
+  const collaboratorOptions = collaborators.map(c => ({
+    label: (
+      <div className="flex items-center gap-2">
+        <div className="h-5 w-5 rounded-full bg-gray-200 text-gray-600 text-xs flex items-center justify-center">
+          {c.avatar}
+        </div>
+        <span>{c.label}</span>
+      </div>
+    ),
+    value: c.value,
+  }));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -110,32 +139,19 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskM
                 placeholder="Nhập nội dung công việc"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="min-h-[100px]"
+                className="min-h-[100px] resize-none"
                 required
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="deadline">Hạn xử lý</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn("w-full justify-start text-left font-normal", !deadline && "text-muted-foreground")}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {deadline ? format(deadline, "dd/MM/yyyy") : "Chọn ngày"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Input type="date" value={deadline ? format(deadline, "yyyy-MM-dd") : ""} onChange={(e) => setDeadline(new Date(e.target.value))} />
-                  </PopoverContent>
-                </Popover>
+                <Input type="date" className="w-full block" value={deadline ? format(deadline, "yyyy-MM-dd") : ""} onChange={(e) => setDeadline(new Date(e.target.value))} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="weight">Trọng số</Label>
                 <Select value={weight} onValueChange={setWeight}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Chọn trọng số" />
                   </SelectTrigger>
                   <SelectContent>
@@ -154,7 +170,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskM
             <div className="grid gap-2">
               <Label htmlFor="priority">Phân loại</Label>
               <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Chọn phân loại" />
                 </SelectTrigger>
                 <SelectContent>
@@ -167,67 +183,65 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskM
                 </SelectContent>
               </Select>
             </div>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="assigner">Người giao:</Label>
+                  <AntdSelect
+                    id="assigner"
+                    style={{ width: "100%" }}
+                    placeholder="Vui lòng chọn"
+                    value={assigner}
+                    onChange={setAssigner}
+                    options={collaborators.map(c => ({ label: c.label, value: c.value }))}
+                    getPopupContainer={triggerNode => triggerNode.parentNode}
+                    showSearch
+                    filterOption={(input, option) => {
+                      const opt = option as { label: string; value: string };
+                      if (!opt || !opt.label) return false;
+                      return opt.label.toLowerCase().includes(input.toLowerCase());
+                    }}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="mainHandler">Người xử lý chính:</Label>
+                  <AntdSelect
+                    id="mainHandler"
+                    style={{ width: "100%" }}
+                    placeholder="Vui lòng chọn"
+                    value={mainHandler}
+                    onChange={setMainHandler}
+                    options={collaborators.map(c => ({ label: c.label, value: c.value }))}
+                    getPopupContainer={triggerNode => triggerNode.parentNode}
+                    showSearch
+                    filterOption={(input, option) => {
+                      const opt = option as { label: string; value: string };
+                      if (!opt || !opt.label) return false;
+                      return opt.label.toLowerCase().includes(input.toLowerCase());
+                    }}
+                  />
+                  {mainHandlerError && <span className="text-red-500 text-xs">{mainHandlerError}</span>}
+                </div>
+              </div>
+            </div>
             <div className="grid gap-2">
               <Label>Người phối hợp</Label>
-              <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" role="combobox" aria-expanded={comboboxOpen} className="justify-between">
-                    {selectedCollaborators.length > 0
-                      ? `${selectedCollaborators.length} người được chọn`
-                      : "Chọn người phối hợp"}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command>
-                    <CommandInput placeholder="Tìm người phối hợp..." />
-                    <CommandList>
-                      <CommandEmpty>Không tìm thấy người phối hợp.</CommandEmpty>
-                      <CommandGroup>
-                        {collaborators.map((collaborator) => (
-                          <CommandItem
-                            key={collaborator.value}
-                            value={collaborator.value}
-                            onSelect={() => {
-                              toggleCollaborator(collaborator.value)
-                            }}
-                          >
-                            <div className="flex items-center">
-                              <div className="h-6 w-6 rounded-full bg-gray-200 text-gray-600 text-xs flex items-center justify-center mr-2">
-                                {collaborator.avatar}
-                              </div>
-                              <span>{collaborator.label}</span>
-                            </div>
-                            <Check
-                              className={cn(
-                                "ml-auto h-4 w-4",
-                                selectedCollaborators.includes(collaborator.value) ? "opacity-100" : "opacity-0",
-                              )}
-                            />
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              {selectedCollaborators.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {selectedCollaborators.map((value) => {
-                    const collaborator = collaborators.find((c) => c.value === value)
-                    return (
-                      <Badge key={value} variant="secondary" className="px-2 py-1">
-                        <div className="flex items-center gap-1">
-                          <div className="h-5 w-5 rounded-full bg-gray-200 text-gray-600 text-xs flex items-center justify-center">
-                            {collaborator?.avatar}
-                          </div>
-                          <span>{collaborator?.label}</span>
-                        </div>
-                      </Badge>
-                    )
-                  })}
-                </div>
-              )}
+              <AntdSelect
+                mode="multiple"
+                style={{ width: "100%" }}
+                placeholder="Chọn người phối hợp"
+                value={selectedCollaborators}
+                onChange={setSelectedCollaborators}
+                options={collaboratorOptions}
+                optionLabelProp="label"
+                getPopupContainer={triggerNode => triggerNode.parentNode}
+                allowClear
+                filterOption={(input, option: any) => {
+                  const opt = option as { label: string; value: string };
+                  if (!opt || !opt.label) return false;
+                  return opt.label.toLowerCase().includes(input.toLowerCase());
+                }}
+              />
             </div>
           </div>
           <DialogFooter>
