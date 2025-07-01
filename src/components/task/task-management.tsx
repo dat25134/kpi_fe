@@ -6,45 +6,15 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CircleDot, Home, Plus, RefreshCw, Search, Settings, User, Calendar as CalendarIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { CircleDot, Home, Plus, RefreshCw, Search, Settings, User, Calendar as CalendarIcon, Loader2 } from "lucide-react"
+import { cn, getAvatarFromName } from "@/lib/utils"
 import AddTaskModal from "./add-task-modal"
-
-// Dữ liệu mẫu
-const initialTasks = [
-  {
-    id: 1,
-    content: "Chuẩn bị gian hàng triển lãm",
-    status: "ongoing",
-    priority: "Phối hợp",
-    assignees: ["V", "K", "T"],
-    count: 4,
-    deadline: "02/05/2025",
-    createdAt: "28/04/2025",
-  },
-  {
-    id: 2,
-    content:
-      "Cập nhật ứng dụng Tây Ninh Smart mới hoàn toàn, loại bỏ các chức năng không dùng, bổ sung các tính năng mới",
-    status: "ongoing",
-    priority: "",
-    assignees: [],
-    count: 4,
-    deadline: "30/06/2025",
-    createdAt: "18/03/2025",
-  },
-  {
-    id: 3,
-    content:
-      "Nâng cấp hệ thống giám sát chất lượng công việc KPI cho Sở KHCN theo hướng đồng bộ, thống nhất với hệ thống quản lý nhiệm vụ của Văn phòng Trung ương đảng",
-    status: "ongoing",
-    priority: "Phối hợp",
-    assignees: ["V", "P"],
-    count: 4,
-    deadline: "30/04/2025",
-    createdAt: "18/03/2025",
-  },
-]
+import { useCategories } from "@/hooks/userCategories"
+import { Category } from "@/types/category"
+import { useTasks } from "@/hooks/useTask"
+import { Task } from "@/types/task"
+import { Tooltip } from "antd"
+import LoadingSpinner from "../ui/loading-spinner"
 
 export default function TaskManagement() {
   const [activeTab, setActiveTab] = useState("ongoing")
@@ -52,11 +22,12 @@ export default function TaskManagement() {
   const [endDate, setEndDate] = useState("2025-06-13")
   const [searchTerm, setSearchTerm] = useState("")
   const [category, setCategory] = useState("")
-  const [tasks, setTasks] = useState(initialTasks)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const { categories, isLoading, error } = useCategories()
+  const { tasks, isLoading: tasksLoading, error: tasksError } = useTasks()
 
-  const handleAddTask = (newTask: any) => {
-    setTasks([...tasks, newTask])
+  const handleAddTask = (newTask: Task) => {
+    console.log(newTask)
   }
 
   return (
@@ -117,9 +88,11 @@ export default function TaskManagement() {
                 <SelectValue placeholder="Vui lòng chọn" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tất cả</SelectItem>
-                <SelectItem value="personal">Cá nhân</SelectItem>
-                <SelectItem value="department">Phòng ban</SelectItem>
+                {categories?.map((category: Category) => (
+                  <SelectItem key={category.id} value={category.id.toString()}>
+                    {category.display_name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -183,6 +156,11 @@ export default function TaskManagement() {
               </div>
 
               <div className="overflow-x-auto">
+                {tasksLoading ? (
+                  <div className="flex justify-center items-center h-full">
+                    <LoadingSpinner />
+                  </div>
+                ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -195,47 +173,79 @@ export default function TaskManagement() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {tasks.map((task) => (
+                    {tasks?.map((task: Task) => (
                       <TableRow key={task.id}>
                         <TableCell>
                           <input type="checkbox" className="rounded" />
                         </TableCell>
                         <TableCell>{task.id}</TableCell>
                         <TableCell>
-                          <div>
-                            {task.priority && (
-                              <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded mr-2">
-                                {task.priority}
-                              </span>
-                            )}
-                            {task.content}
-                          </div>
-                          {task.assignees.length > 0 && (
-                            <div className="mt-1">
-                              <span className="text-sm text-gray-500">Phối hợp: </span>
-                              {task.assignees.map((assignee, index) => (
-                                <span
-                                  key={index}
-                                  className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 text-green-800 text-xs mr-1"
-                                >
-                                  {assignee}
-                                </span>
-                              ))}
+                          <div className="flex">
+                            <div className="flex flex-col items-center justify-center min-w-[56px] max-w-[56px] mr-3">
+                              {task.mainHandler && (
+                                <Tooltip title={`Xử lý chính: ${task.mainHandler.name}`} placement="top">
+                                  <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center text-base font-bold cursor-default mb-1">
+                                    {getAvatarFromName(task.mainHandler.name)}
+                                  </div>
+                                </Tooltip>
+                              )}
                             </div>
-                          )}
+                            <div className="flex flex-col min-w-[60px] max-w-[130px] mr-3 w-full">
+                              {task?.category && (
+                                <span className={`block bg-${task?.category?.color}-100 text-${task?.category?.color}-800 text-xs px-2 py-0.5 rounded mb-1`}>
+                                  {String(task?.category?.display_name)}
+                                </span>
+                              )}
+                              {task.assignees.length > 0 && (
+                                <div>
+                                  <span className="text-sm text-gray-500">Phối hợp: </span>
+                                  {(() => {
+                                    const MAX_DISPLAY = 3;
+                                    const displayedAssignees = task.assignees.slice(0, MAX_DISPLAY);
+                                    const hiddenCount = task.assignees.length - MAX_DISPLAY;
+                                    return (
+                                      <>
+                                        {displayedAssignees.map((assignee: any, index: number) => (
+                                          <span
+                                            title={assignee.name}
+                                            key={index}
+                                            className={
+                                              "inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 text-green-800 text-xs " +
+                                              (index > 0 ? "-ml-2 border-2 border-white" : "")
+                                            }
+                                          >
+                                            {getAvatarFromName(assignee.name)}
+                                          </span>
+                                        ))}
+                                        {hiddenCount > 0 && (
+                                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-xs -ml-2 border-2 border-white">
+                                            +{hiddenCount}
+                                          </span>
+                                        )}
+                                      </>
+                                    );
+                                  })()}
+                                </div>
+                              )}
+                            </div>
+                            <div className="break-words whitespace-normal flex-1">
+                              {task.content}
+                            </div>
+                          </div>
                         </TableCell>
                         <TableCell className="text-center hidden md:table-cell">{task.count}</TableCell>
                         <TableCell className="text-red-500 hidden md:table-cell">{task.deadline}</TableCell>
                         <TableCell className="hidden md:table-cell">{task.createdAt}</TableCell>
                       </TableRow>
                     ))}
-                  </TableBody>
-                </Table>
+                    </TableBody>
+                  </Table>
+                )}
               </div>
 
               <div className="flex justify-between items-center p-4 text-sm">
                 <div>
-                  1-{tasks.length} / tổng {tasks.length} công việc
+                  1-{tasks?.length} / tổng {tasks?.length} công việc
                 </div>
                 <div className="flex items-center">
                   <Button variant="outline" size="icon" className="h-8 w-8 rounded-full">
@@ -251,7 +261,7 @@ export default function TaskManagement() {
         </div>
       </div>
 
-      <AddTaskModal open={isAddModalOpen} onOpenChange={setIsAddModalOpen} onAddTask={handleAddTask} />
+      <AddTaskModal open={isAddModalOpen} onOpenChange={setIsAddModalOpen} onAddTask={handleAddTask} categories={categories} />
     </div>
   )
 }

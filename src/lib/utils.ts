@@ -32,3 +32,10 @@ export function extractTextFromReactNode(node: React.ReactNode): string {
   }
   return "";
 }
+
+export function getAvatarFromName(name: string): string {
+  const nameParts = name.split(" ")
+  return nameParts.length >= 2
+    ? nameParts[0].charAt(0).toUpperCase() + nameParts[nameParts.length - 1].charAt(0).toUpperCase()
+    : name.substring(0, 2).toUpperCase()
+}

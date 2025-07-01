@@ -11,12 +11,14 @@ import {
 import type { Employee, EmployeeSummary, EmployeeFilters, EmployeeListResponse } from '@/types/employee';
 import useSWR from 'swr';
 import { syncEmployeePermissions } from '@/services/permission';
+import { fetchAllUsers } from '@/services/user';
 
 export function useEmployees() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [summary, setSummary] = useState<EmployeeSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [summaryLoading, setSummaryLoading] = useState(true);
+  const [allUsers, setAllUsers] = useState<Employee[]>([]);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -50,6 +52,15 @@ export function useEmployees() {
     };
     loadEmployees();
   }, [JSON.stringify(filters), refetchIndex]);
+
+  // Fetch all users
+  useEffect(() => {
+    const loadAllUsers = async () => {
+      const data = await fetchAllUsers();
+      setAllUsers(data);
+    };
+    loadAllUsers();
+  }, []);
 
   // Add new employee
   const addEmployee = useCallback(async (employeeData: Omit<Employee, 'id' | 'joinDate' | 'projects'>) => {
@@ -118,6 +129,7 @@ export function useEmployees() {
     summaryLoading,
     pagination,
     filters,
+    allUsers,
     
     // Actions
     addEmployee,

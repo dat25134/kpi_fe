@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster"
 import Footer from "@/components/shared/footer";
+import AuthRedirectListener from "@/components/shared/auth-redirect-listener";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,6 +30,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <AuthRedirectListener />
         {children}
         <Toaster />
         <Footer />

@@ -23,47 +23,55 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon, Check, ChevronsUpDown } from "lucide-react"
 import { format } from "date-fns"
-import { vi } from "date-fns/locale"
-import { cn, extractTextFromReactNode } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Input } from "../ui/input"
 import { Select as AntdSelect } from "antd"
-
-// Dữ liệu mẫu cho người phối hợp
-const collaborators = [
-  { value: "pnv", label: "Phạm Ngọc Vinh", avatar: "PNV" },
-  { value: "pvk", label: "Phan Vinh Khang", avatar: "PVK" },
-  { value: "lhl", label: "Lê Hữu Lợi", avatar: "LHL" },
-  { value: "dtnh", label: "Đặng Trần Như Hảo", avatar: "ĐTNH" },
-  { value: "dhd", label: "Đàm Hải Đăng", avatar: "ĐHĐ" },
-  { value: "vdm", label: "Võ Đức Mạnh", avatar: "VĐM" },
-]
+import { Category } from "@/types/category"
+import { useEmployees } from "@/hooks/useEmployees"
 
 type AddTaskModalProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   onAddTask: (task: any) => void
+  categories: Category[]
 }
 
-export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskModalProps) {
+export default function AddTaskModal({ open, onOpenChange, onAddTask, categories }: AddTaskModalProps) {
   const [content, setContent] = useState("")
   const [deadline, setDeadline] = useState<Date | undefined>(new Date())
   const [priority, setPriority] = useState("")
   const [weight, setWeight] = useState("4")
   const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>([])
   const [comboboxOpen, setComboboxOpen] = useState(false)
-  const [assigner, setAssigner] = useState("")
-  const [mainHandler, setMainHandler] = useState("")
+  const [assigner, setAssigner] = useState<number | undefined>(undefined)
+  const [mainHandler, setMainHandler] = useState<number | undefined>(undefined)
   const [mainHandlerError, setMainHandlerError] = useState("")
+  const [startDate, setStartDate] = useState<Date | undefined>(new Date())
+  const [startDateError, setStartDateError] = useState("")
+  const { allUsers, loading } = useEmployees()
+
+  // Dữ liệu mẫu cho người phối hợp
+  const collaborators = allUsers?.map((employee) => ({
+    value: employee.id,
+    label: employee.name,
+    avatar: employee.avatar,
+  }))
+
+  const handleCloseModal = () => {
+    onOpenChange(false)
+    resetForm()
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    // Validate ngày bắt đầu
+    if (!startDate) {
+      setStartDateError("Vui lòng chọn ngày bắt đầu")
+      return
+    } else {
+      setStartDateError("")
+    }
     // Validate mainHandler
     if (!mainHandler) {
       setMainHandlerError("Vui lòng chọn người xử lý chính")
@@ -71,7 +79,6 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskM
     } else {
       setMainHandlerError("")
     }
-
     // Tạo task mới
     const newTask = {
       id: Math.floor(Math.random() * 1000), // ID tạm thời
@@ -79,16 +86,16 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskM
       status: "ongoing",
       priority: priority || "",
       assignees: selectedCollaborators.map((id) => {
-        const collaborator = collaborators.find((c) => c.value === id)
+        const collaborator = collaborators.find((c) => c.value === Number(id))
         return collaborator ? collaborator.avatar.charAt(0) : ""
       }),
       count: Number.parseInt(weight),
+      startDate: startDate ? format(startDate, "dd/MM/yyyy") : "",
       deadline: deadline ? format(deadline, "dd/MM/yyyy") : "",
       createdAt: format(new Date(), "dd/MM/yyyy"),
       assigner,
       mainHandler,
     }
-
     onAddTask(newTask)
     resetForm()
     onOpenChange(false)
@@ -97,11 +104,13 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskM
   const resetForm = () => {
     setContent("")
     setDeadline(new Date())
+    setStartDate(new Date())
+    setStartDateError("")
     setPriority("")
-    setWeight("4")
+    setWeight("")
     setSelectedCollaborators([])
-    setAssigner("")
-    setMainHandler("")
+    setAssigner(undefined)
+    setMainHandler(undefined)
     setMainHandlerError("")
   }
 
@@ -145,8 +154,33 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskM
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
+                <Label htmlFor="startDate">Ngày bắt đầu</Label>
+                <Input type="date" className="w-full block" value={startDate ? format(startDate, "yyyy-MM-dd") : ""} onChange={(e) => setStartDate(new Date(e.target.value))} required />
+                {startDateError && <span className="text-red-500 text-xs">{startDateError}</span>}
+              </div>
+              <div className="grid gap-2">
                 <Label htmlFor="deadline">Hạn xử lý</Label>
                 <Input type="date" className="w-full block" value={deadline ? format(deadline, "yyyy-MM-dd") : ""} onChange={(e) => setDeadline(new Date(e.target.value))} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="priority">Phân loại</Label>
+                <Select value={priority} onValueChange={setPriority}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Chọn phân loại" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Phân loại</SelectLabel>
+                      {categories?.map((category: Category) => (
+                        <SelectItem key={category.id} value={category.id.toString()}>
+                          {category.display_name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="weight">Trọng số</Label>
@@ -167,22 +201,6 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskM
                 </Select>
               </div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="priority">Phân loại</Label>
-              <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Chọn phân loại" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Phân loại</SelectLabel>
-                    <SelectItem value="Phối hợp">Phối hợp</SelectItem>
-                    <SelectItem value="Ưu tiên">Ưu tiên</SelectItem>
-                    <SelectItem value="Quan trọng">Quan trọng</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
@@ -194,10 +212,11 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskM
                     value={assigner}
                     onChange={setAssigner}
                     options={collaborators.map(c => ({ label: c.label, value: c.value }))}
+                    allowClear
                     getPopupContainer={triggerNode => triggerNode.parentNode}
                     showSearch
-                    filterOption={(input, option) => {
-                      const opt = option as { label: string; value: string };
+                    filterOption={(input, option: any) => {
+                      const opt = option as { label: string; value: number };
                       if (!opt || !opt.label) return false;
                       return opt.label.toLowerCase().includes(input.toLowerCase());
                     }}
@@ -212,10 +231,11 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskM
                     value={mainHandler}
                     onChange={setMainHandler}
                     options={collaborators.map(c => ({ label: c.label, value: c.value }))}
+                    allowClear
                     getPopupContainer={triggerNode => triggerNode.parentNode}
                     showSearch
-                    filterOption={(input, option) => {
-                      const opt = option as { label: string; value: string };
+                    filterOption={(input, option: any) => {
+                      const opt = option as { label: string; value: number };
                       if (!opt || !opt.label) return false;
                       return opt.label.toLowerCase().includes(input.toLowerCase());
                     }}
@@ -237,7 +257,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskM
                 getPopupContainer={triggerNode => triggerNode.parentNode}
                 allowClear
                 filterOption={(input, option: any) => {
-                  const opt = option as { label: string; value: string };
+                  const opt = option as { label: string; value: number };
                   if (!opt || !opt.label) return false;
                   return opt.label.toLowerCase().includes(input.toLowerCase());
                 }}
@@ -245,7 +265,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskM
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={handleCloseModal}>
               Hủy
             </Button>
             <Button type="submit">Thêm mới</Button>

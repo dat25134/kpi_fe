@@ -22,3 +22,8 @@ export async function fetchUserProfile() {
   const response = await apiClient.get(API_ENDPOINTS.USER.PROFILE, getConfig());
   return response.data;
 } 
+
+export async function fetchAllUsers() {
+  const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.ALL, getConfig());
+  return response.data.data;
+}

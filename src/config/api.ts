@@ -23,6 +23,7 @@ export const API_ENDPOINTS = {
     DELETE: (id: number) => `${API_URL}/employees/${id}`,
     DETAIL: (id: number) => `${API_URL}/employees/${id}`,
     MANAGER: `${API_URL}/employees/manager`,
+    ALL: `${API_URL}/employees/all-employees`,
   },
 
   ROLES: {
@@ -41,6 +42,18 @@ export const API_ENDPOINTS = {
     MODULES: `${API_URL}/permissions/permission-modules`,
     SYNC: `${API_URL}/permissions/sync-permission`,
     SYNC_PERMISSION_BY_EMPLOYEE: `${API_URL}/permissions/sync-permission-by-employee`,
+  },
+
+  CATEGORIES: {
+    LIST: `${API_URL}/categories`,
+  },
+
+  TASKS: {
+    LIST: `${API_URL}/tasks`,
+    CREATE: `${API_URL}/tasks`,
+    UPDATE: (id: number) => `${API_URL}/tasks/${id}`,
+    DELETE: (id: number) => `${API_URL}/tasks/${id}`,
+    DETAIL: (id: number) => `${API_URL}/tasks/${id}`,
   },
   // Thêm các nhóm API khác ở đây
 } as const;
