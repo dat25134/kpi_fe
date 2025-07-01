@@ -15,6 +15,7 @@ import ConfirmDeleteModal from "../shared/confirm-delete-modal"
 import { toast } from "sonner"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRolesSelection } from "@/hooks/useRole"
+import { getErrorMessage } from "@/services/errorHandler"
 const EmployeeTable = dynamic(() => import("./EmployeeTable"), { ssr: false })
 
 const AddEmployeeModal = dynamic(() => import("./add-employee-modal"), { ssr: false })
@@ -35,6 +36,7 @@ export default function EmployeeManagement() {
     applyFilters,
     changePage,
     clearFilters,
+    setLoading,
   } = useEmployees()
   const { data: departments, isLoading: departmentsLoading } = useDepartmentsListSelect()
   const { data: roles, isLoading: rolesLoading } = useRolesSelection()
@@ -109,8 +111,9 @@ export default function EmployeeManagement() {
       await removeEmployee(employeeToDelete)
       toast.success("Xóa nhân viên thành công!")
     } catch (error) {
-      // Error is handled in the hook, but we can show a generic message
-      toast.error("Xóa nhân viên thất bại. Vui lòng thử lại.")
+      toast.error(getErrorMessage(error))
+      // refetch()
+      setLoading(false)
     } finally {
       setIsDeleteModalOpen(false)
       setEmployeeToDelete(null)

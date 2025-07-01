@@ -14,6 +14,7 @@ import { deleteDepartment } from "@/services/department"
 import ConfirmDeleteModal from "../shared/confirm-delete-modal"
 import { toast } from "sonner"
 import { useDepartments, useDepartmentSummary } from "@/hooks/useDepartments"
+import { getErrorMessage } from "@/services/errorHandler"
 const DepartmentTable = dynamic(() => import("./DepartmentTable"), { ssr: false })
 
 export default function DepartmentManagement() {
@@ -76,7 +77,7 @@ export default function DepartmentManagement() {
       mutate("departments-summary")
     } catch (error) {
       console.error("Failed to delete department", error)
-      toast.error("Xóa phòng ban thất bại. Vui lòng thử lại.")
+      toast.error(getErrorMessage(error))
     } finally {
       setIsDeleteModalOpen(false)
       setDepartmentToDelete(null)

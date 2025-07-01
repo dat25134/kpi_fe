@@ -19,10 +19,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ValidationError } from "@/services/employee"
 import { toast } from "sonner"
 import { formatVND } from "@/lib/utils"
 import AddEmployeeFormFields from "./AddEmployeeFormFields"
+import { getErrorMessage, getValidationErrors } from "@/services/errorHandler"
 
 type AddEmployeeModalProps = {
   open: boolean
@@ -125,21 +125,17 @@ export default function AddEmployeeModal({
     try {
       if (editingEmployee) {
         await onAddEmployee({ ...editingEmployee, ...employeeData })
+        toast.success("Cập nhật nhân viên thành công!")
       } else {
         await onAddEmployee(employeeData)
+        toast.success("Thêm nhân viên thành công!")
       }
-
       resetForm()
       onOpenChange(false)
       onClose()
     } catch (error) {
-      if (error instanceof ValidationError) {
-        setErrors(error.errors)
-        toast.error("Thông tin không hợp lệ, vui lòng kiểm tra lại.")
-      } else {
-        console.error(error)
-        toast.error("Đã có lỗi xảy ra. Vui lòng thử lại.")
-      }
+      setErrors(getValidationErrors(error) || {})
+      toast.error(getErrorMessage(error))
     }
   }
 

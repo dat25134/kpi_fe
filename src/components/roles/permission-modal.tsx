@@ -31,6 +31,7 @@ import {
 import { PermissionModalProps } from "@/types/permission"
 import { usePermissions } from "@/hooks/usePermission"
 import { useModules } from "@/hooks/useModule"
+import { getErrorMessage, getValidationErrors } from "@/services/errorHandler"
 
 // Tạo ánh xạ tên icon sang component
 const iconMap: Record<string, any> = {
@@ -52,7 +53,8 @@ export default function PermissionModal({
   const [selectedModule, setSelectedModule] = useState("all")
   // Danh sách tất cả quyền hạn có thể có trong hệ thống
   const { permissions: allPermissions } = usePermissions()
-  const { modules: allModules } = useModules()
+  const { modules: allModulesRaw } = useModules()
+  const allModules = allModulesRaw ?? [];
 
   const moduleIcons = allModules.reduce((acc: Record<string, any>, module: any) => {
     acc[module.name] = module.icon

@@ -16,6 +16,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { toast } from "sonner"
+import { getErrorMessage, getValidationErrors } from "@/services/errorHandler"
 
 type AddRoleModalProps = {
   open: boolean
@@ -68,19 +70,19 @@ export default function AddRoleModal({
     try {
       if (editingRole) {
         await onAddRole({ ...editingRole, ...roleData })
+        toast.success("Cập nhật vai trò thành công!")
       } else {
         await onAddRole(roleData)
+        toast.success("Thêm vai trò thành công!")
       }
       resetForm()
       setErrorMsg(null)
       onOpenChange(false)
       onClose()
     } catch (error: any) {
-      if (error?.errors) {
-        setErrorMsg(error.errors)
-      } else {
-        setErrorMsg({ general: [error?.message || "Có lỗi xảy ra, vui lòng kiểm tra lại!"] })
-      }
+      const msg = getErrorMessage(error)
+      setErrorMsg(getValidationErrors(error) || { general: [msg] })
+      toast.error(msg)
     } finally {
       setIsSubmitting(false)
     }

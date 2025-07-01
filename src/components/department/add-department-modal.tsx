@@ -28,6 +28,7 @@ import { useManagers } from "@/hooks/useEmployees"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { getErrorMessage, getValidationErrors } from "@/services/errorHandler"
 
 type AddDepartmentModalProps = {
   open: boolean
@@ -74,7 +75,10 @@ export default function AddDepartmentModal({
     setErrors({})
 
     const selectedManager = managers.find((m) => m.id.toString() === managerId)
-    if (!selectedManager) return
+    if (!selectedManager) {
+      setErrors({ manager_id: ["Vui lòng chọn trưởng phòng"] })
+      return
+    }
 
     const departmentData: DepartmentPayload = {
       name,
@@ -99,15 +103,9 @@ export default function AddDepartmentModal({
       onOpenChange(false)
       onClose()
     } catch (error: any) {
-      console.error("Failed to add department:", error)
-      const errorData = error.response?.data
-      if (errorData && errorData.errors) {
-        setErrors(errorData.errors)
-      } else {
-        const errorMessage = errorData?.message || "Đã xảy ra lỗi. Vui lòng thử lại."
-        setErrors({ general: [errorMessage] })
-        toast.error(errorMessage)
-      }
+      const msg = getErrorMessage(error)
+      setErrors(getValidationErrors(error) || { general: [msg] })
+      toast.error(msg)
     }
   }
 
