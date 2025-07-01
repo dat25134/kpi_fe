@@ -60,82 +60,80 @@ export default function TaskManagement() {
   }
 
   return (
-    <div className="mx-auto p-4 w-full">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" className="flex items-center gap-2 bg-blue-50 border-blue-200">
-            <User className="h-4 w-4 text-blue-500" />
-            <span className="text-blue-700">Công việc</span>
-          </Button>
-          <Button variant="outline" className="flex items-center gap-2">
-            <CircleDot className="h-4 w-4" />
-            <span>Egov</span>
-          </Button>
+    <div className="mx-auto w-full">
+      <div className="px-4 md:px-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-4">
+            <Button variant="outline" className="flex items-center gap-2 bg-blue-50 border-blue-200">
+              <User className="h-4 w-4 text-blue-500" />
+              <span className="text-blue-700">Công việc</span>
+            </Button>
+            <Button variant="outline" className="flex items-center gap-2">
+              <CircleDot className="h-4 w-4" />
+              <span>Egov</span>
+            </Button>
+          </div>
+          <div className="flex flex-col md:flex-row items-start md:items-center text-sm text-gray-500 gap-y-1 md:gap-y-0 md:gap-x-6">
+            <div className="flex items-center gap-x-1">
+              <span>KPI hiện tại</span>
+              <span>:</span>
+              <span className="font-semibold text-gray-700">2.0</span>
+            </div>
+            <div className="flex items-center gap-x-1">
+              <span>Tạm xếp loại</span>
+              <span>:</span>
+              <span className="font-semibold text-gray-700">2.0 / 4.0</span>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center space-x-4">
-          <div className="text-sm text-gray-500">KPI hiện tại</div>
-          <div className="text-sm text-gray-500">/</div>
-          <div className="text-sm text-gray-500">Tạm xếp loại</div> 
-          <div className="text-sm text-gray-500">:</div>
-          <div className="text-sm text-gray-500">- / 4.0</div>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-        <div className="col-span-1 md:col-span-1">
-          <label className="text-sm font-medium">Nội dung:</label>
-          <Input placeholder="Nhập dữ liệu" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-        </div>
-        <div className="col-span-1 md:col-span-1">
-          <label className="text-sm font-medium">Thời gian:</label>
-          <div className="flex items-center space-x-2">
-            <div className="relative flex items-center w-full">
-              <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-4 mb-4 w-full">
+          <div>
+            <label className="text-sm font-medium mb-1 block">Nội dung:</label>
+            <Input className="w-full" placeholder="Nhập dữ liệu" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-1 block">Thời gian:</label>
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="pl-10 block" 
+                className="w-full block"
               />
-            </div>
-            <span>-</span>
-            <div className="relative flex items-center w-full">
-              <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
+              <span className="hidden sm:inline">-</span>
               <Input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="pl-10 block"
+                className="w-full block"
               />
             </div>
           </div>
-        </div>
-        <div className="col-span-2 md:col-span-1">
-          <label className="text-sm font-medium">Phân loại:</label>
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Vui lòng chọn" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tất cả</SelectItem>
-              <SelectItem value="personal">Cá nhân</SelectItem>
-              <SelectItem value="department">Phòng ban</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="col-span-1 md:col-span-1 flex items-end space-x-2">
-          <Button variant="outline" className="flex-1">
-            Làm lại
-          </Button>
-          <Button className="flex-1 bg-blue-600 hover:bg-blue-700">
-            <Search className="h-4 w-4 mr-2" />
-            Tìm kiếm
-          </Button>
+          <div>
+            <label className="text-sm font-medium mb-1 block">Phân loại:</label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Vui lòng chọn" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả</SelectItem>
+                <SelectItem value="personal">Cá nhân</SelectItem>
+                <SelectItem value="department">Phòng ban</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col md:flex-row gap-2 items-end justify-end">
+            <Button variant="outline" className="w-full md:w-auto">Làm lại</Button>
+            <Button className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
+              <Search className="h-4 w-4 mr-2" />
+              Tìm kiếm
+            </Button>
+          </div>
         </div>
       </div>
-
-      <div className="flex">
-        <div className="w-64 bg-gray-50 p-4 rounded-l-lg">
+      <div className="flex flex-col md:flex-row px-4 md:px-6">
+        <div className="hidden md:block w-64 bg-gray-50 p-4 rounded-l-lg">
           <div className="mb-4">
             <h3 className="text-sm font-medium text-gray-500 mb-2">Cá nhân</h3>
             <Button variant="ghost" className="w-full justify-start text-blue-600 bg-blue-50 hover:bg-blue-100">
@@ -151,10 +149,9 @@ export default function TaskManagement() {
             </Button>
           </div>
         </div>
-
-        <div className="flex-1 border rounded-r-lg">
+        <div className="flex-1 border rounded-r-lg md:rounded-l-none md:rounded-r-lg overflow-x-auto">
           <Tabs defaultValue="ongoing" className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="border-b w-full justify-start rounded-none h-auto p-0">
+            <TabsList className="border-b w-full justify-start rounded-none h-auto p-0 overflow-x-auto">
               <TabsTrigger
                 value="ongoing"
                 className={cn(
@@ -185,54 +182,56 @@ export default function TaskManagement() {
                 </Button>
               </div>
 
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-10"></TableHead>
-                    <TableHead className="w-10">#</TableHead>
-                    <TableHead>Nội dung</TableHead>
-                    <TableHead className="w-24 text-center">Trọng số</TableHead>
-                    <TableHead className="w-28">Hạn xử lý</TableHead>
-                    <TableHead className="w-28">Ngày tạo</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tasks.map((task) => (
-                    <TableRow key={task.id}>
-                      <TableCell>
-                        <input type="checkbox" className="rounded" />
-                      </TableCell>
-                      <TableCell>{task.id}</TableCell>
-                      <TableCell>
-                        <div>
-                          {task.priority && (
-                            <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded mr-2">
-                              {task.priority}
-                            </span>
-                          )}
-                          {task.content}
-                        </div>
-                        {task.assignees.length > 0 && (
-                          <div className="mt-1">
-                            <span className="text-sm text-gray-500">Phối hợp: </span>
-                            {task.assignees.map((assignee, index) => (
-                              <span
-                                key={index}
-                                className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 text-green-800 text-xs mr-1"
-                              >
-                                {assignee}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-center">{task.count}</TableCell>
-                      <TableCell className="text-red-500">{task.deadline}</TableCell>
-                      <TableCell>{task.createdAt}</TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-10"></TableHead>
+                      <TableHead className="w-10">#</TableHead>
+                      <TableHead>Nội dung</TableHead>
+                      <TableHead className="w-24 text-center hidden md:table-cell">Trọng số</TableHead>
+                      <TableHead className="w-28 hidden md:table-cell">Hạn xử lý</TableHead>
+                      <TableHead className="w-28 hidden md:table-cell">Ngày tạo</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {tasks.map((task) => (
+                      <TableRow key={task.id}>
+                        <TableCell>
+                          <input type="checkbox" className="rounded" />
+                        </TableCell>
+                        <TableCell>{task.id}</TableCell>
+                        <TableCell>
+                          <div>
+                            {task.priority && (
+                              <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded mr-2">
+                                {task.priority}
+                              </span>
+                            )}
+                            {task.content}
+                          </div>
+                          {task.assignees.length > 0 && (
+                            <div className="mt-1">
+                              <span className="text-sm text-gray-500">Phối hợp: </span>
+                              {task.assignees.map((assignee, index) => (
+                                <span
+                                  key={index}
+                                  className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 text-green-800 text-xs mr-1"
+                                >
+                                  {assignee}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center hidden md:table-cell">{task.count}</TableCell>
+                        <TableCell className="text-red-500 hidden md:table-cell">{task.deadline}</TableCell>
+                        <TableCell className="hidden md:table-cell">{task.createdAt}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
               <div className="flex justify-between items-center p-4 text-sm">
                 <div>

@@ -143,8 +143,8 @@ export default function EvaluationForm() {
         <h2 className="text-lg font-medium">Đơn vị hiện tại</h2>
       </div>
 
-      <div className="flex">
-        <div className="w-64 bg-gray-50 p-4 rounded-l-lg">
+      <div className="flex flex-col md:flex-row">
+        <div className="hidden md:block w-64 bg-gray-50 p-4 rounded-l-lg">
           <div className="mb-4">
             <h3 className="text-sm font-medium text-gray-500 mb-2">Cá nhân</h3>
             <Button variant="ghost" className="w-full justify-start text-blue-600 bg-blue-50 hover:bg-blue-100">
@@ -161,9 +161,9 @@ export default function EvaluationForm() {
           </div>
         </div>
 
-        <div className="flex-1 border rounded-r-lg">
+        <div className="flex-1 border rounded-lg md:rounded-l-none md:rounded-r-lg overflow-x-auto">
           <Tabs defaultValue="personal" className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="border-b w-full justify-start rounded-none h-auto p-0">
+            <TabsList className="border-b w-full justify-start rounded-none h-auto p-0 overflow-x-auto">
               <TabsTrigger
                 value="personal"
                 className={cn(
@@ -202,59 +202,61 @@ export default function EvaluationForm() {
                 </Button>
               </div>
 
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-16 text-center">STT</TableHead>
-                    <TableHead>Họ tên</TableHead>
-                    <TableHead>Loại phiếu</TableHead>
-                    <TableHead className="w-28">Thời gian</TableHead>
-                    <TableHead className="w-40">Trạng thái</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {evaluations.map((group, groupIndex) => (
-                    <React.Fragment key={`group-${groupIndex}`}>
-                      <TableRow className="bg-gray-50">
-                        <TableCell colSpan={5} className="font-medium">
-                          {group.month} ({group.count} phiếu)
-                        </TableCell>
-                      </TableRow>
-                      {group.items.map((item, itemIndex) => (
-                        <TableRow key={`item-${groupIndex}-${itemIndex}`}>
-                          <TableCell className="text-center">{item.id}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <Avatar className="h-8 w-8 mr-2">
-                                <AvatarFallback className="bg-gray-200 text-gray-600 text-xs">
-                                  {item.avatar}
-                                </AvatarFallback>
-                              </Avatar>
-                              {item.name}
-                            </div>
-                          </TableCell>
-                          <TableCell>{item.role}</TableCell>
-                          <TableCell>{item.period}</TableCell>
-                          <TableCell>
-                            <Badge
-                              className={cn(
-                                "font-normal",
-                                item.statusType === "waiting"
-                                  ? "bg-amber-100 text-amber-800 hover:bg-amber-100"
-                                  : item.statusType === "review1"
-                                    ? "bg-blue-100 text-blue-800 hover:bg-blue-100"
-                                    : "bg-purple-100 text-purple-800 hover:bg-purple-100",
-                              )}
-                            >
-                              {item.status}
-                            </Badge>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-16 text-center">STT</TableHead>
+                      <TableHead>Họ tên</TableHead>
+                      <TableHead>Loại phiếu</TableHead>
+                      <TableHead className="w-28">Thời gian</TableHead>
+                      <TableHead className="w-40">Trạng thái</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {evaluations.map((group, groupIndex) => (
+                      <React.Fragment key={`group-${groupIndex}`}>
+                        <TableRow className="bg-gray-50">
+                          <TableCell colSpan={5} className="font-medium">
+                            {group.month} ({group.count} phiếu)
                           </TableCell>
                         </TableRow>
-                      ))}
-                    </React.Fragment>
-                  ))}
-                </TableBody>
-              </Table>
+                        {group.items.map((item, itemIndex) => (
+                          <TableRow key={`item-${groupIndex}-${itemIndex}`}>
+                            <TableCell className="text-center">{item.id}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center">
+                                <Avatar className="h-8 w-8 mr-2">
+                                  <AvatarFallback className="bg-gray-200 text-gray-600 text-xs">
+                                    {item.avatar}
+                                  </AvatarFallback>
+                                </Avatar>
+                                {item.name}
+                              </div>
+                            </TableCell>
+                            <TableCell>{item.role}</TableCell>
+                            <TableCell>{item.period}</TableCell>
+                            <TableCell>
+                              <Badge
+                                className={cn(
+                                  "font-normal",
+                                  item.statusType === "waiting"
+                                    ? "bg-amber-100 text-amber-800 hover:bg-amber-100"
+                                    : item.statusType === "review1"
+                                      ? "bg-blue-100 text-blue-800 hover:bg-blue-100"
+                                      : "bg-purple-100 text-purple-800 hover:bg-purple-100",
+                                )}
+                              >
+                                {item.status}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </React.Fragment>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
               <div className="flex justify-between items-center p-4 text-sm">
                 <div>1-3 trên 3 phiếu</div>
