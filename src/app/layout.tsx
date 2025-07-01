@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { LoadingProvider } from '@/context/loading-context';
 import { Toaster } from "@/components/ui/toaster"
 import Footer from "@/components/shared/footer";
 
@@ -30,9 +29,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <LoadingProvider>
-          {children}
-        </LoadingProvider>
+        {children}
         <Toaster />
         <Footer />
       </body>

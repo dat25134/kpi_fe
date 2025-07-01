@@ -31,6 +31,7 @@ import { vi } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { Input } from "../ui/input"
 
 // Dữ liệu mẫu cho người phối hợp
 const collaborators = [
@@ -127,7 +128,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask }: AddTaskM
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
-                    <Calendar mode="single" selected={deadline} onSelect={setDeadline} initialFocus locale={vi} />
+                    <Input type="date" value={deadline ? format(deadline, "yyyy-MM-dd") : ""} onChange={(e) => setDeadline(new Date(e.target.value))} />
                   </PopoverContent>
                 </Popover>
               </div>
