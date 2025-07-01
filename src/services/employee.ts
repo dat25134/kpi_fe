@@ -17,127 +17,80 @@ const getConfig = () => {
   };
 }
 
-// Custom error for validation
-export class ValidationError extends Error {
-  constructor(public errors: Record<string, string[]>) {
-    super('Validation Error');
-    this.name = 'ValidationError';
-  }
-}
-
 // API Functions
 
 /**
  * Lấy thống kê tổng quan về nhân viên
  */
 export async function fetchEmployeeSummary(): Promise<EmployeeSummary> {
-  try {
-    const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.SUMMARY, getConfig());
-    return response.data.data;
-  } catch (error) {
-    throw handleApiError(error);
-  }
+  const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.SUMMARY, getConfig());
+  return response.data.data;
 }
 
 /**
  * Lấy danh sách nhân viên với phân trang và lọc
  */
 export async function fetchEmployees(filters: EmployeeFilters = {}): Promise<EmployeeListResponse> {
-  try {
-    const params = new URLSearchParams();
-    
-    if (filters.search) {
-      params.append('search', filters.search);
-    }
-    if (filters.departmentId) {
-      params.append('department_id', filters.departmentId.toString());
-    }
-    if (filters.roleName) {
-      params.append('role_name', filters.roleName);
-    }
-    if (filters.status) {
-      params.append('status', filters.status);
-    }
-    if (filters.page) {
-      params.append('page', filters.page.toString());
-    }
-    if (filters.limit) {
-      params.append('limit', filters.limit.toString());
-    }
-
-    const response = await apiClient.get(`${API_ENDPOINTS.EMPLOYEES.LIST}?${params.toString()}`, getConfig());
-    return response.data.data;
-  } catch (error) {
-    throw handleApiError(error);
+  const params = new URLSearchParams();
+  
+  if (filters.search) {
+    params.append('search', filters.search);
   }
+  if (filters.departmentId) {
+    params.append('department_id', filters.departmentId.toString());
+  }
+  if (filters.roleName) {
+    params.append('role_name', filters.roleName);
+  }
+  if (filters.status) {
+    params.append('status', filters.status);
+  }
+  if (filters.page) {
+    params.append('page', filters.page.toString());
+  }
+  if (filters.limit) {
+    params.append('limit', filters.limit.toString());
+  }
+
+  const response = await apiClient.get(`${API_ENDPOINTS.EMPLOYEES.LIST}?${params.toString()}`, getConfig());
+  return response.data.data;
 }
 
 /**
  * Tạo nhân viên mới
  */
 export async function createEmployee(employeeData: Omit<Employee, 'id' | 'joinDate' | 'projects'>): Promise<Employee> {
-  try {
-    const response = await apiClient.post(API_ENDPOINTS.EMPLOYEES.CREATE, employeeData, getConfig());
-    return response.data.data;
-  } catch (error) {
-    if (isAxiosError(error) && error.response?.status === 422) {
-      throw new ValidationError(error.response.data.errors);
-    }
-    console.error('Lỗi tạo nhân viên:', error);
-    throw error;
-  }
+  const response = await apiClient.post(API_ENDPOINTS.EMPLOYEES.CREATE, employeeData, getConfig());
+  return response.data.data;
 }
 
 /**
  * Cập nhật thông tin nhân viên
  */
 export async function updateEmployee(id: number, employeeData: Partial<Employee>): Promise<Employee> {
-  try {
-    const response = await apiClient.put(API_ENDPOINTS.EMPLOYEES.UPDATE(id), employeeData, getConfig());
-    return response.data.data;
-  } catch (error) {
-    if (isAxiosError(error) && error.response?.status === 422) {
-      throw new ValidationError(error.response.data.errors);
-    }
-    console.error('Lỗi cập nhật nhân viên:', error);
-    throw error;
-  }
+  const response = await apiClient.put(API_ENDPOINTS.EMPLOYEES.UPDATE(id), employeeData, getConfig());
+  return response.data.data;
 }
 
 /**
  * Xóa nhân viên
  */
 export async function deleteEmployee(id: number): Promise<void> {
-  try {
-    await apiClient.delete(API_ENDPOINTS.EMPLOYEES.DELETE(id), getConfig());
-  } catch (error) {
-    console.error('Lỗi xóa nhân viên:', error);
-    throw error;
-  }
+  await apiClient.delete(API_ENDPOINTS.EMPLOYEES.DELETE(id), getConfig());
 }
 
 /**
  * Lấy chi tiết nhân viên
  */
 export async function fetchEmployeeDetail(id: number): Promise<Employee> {
-  try {
-    const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.DETAIL(id), getConfig());
-    return response.data.data;
-  } catch (error) {
-    console.error('Lỗi lấy chi tiết nhân viên:', error);
-    throw error;
-  }
+  const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.DETAIL(id), getConfig());
+  return response.data.data;
 } 
 
 /**
  * Lấy danh sách nhân viên có vai trò là trưởng phòng
  */
 export async function fetchManagerEmployees(): Promise<Employee[]> {
-  try {
-    const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.MANAGER, getConfig());
-    return response.data.data;
-  } catch (error) {
-    console.error('Lỗi lấy danh sách trưởng phòng:', error);
-    throw error;
-  }
+  const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.MANAGER, getConfig());
+  return response.data.data;
 }

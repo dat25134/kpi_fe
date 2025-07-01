@@ -29,24 +29,28 @@ export function useRole() {
   const addRole = async (roleData: CreateRoleData) => {
     await createRole(roleData);
     mutate(API_ENDPOINTS.ROLES.LIST);
+    mutate(API_ENDPOINTS.ROLES.SUMMARY);
   };
 
   // Sửa vai trò
   const editRole = async (id: number, data: UpdateRoleData) => {
     await updateRole(id, data);
     mutate(API_ENDPOINTS.ROLES.LIST);
+    mutate(API_ENDPOINTS.ROLES.SUMMARY);
   };
 
   // Xóa vai trò
   const removeRole = async (id: number) => {
     await deleteRole(id);
     mutate(API_ENDPOINTS.ROLES.LIST);
+    mutate(API_ENDPOINTS.ROLES.SUMMARY);
   };
 
   // Sắp xếp lại vai trò
   const reorder = async (roleIds: number[]) => {
     await updateRoleOrder(roleIds);
     mutate(API_ENDPOINTS.ROLES.LIST);
+    mutate(API_ENDPOINTS.ROLES.SUMMARY);
   };
 
   // Lấy chi tiết vai trò

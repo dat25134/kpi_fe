@@ -1,15 +1,9 @@
 import { API_ENDPOINTS } from '@/config/api';
 import apiClient from "./apiClient";
-import { handleApiError } from "./errorHandler";
-import type { LoginResponse } from '@/types/auth';
 
 export async function login(email: string, password: string): Promise<any> {
-  try {
-    const response = await apiClient.post(API_ENDPOINTS.AUTH.LOGIN, { email, password });
-    return response.data;
-  } catch (error) {
-    throw handleApiError(error);
-  }
+  const response = await apiClient.post(API_ENDPOINTS.AUTH.LOGIN, { email, password });
+  return response.data;
 }
 
 export const setAuthToken = (token: string) => {

@@ -19,138 +19,27 @@ import { Label } from "@/components/ui/label"
 import {
   Shield,
   Users,
-  DollarSign,
   FileText,
   Settings,
   Search,
   CheckCircle,
   XCircle,
   AlertTriangle,
+  Building2,
+  ClipboardCheck,
 } from "lucide-react"
 import { PermissionModalProps } from "@/types/permission"
-// Danh sách tất cả quyền hạn có thể có trong hệ thống
-const allPermissions = [
-  // Quản lý nhân sự
-  {
-    id: 1,
-    name: "Xem danh sách nhân viên",
-    module: "HR",
-    category: "Xem",
-    description: "Xem thông tin cơ bản của nhân viên",
-  },
-  { id: 2, name: "Thêm nhân viên mới", module: "HR", category: "Thêm", description: "Tạo hồ sơ nhân viên mới" },
-  {
-    id: 3,
-    name: "Chỉnh sửa thông tin nhân viên",
-    module: "HR",
-    category: "Sửa",
-    description: "Cập nhật thông tin nhân viên",
-  },
-  { id: 4, name: "Xóa nhân viên", module: "HR", category: "Xóa", description: "Xóa hồ sơ nhân viên khỏi hệ thống" },
-  { id: 5, name: "Quản lý chức vụ", module: "HR", category: "Quản lý", description: "Phân công và thay đổi chức vụ" },
+import { usePermissions } from "@/hooks/usePermission"
+import { useModules } from "@/hooks/useModule"
+import { getErrorMessage, getValidationErrors } from "@/services/errorHandler"
 
-  // Tài chính
-  {
-    id: 6,
-    name: "Xem báo cáo tài chính",
-    module: "Finance",
-    category: "Xem",
-    description: "Truy cập các báo cáo tài chính",
-  },
-  {
-    id: 7,
-    name: "Phê duyệt ngân sách",
-    module: "Finance",
-    category: "Phê duyệt",
-    description: "Phê duyệt đề xuất ngân sách",
-  },
-  {
-    id: 8,
-    name: "Quản lý lương thưởng",
-    module: "Finance",
-    category: "Quản lý",
-    description: "Thiết lập và điều chỉnh lương",
-  },
-  { id: 9, name: "Xuất hóa đơn", module: "Finance", category: "Xuất", description: "Tạo và xuất hóa đơn" },
-  {
-    id: 10,
-    name: "Quản lý chi phí",
-    module: "Finance",
-    category: "Quản lý",
-    description: "Theo dõi và kiểm soát chi phí",
-  },
-
-  // Quản lý dự án
-  { id: 11, name: "Xem danh sách dự án", module: "Project", category: "Xem", description: "Xem thông tin các dự án" },
-  { id: 12, name: "Tạo dự án mới", module: "Project", category: "Thêm", description: "Khởi tạo dự án mới" },
-  {
-    id: 13,
-    name: "Phân công nhiệm vụ",
-    module: "Project",
-    category: "Phân công",
-    description: "Giao việc cho thành viên",
-  },
-  {
-    id: 14,
-    name: "Theo dõi tiến độ",
-    module: "Project",
-    category: "Theo dõi",
-    description: "Giám sát tiến độ thực hiện",
-  },
-  { id: 15, name: "Đóng dự án", module: "Project", category: "Quản lý", description: "Kết thúc và đánh giá dự án" },
-
-  // Hệ thống
-  {
-    id: 16,
-    name: "Cấp quyền người dùng",
-    module: "System",
-    category: "Cấp quyền",
-    description: "Phân quyền cho người dùng khác",
-  },
-  { id: 17, name: "Xem log hệ thống", module: "System", category: "Xem", description: "Truy cập nhật ký hệ thống" },
-  { id: 18, name: "Sao lưu dữ liệu", module: "System", category: "Sao lưu", description: "Thực hiện backup dữ liệu" },
-  {
-    id: 19,
-    name: "Cấu hình hệ thống",
-    module: "System",
-    category: "Cấu hình",
-    description: "Thay đổi cài đặt hệ thống",
-  },
-  {
-    id: 20,
-    name: "Quản lý tích hợp",
-    module: "System",
-    category: "Quản lý",
-    description: "Quản lý các tích hợp bên ngoài",
-  },
-
-  // Báo cáo
-  { id: 21, name: "Xem báo cáo KPI", module: "Report", category: "Xem", description: "Truy cập báo cáo hiệu suất" },
-  { id: 22, name: "Xuất báo cáo", module: "Report", category: "Xuất", description: "Xuất báo cáo ra file" },
-  { id: 23, name: "Tạo báo cáo tùy chỉnh", module: "Report", category: "Tạo", description: "Tạo báo cáo theo yêu cầu" },
-  {
-    id: 24,
-    name: "Lên lịch báo cáo",
-    module: "Report",
-    category: "Lên lịch",
-    description: "Tự động gửi báo cáo định kỳ",
-  },
-]
-
-const moduleIcons = {
-  HR: Users,
-  Finance: DollarSign,
-  Project: FileText,
-  System: Settings,
-  Report: FileText,
-}
-
-const moduleColors = {
-  HR: "bg-blue-100 text-blue-800",
-  Finance: "bg-green-100 text-green-800",
-  Project: "bg-purple-100 text-purple-800",
-  System: "bg-red-100 text-red-800",
-  Report: "bg-orange-100 text-orange-800",
+// Tạo ánh xạ tên icon sang component
+const iconMap: Record<string, any> = {
+  Users,
+  Building2,
+  FileText,
+  ClipboardCheck,
+  Settings,
 }
 
 export default function PermissionModal({
@@ -162,20 +51,39 @@ export default function PermissionModal({
   const [permissions, setPermissions] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedModule, setSelectedModule] = useState("all")
+  // Danh sách tất cả quyền hạn có thể có trong hệ thống
+  const { permissions: allPermissions } = usePermissions()
+  const { modules: allModulesRaw } = useModules()
+  const allModules = allModulesRaw ?? [];
+
+  const moduleIcons = allModules.reduce((acc: Record<string, any>, module: any) => {
+    acc[module.name] = module.icon
+    return acc
+  }, {})
+
+  const moduleDisplayNames = allModules.reduce((acc: Record<string, any>, module: any) => {
+    acc[module.name] = module.display_name
+    return acc
+  }, {})
+
+  const moduleColors = allModules.reduce((acc: Record<string, any>, module: any) => {
+    acc[module.name] = module.color
+    return acc
+  }, {})
 
   useEffect(() => {
     if (role) {
-      // Khởi tạo permissions với tất cả quyền có thể có
-      const rolePermissions = allPermissions.map((perm) => {
-        const existingPerm = role.permissions?.find((p: any) => p.id === perm.id)
-        return {
-          ...perm,
-          granted: existingPerm ? existingPerm.granted : false,
-        }
-      })
-      setPermissions(rolePermissions)
+      // Nếu role.permissions là mảng id: [1,3,5]
+      const grantedIds = Array.isArray(role.permissions)
+        ? role.permissions.map((p: any) => (typeof p === 'object' ? p.id : p))
+        : [];
+      const rolePermissions = allPermissions.map((perm: any) => ({
+        ...perm,
+        granted: grantedIds.includes(perm.id),
+      }));
+      setPermissions(rolePermissions);
     }
-  }, [role])
+  }, [role, allPermissions]);
 
   if (!role) return null
 
@@ -184,8 +92,9 @@ export default function PermissionModal({
   }
 
   const handleSave = () => {
-    onUpdatePermissions(role.id, permissions)
-    onOpenChange(false)
+      const role_id = role.id
+      const permission_ids = permissions.filter((p: any) => p.granted).map((p: any) => p.id)
+    onUpdatePermissions(role.id, permission_ids)
   }
 
   const handleSelectAll = (module: string) => {
@@ -222,7 +131,7 @@ export default function PermissionModal({
   const grantedCount = permissions.filter((p) => p.granted).length
   const totalCount = permissions.length
 
-  const modules = [...new Set(allPermissions.map((p) => p.module))]
+  const modules = [...new Set(allPermissions.map((p: any) => p.module))]
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -275,13 +184,13 @@ export default function PermissionModal({
 
         <Tabs value={selectedModule} onValueChange={setSelectedModule} className="w-full max-h-[350px]">
           <div className="flex items-center justify-between mb-3">
-            <TabsList className="grid w-full grid-cols-6 h-9">
+            <TabsList className="flex w-full h-9">
               <TabsTrigger value="all" className="text-xs">Tất cả</TabsTrigger>
-              <TabsTrigger value="HR" className="text-xs">Nhân sự</TabsTrigger>
-              <TabsTrigger value="Finance" className="text-xs">Tài chính</TabsTrigger>
-              <TabsTrigger value="Project" className="text-xs">Dự án</TabsTrigger>
-              <TabsTrigger value="System" className="text-xs">Hệ thống</TabsTrigger>
-              <TabsTrigger value="Report" className="text-xs">Báo cáo</TabsTrigger>
+              {modules.map((module: any) => (
+                <TabsTrigger key={module} value={module} className="text-xs">
+                  {moduleDisplayNames[module] || module}
+                </TabsTrigger>
+              ))}
             </TabsList>
           </div>
 
@@ -309,25 +218,20 @@ export default function PermissionModal({
           {/* Danh sách quyền */}
           <div className="max-h-[350px] overflow-y-auto space-y-2">
             {Object.entries(groupedPermissions).map(([module, modulePermissions]: any) => {
-              const ModuleIcon = moduleIcons[module as keyof typeof moduleIcons]
+              const ModuleIcon = moduleIcons[module as keyof typeof moduleIcons] || FileText;
 
               return (
                 <Card key={module} className="border-0 shadow-sm">
                   <CardHeader className="pb-2 pt-3 px-4">
                     <CardTitle className="text-base flex items-center gap-2">
-                      <ModuleIcon className="h-4 w-4" />
-                      {module === "HR"
-                        ? "Quản lý Nhân sự"
-                        : module === "Finance"
-                          ? "Tài chính"
-                          : module === "Project"
-                            ? "Quản lý Dự án"
-                            : module === "System"
-                              ? "Hệ thống"
-                              : module === "Report"
-                                ? "Báo cáo"
-                                : module}
-                      <Badge className={`text-xs ${moduleColors[module as keyof typeof moduleColors]}`}>
+                      {/* Lấy icon từ modulePermissions[0]?.icon hoặc module (nếu có) */}
+                      {(() => {
+                        const iconName = modulePermissions[0]?.icon || module;
+                        const IconComponent = iconMap[iconName] || FileText;
+                        return <IconComponent className="h-4 w-4" />;
+                      })()}
+                      {moduleDisplayNames[module] || module}
+                      <Badge className={`text-xs ${moduleColors[module as keyof typeof moduleColors] || 'bg-gray-100 text-gray-800'}`}>
                         {modulePermissions.length} quyền
                       </Badge>
                     </CardTitle>
@@ -372,7 +276,7 @@ export default function PermissionModal({
         </Tabs>
 
         {/* Cảnh báo */}
-        {role.order === 1 && (
+        {role.order === 0 && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2 flex items-start gap-2 mt-3">
             <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
             <div>

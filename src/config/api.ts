@@ -35,6 +35,12 @@ export const API_ENDPOINTS = {
     REORDER: `${API_URL}/roles/reorder`,
     SELECTION: `${API_URL}/roles/selection`,
   },
+
+  PERMISSIONS: {
+    LIST: `${API_URL}/permissions`,
+    MODULES: `${API_URL}/permissions/permission-modules`,
+    SYNC: `${API_URL}/permissions/sync-permission`,
+  },
   // Thêm các nhóm API khác ở đây
 } as const;
 

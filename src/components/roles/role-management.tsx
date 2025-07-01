@@ -10,6 +10,11 @@ import ConfirmDeleteModal from "../shared/confirm-delete-modal"
 import { toast } from "sonner"
 import type { Role } from "@/types/role"
 import dynamic from "next/dynamic"
+import { useSyncPermissions } from "@/hooks/usePermission"
+import { syncPermissions } from "@/services/permission"
+import { mutate } from "swr"
+import { API_ENDPOINTS } from "@/config/api"
+import { getErrorMessage } from "@/services/errorHandler"
 
 const RoleTable = dynamic(() => import("./RoleTable"), { ssr: false })
 const AddRoleModal = dynamic(() => import("./add-role-modal"), { ssr: false })
@@ -31,13 +36,7 @@ export default function RoleManagement() {
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false)
 
   const handleAddRole = async (newRole: any) => {
-    try {
-      await addRole(newRole)
-      setIsAddModalOpen(false)
-      toast.success("Thêm vai trò thành công!")
-    } catch (error) {
-      toast.error("Thêm vai trò thất bại. Vui lòng thử lại.")
-    }
+    await addRole(newRole)
   }
 
   const handleManagePermissions = (role: any) => {
@@ -45,20 +44,20 @@ export default function RoleManagement() {
     setIsPermissionModalOpen(true)
   }
 
-  const handleUpdatePermissions = (roleId: number, updatedPermissions: any[]) => {
-    // Cập nhật local state và trigger re-fetch
-    console.log(roleId, updatedPermissions)
+  const handleUpdatePermissions = async (roleId: number, permission_ids: number[]) => {
+    try {
+      await syncPermissions(roleId, permission_ids)
+      mutate(API_ENDPOINTS.ROLES.LIST)
+      setIsPermissionModalOpen(false)
+      toast.success("Cập nhật quyền hạn thành công!")
+    } catch (error) {
+      toast.error(getErrorMessage(error))
+    }
   }
 
   const handleEditRole = async (updatedRole: any) => {
-    try {   
     const { id, ...dataToUpdate } = updatedRole
     await editRole(id, dataToUpdate)
-    setIsAddModalOpen(false)
-    toast.success("Cập nhật vai trò thành công!")
-    } catch (error) {
-      toast.error("Cập nhật vai trò thất bại. Vui lòng thử lại.")
-    }
   }
 
   const handleDeleteRequest = (id: number) => {
@@ -77,7 +76,7 @@ export default function RoleManagement() {
       await removeRole(roleToDelete)
       toast.success("Xóa vai trò thành công!")
     } catch (error) {
-      toast.error("Xóa vai trò thất bại. Vui lòng thử lại.")
+      toast.error(getErrorMessage(error))
     } finally {
       setIsDeleteModalOpen(false)
       setRoleToDelete(null)
@@ -141,7 +140,7 @@ export default function RoleManagement() {
       await reorder(updatedRoles.map((r: any) => r.id))
       toast.success("Cập nhật thứ tự vai trò thành công!")
     } catch (error) {
-      toast.error("Cập nhật thứ tự vai trò thất bại!")
+      toast.error(getErrorMessage(error))
     }
 
     setDraggedItem(null)
