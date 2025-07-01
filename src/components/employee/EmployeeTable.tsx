@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Phone, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
+import { Phone, MoreHorizontal, Eye, Edit, Trash2, Shield } from "lucide-react";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import React from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -13,9 +13,10 @@ interface EmployeeTableProps {
   onViewDetail: (employee: any) => void;
   onEdit: (employee: any) => void;
   onDelete: (id: number) => void;
+  onManagePermissions?: (employee: any) => void;
 }
 
-export default function EmployeeTable({ employees, loading, onViewDetail, onEdit, onDelete }: EmployeeTableProps) {
+export default function EmployeeTable({ employees, loading, onViewDetail, onEdit, onDelete, onManagePermissions }: EmployeeTableProps) {
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -93,6 +94,12 @@ export default function EmployeeTable({ employees, loading, onViewDetail, onEdit
                         <Edit className="mr-2 h-4 w-4" />
                         <span>Chỉnh sửa</span>
                       </DropdownMenuItem>
+                      {onManagePermissions && (
+                        <DropdownMenuItem onClick={() => onManagePermissions(employee)}>
+                          <Shield className="mr-2 h-4 w-4" />
+                          <span>Quản lý quyền</span>
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem
                         onClick={() => onDelete(employee.id)}
                         className="text-red-600"

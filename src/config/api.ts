@@ -40,6 +40,7 @@ export const API_ENDPOINTS = {
     LIST: `${API_URL}/permissions`,
     MODULES: `${API_URL}/permissions/permission-modules`,
     SYNC: `${API_URL}/permissions/sync-permission`,
+    SYNC_PERMISSION_BY_EMPLOYEE: `${API_URL}/permissions/sync-permission-by-employee`,
   },
   // Thêm các nhóm API khác ở đây
 } as const;
