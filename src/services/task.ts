@@ -1,6 +1,7 @@
 import { API_CONFIG, API_ENDPOINTS } from "@/config/api";
 import { getAuthToken } from "./auth";
 import apiClient from "./apiClient";
+import type { Task } from "@/types/task";
 
 const getConfig = () => {
   const token = getAuthToken();
@@ -18,5 +19,15 @@ export async function fetchTasks(params = {}) {
     ...getConfig(),
     params,
   });
+  return response.data.data;
+}
+
+export async function createTask(taskData: Omit<Task, 'id'>) {
+  const response = await apiClient.post(API_ENDPOINTS.TASKS.CREATE, taskData, getConfig());
+  return response.data.data;
+}
+
+export async function updateTask(id: number, taskData: Partial<Task>) {
+  const response = await apiClient.put(API_ENDPOINTS.TASKS.UPDATE(id), taskData, getConfig());
   return response.data.data;
 }

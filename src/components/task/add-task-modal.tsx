@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -28,15 +28,19 @@ import { Input } from "../ui/input"
 import { Select as AntdSelect } from "antd"
 import { Category } from "@/types/category"
 import { useEmployees } from "@/hooks/useEmployees"
+import { toast } from "sonner"
+import { getErrorMessage, getValidationErrors } from "@/services/errorHandler"
 
 type AddTaskModalProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onAddTask: (task: any) => void
+  onAddTask: (task: any) => Promise<void>
+  onEditTask?: (id: number, task: any) => Promise<void>
+  editingTask?: any
   categories: Category[]
 }
 
-export default function AddTaskModal({ open, onOpenChange, onAddTask, categories }: AddTaskModalProps) {
+export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask, editingTask, categories }: AddTaskModalProps) {
   const [content, setContent] = useState("")
   const [deadline, setDeadline] = useState<Date | undefined>(new Date())
   const [priority, setPriority] = useState("")
@@ -49,6 +53,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, categories
   const [startDate, setStartDate] = useState<Date | undefined>(new Date())
   const [startDateError, setStartDateError] = useState("")
   const { allUsers, loading } = useEmployees()
+  const [errorMsg, setErrorMsg] = useState<Record<string, string[]> | null>(null)
 
   // Dữ liệu mẫu cho người phối hợp
   const collaborators = allUsers?.map((employee) => ({
@@ -57,48 +62,63 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, categories
     avatar: employee.avatar,
   }))
 
+  useEffect(() => {
+    if (editingTask) {
+      setContent(editingTask.content || "")
+      setDeadline(editingTask.deadline ? new Date(editingTask.deadline) : new Date())
+      setStartDate(editingTask.startDate ? new Date(editingTask.startDate) : new Date())
+      setPriority(editingTask.category?.id?.toString() || "")
+      setWeight(editingTask.count?.toString() || "4")
+      setSelectedCollaborators(editingTask.assignees?.map((a: any) => Number(a.id)) || [])
+      setAssigner(editingTask.assigner?.id)
+      setMainHandler(editingTask.mainHandler?.id)
+      setMainHandlerError("")
+      setStartDateError("")
+    } else {
+      resetForm()
+    }
+    setErrorMsg(null)
+  }, [editingTask, open])
+
   const handleCloseModal = () => {
     onOpenChange(false)
     resetForm()
   }
-
-  const handleSubmit = (e: React.FormEvent) => {
+  console.log(editingTask)
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Validate ngày bắt đầu
-    if (!startDate) {
-      setStartDateError("Vui lòng chọn ngày bắt đầu")
-      return
-    } else {
-      setStartDateError("")
-    }
-    // Validate mainHandler
-    if (!mainHandler) {
-      setMainHandlerError("Vui lòng chọn người xử lý chính")
-      return
-    } else {
-      setMainHandlerError("")
-    }
-    // Tạo task mới
-    const newTask = {
-      id: Math.floor(Math.random() * 1000), // ID tạm thời
+    // Chuẩn bị dữ liệu
+    const taskData = {
       content,
-      status: "ongoing",
-      priority: priority || "",
-      assignees: selectedCollaborators.map((id) => {
-        const collaborator = collaborators.find((c) => c.value === Number(id))
-        return collaborator ? collaborator.avatar.charAt(0) : ""
-      }),
+      status: editingTask ? editingTask.status : "ongoing",
+      category: priority,
+      assignees: selectedCollaborators.map(Number),
       count: Number.parseInt(weight),
-      startDate: startDate ? format(startDate, "dd/MM/yyyy") : "",
-      deadline: deadline ? format(deadline, "dd/MM/yyyy") : "",
-      createdAt: format(new Date(), "dd/MM/yyyy"),
-      assigner,
-      mainHandler,
+      startDate: startDate ? startDate.toISOString() : "",
+      deadline: deadline ? deadline.toISOString() : "",
+      createdAt: editingTask ? editingTask.createdAt : new Date().toISOString(),
+      assigner: assigner ?? undefined,
+      mainHandler: mainHandler ?? undefined,
+      description: editingTask ? editingTask.description : "",
     }
-    onAddTask(newTask)
-    resetForm()
-    onOpenChange(false)
+    try {
+      if (editingTask && onEditTask) {
+        await onEditTask(editingTask.id, taskData)
+        toast.success("Cập nhật công việc thành công!")
+      } else {
+        await onAddTask(taskData)
+        toast.success("Thêm công việc thành công!")
+      }
+      resetForm()
+      setErrorMsg(null)
+      onOpenChange(false)
+    } catch (error: any) {
+      const msg = getErrorMessage(error)
+      setErrorMsg(getValidationErrors(error) || { general: [msg] })
+      toast.error(msg)
+      
+    }
   }
 
   const resetForm = () => {
@@ -114,12 +134,6 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, categories
     setMainHandlerError("")
   }
 
-  const toggleCollaborator = (value: string) => {
-    setSelectedCollaborators((current) =>
-      current.includes(value) ? current.filter((item) => item !== value) : [...current, value],
-    )
-  }
-
   const collaboratorOptions = collaborators.map(c => ({
     label: (
       <div className="flex items-center gap-2">
@@ -131,15 +145,18 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, categories
     ),
     value: c.value,
   }));
-
+  console.log(editingTask)
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Thêm mới công việc</DialogTitle>
-            <DialogDescription>Nhập thông tin chi tiết công việc cần thêm mới vào hệ thống.</DialogDescription>
+            <DialogTitle>{editingTask ? "Chỉnh sửa công việc" : "Thêm mới công việc"}</DialogTitle>
+            <DialogDescription>Nhập thông tin chi tiết công việc cần {editingTask ? "cập nhật" : "thêm mới"} vào hệ thống.</DialogDescription>
           </DialogHeader>
+          {errorMsg?.general && (
+            <div className="text-red-600 text-sm mb-2">{errorMsg.general.join(" ")}</div>
+          )}
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="content">Nội dung công việc</Label>
@@ -151,16 +168,30 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, categories
                 className="min-h-[100px] resize-none"
                 required
               />
+              {errorMsg?.content && <span className="text-red-500 text-xs">{errorMsg.content.join(" ")}</span>}
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 items-start">
               <div className="grid gap-2">
                 <Label htmlFor="startDate">Ngày bắt đầu</Label>
-                <Input type="date" className="w-full block" value={startDate ? format(startDate, "yyyy-MM-dd") : ""} onChange={(e) => setStartDate(new Date(e.target.value))} required />
+                <Input 
+                  type="date" 
+                  className="w-full block" 
+                  value={startDate instanceof Date && !isNaN(startDate.getTime()) ? format(startDate, "yyyy-MM-dd") : ""} 
+                  onChange={(e) => setStartDate(new Date(e.target.value))} 
+                  required 
+                />
                 {startDateError && <span className="text-red-500 text-xs">{startDateError}</span>}
+                {errorMsg?.startDate && <span className="text-red-500 text-xs">{errorMsg.startDate.join(" ")}</span>}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="deadline">Hạn xử lý</Label>
-                <Input type="date" className="w-full block" value={deadline ? format(deadline, "yyyy-MM-dd") : ""} onChange={(e) => setDeadline(new Date(e.target.value))} />
+                <Input
+                  type="date"
+                  className="w-full block"
+                  value={deadline instanceof Date && !isNaN(deadline.getTime()) ? format(deadline, "yyyy-MM-dd") : ""}
+                  onChange={(e) => setDeadline(new Date(e.target.value))}
+                />
+                {errorMsg?.deadline && <span className="text-red-500 text-xs">{errorMsg.deadline.join(" ")}</span>}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -181,6 +212,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, categories
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                {errorMsg?.category && <span className="text-red-500 text-xs">{errorMsg.category.join(" ")}</span>}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="weight">Trọng số</Label>
@@ -199,6 +231,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, categories
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                {errorMsg?.count && <span className="text-red-500 text-xs">{errorMsg.count.join(" ")}</span>}
               </div>
             </div>
             <div className="grid gap-4 py-4">
@@ -221,6 +254,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, categories
                       return opt.label.toLowerCase().includes(input.toLowerCase());
                     }}
                   />
+                  {errorMsg?.assigner && <span className="text-red-500 text-xs">{errorMsg.assigner.join(" ")}</span>}
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="mainHandler">Người xử lý chính:</Label>
@@ -241,6 +275,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, categories
                     }}
                   />
                   {mainHandlerError && <span className="text-red-500 text-xs">{mainHandlerError}</span>}
+                  {errorMsg?.mainHandler && <span className="text-red-500 text-xs">{errorMsg.mainHandler.join(" ")}</span>}
                 </div>
               </div>
             </div>
@@ -262,13 +297,14 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, categories
                   return opt.label.toLowerCase().includes(input.toLowerCase());
                 }}
               />
+              {errorMsg?.assignees && <span className="text-red-500 text-xs">{errorMsg.assignees.join(" ")}</span>}
             </div>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleCloseModal}>
               Hủy
             </Button>
-            <Button type="submit">Thêm mới</Button>
+            <Button type="submit">{editingTask ? "Cập nhật" : "Thêm mới"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

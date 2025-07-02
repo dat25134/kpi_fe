@@ -16,6 +16,8 @@ import { Tooltip } from "antd"
 import LoadingSpinner from "../ui/loading-spinner"
 import TableTask from "./table-task"
 import { addMonths, format } from "date-fns"
+import { toast } from "sonner"
+import { getErrorMessage, getValidationErrors } from "@/services/errorHandler"
 
 export default function TaskManagement() {
   const [activeTab, setActiveTab] = useState("ongoing")
@@ -36,7 +38,9 @@ export default function TaskManagement() {
     tasks,
     pagination,
     isLoading: tasksLoading,
-    error: tasksError
+    error: tasksError,
+    addTask,
+    editTask
   } = useTasks({
     page: currentPage,
     search: searchTerm,
@@ -45,6 +49,7 @@ export default function TaskManagement() {
     category,
     status: activeTab === "completed" ? "completed" : ""
   })
+  const [editingTask, setEditingTask] = useState<Task | null>(null)
   
   const handleSearch = () => {
     setStartDate(inputStartDate)
@@ -70,8 +75,12 @@ export default function TaskManagement() {
     setCurrentPage(1)
   }, [activeTab])
 
-  const handleAddTask = (newTask: Task) => {
-    console.log(newTask)
+  const handleAddTask = async (newTask: Task) => {
+      await addTask(newTask)
+  }
+
+  const handleEditTask = async (id: number, updatedTask: Partial<Task>) => {
+      await editTask(id, updatedTask)
   }
 
   const handlePageChange = (page: number) => {
@@ -210,7 +219,7 @@ export default function TaskManagement() {
                     <LoadingSpinner />
                   </div>
                 ) : (
-                  <TableTask tasks={tasks} />
+                  <TableTask pagination={pagination} tasks={tasks} onRowClick={(task) => { setEditingTask(task); setIsAddModalOpen(true); }} />
                 )}
               </div>
 
@@ -256,7 +265,17 @@ export default function TaskManagement() {
         </div>
       </div>
 
-      <AddTaskModal open={isAddModalOpen} onOpenChange={setIsAddModalOpen} onAddTask={handleAddTask} categories={categories} />
+      <AddTaskModal
+        open={isAddModalOpen}
+        onOpenChange={(open) => {
+          setIsAddModalOpen(open)
+          if (!open) setEditingTask(null)
+        }}
+        onAddTask={handleAddTask}
+        onEditTask={handleEditTask}
+        editingTask={editingTask}
+        categories={categories}
+      />
     </div>
   )
 }
