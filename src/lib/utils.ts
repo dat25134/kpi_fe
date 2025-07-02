@@ -39,3 +39,11 @@ export function getAvatarFromName(name: string): string {
     ? nameParts[0].charAt(0).toUpperCase() + nameParts[nameParts.length - 1].charAt(0).toUpperCase()
     : name.substring(0, 2).toUpperCase()
 }
+
+export function formatDate(date: string): string {
+  const dateObj = new Date(date);
+  const day = String(dateObj.getDate()).padStart(2, '0');
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const year = dateObj.getFullYear();
+  return `${day}/${month}/${year}`;
+}

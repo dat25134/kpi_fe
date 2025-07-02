@@ -46,8 +46,9 @@ export default function PermissionModal({
   open,
   onOpenChange,
   role,
+  employee,
   onUpdatePermissions,
-}: PermissionModalProps) {
+}: PermissionModalProps & { employee?: any }) {
   const [permissions, setPermissions] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedModule, setSelectedModule] = useState("all")
@@ -85,7 +86,7 @@ export default function PermissionModal({
     }
   }, [role, allPermissions]);
 
-  if (!role) return null
+  if (!role && !employee) return null
 
   const handlePermissionToggle = (permissionId: number, granted: boolean) => {
     setPermissions((prev) => prev.map((perm) => (perm.id === permissionId ? { ...perm, granted } : perm)))
@@ -139,10 +140,25 @@ export default function PermissionModal({
         <DialogHeader className="pb-3">
           <DialogTitle className="flex items-center gap-2 text-lg">
             <Shield className="h-5 w-5 text-blue-600" />
-            Cấp quyền cho chức vụ: {role.display_name}
-            <Badge variant="outline">{role.code}</Badge>
+            {employee
+              ? (<>
+                  Cấp quyền cho nhân viên: {employee.name}
+                  <Badge variant="outline">{employee.code || employee.email || employee.id}</Badge>
+                </>)
+              : role
+                ? (<>
+                    Cấp quyền cho chức vụ: {role.display_name}
+                    <Badge variant="outline">{role.code}</Badge>
+                  </>)
+                : null}
           </DialogTitle>
-          <DialogDescription>Quản lý quyền hạn và phân quyền truy cập cho chức vụ này</DialogDescription>
+          <DialogDescription>
+            {employee
+              ? "Quản lý quyền hạn và phân quyền truy cập cho nhân viên này"
+              : role
+                ? "Quản lý quyền hạn và phân quyền truy cập cho chức vụ này"
+                : ""}
+          </DialogDescription>
         </DialogHeader>
 
         {/* Thống kê quyền */}
@@ -276,7 +292,7 @@ export default function PermissionModal({
         </Tabs>
 
         {/* Cảnh báo */}
-        {role.order === 0 && (
+        {role && role.order === 0 && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2 flex items-start gap-2 mt-3">
             <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
             <div>

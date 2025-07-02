@@ -395,6 +395,7 @@ export default function EmployeeManagement() {
         onOpenChange={setIsPermissionModalOpen}
         role={selectedEmployeeForPermission}
         onUpdatePermissions={handleUpdateEmployeePermissions}
+        employee={selectedEmployeeForPermission}
       />
     </div>
   )
