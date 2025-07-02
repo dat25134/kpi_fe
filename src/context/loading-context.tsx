@@ -1,50 +1,54 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import type { LoadingContextType } from '@/types/loading';
+import { toast } from "sonner";
 
 const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
 export function LoadingProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const loadingTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
-  const showLoading = () => setIsLoading(true);
-  const hideLoading = () => setIsLoading(false);
+  const showLoading = () => {
+    setIsLoading(true);
+    if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+    loadingTimeoutRef.current = setTimeout(() => {
+      setIsLoading(false);
+      toast.error("Có lỗi xảy ra, vui lòng thử lại!");
+    }, 30000);
+  };
 
-  // Reset loading state on route change
+  const hideLoading = () => {
+    setIsLoading(false);
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = null;
+    }
+  };
+
+  // Reset loading state on route change (nếu muốn)
   useEffect(() => {
     hideLoading();
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   // Handle click events on links
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const linkElement = target.closest('a');
-      
       if (linkElement?.href) {
         try {
           const url = new URL(linkElement.href);
           const currentUrl = new URL(window.location.href);
-          
-          // Don't show loading if clicking the current page
-          if (url.pathname === currentUrl.pathname && 
-              url.search === currentUrl.search && 
-              !linkElement.href.startsWith('#')) {
-            e.preventDefault(); // Prevent unnecessary navigation
-            return;
-          }
-          
-          // Only show loading for internal links that are not anchors
+          // Chỉ show loading cho link nội bộ, không phải anchor
           if (url.origin === currentUrl.origin && !linkElement.href.startsWith('#')) {
             showLoading();
           }
         } catch (error) {
           // Invalid URL, do nothing
-          console.error('Invalid URL:', error);
         }
       }
     };
@@ -60,7 +64,7 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
       document.removeEventListener('click', handleClick);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [pathname]); // Add pathname as dependency to access current path
+  }, []);
 
   return (
     <LoadingContext.Provider value={{ isLoading, showLoading, hideLoading }}>

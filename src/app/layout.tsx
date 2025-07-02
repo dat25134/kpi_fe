@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster"
 import Footer from "@/components/shared/footer";
 import AuthRedirectListener from "@/components/shared/auth-redirect-listener";
+import { LoadingProvider } from "@/context/loading-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,10 +31,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <LoadingProvider>
         <AuthRedirectListener />
         {children}
-        <Toaster />
-        <Footer />
+          <Toaster />
+          <Footer />
+        </LoadingProvider>
       </body>
     </html>
   );
