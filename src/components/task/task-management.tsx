@@ -18,6 +18,8 @@ import TableTask from "./table-task"
 import { addMonths, format } from "date-fns"
 import { toast } from "sonner"
 import { getErrorMessage, getValidationErrors } from "@/services/errorHandler"
+import { mutate } from "swr"
+import { Dropdown, Menu } from "antd"
 
 export default function TaskManagement() {
   const [activeTab, setActiveTab] = useState("ongoing")
@@ -33,6 +35,7 @@ export default function TaskManagement() {
   const [category, setCategory] = useState("")
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(20)
   const { categories, isLoading, error } = useCategories()
   const {
     tasks,
@@ -47,7 +50,8 @@ export default function TaskManagement() {
     startDate,
     endDate,
     category,
-    status: activeTab === "completed" ? "completed" : ""
+    status: activeTab === "completed" ? "completed" : "",
+    itemsPerPage
   })
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   
@@ -87,6 +91,39 @@ export default function TaskManagement() {
     setCurrentPage(page)
   }
 
+  const refreshTasks = () => {
+    mutate(["tasks", {
+      page: currentPage,
+      search: searchTerm,
+      startDate,
+      endDate,
+      category,
+      status: activeTab === "completed" ? "completed" : ""
+    }]);
+  }
+
+  const handleChangeItemsPerPage = (value: number) => {
+    setItemsPerPage(value)
+    setCurrentPage(1)
+  }
+
+  const itemsPerPageMenuItems = [
+    {
+      key: '10',
+      label: 'Ít (10)',
+      onClick: () => handleChangeItemsPerPage(10),
+    },
+    {
+      key: '20',
+      label: 'Bình thường (20)',
+      onClick: () => handleChangeItemsPerPage(20),
+    },
+    {
+      key: '50',
+      label: 'Nhiều (50)',
+      onClick: () => handleChangeItemsPerPage(50),
+    },
+  ]
 
   return (
     <div className="mx-auto w-full">
@@ -106,12 +143,12 @@ export default function TaskManagement() {
             <div className="flex items-center gap-x-1">
               <span>KPI hiện tại</span>
               <span>:</span>
-              <span className="font-semibold text-gray-700">2.0</span>
+              <span className="font-semibold text-gray-700">2.0 / 4.0</span>
             </div>
             <div className="flex items-center gap-x-1">
               <span>Tạm xếp loại</span>
               <span>:</span>
-              <span className="font-semibold text-gray-700">2.0 / 4.0</span>
+              <span className="font-semibold text-gray-700">Tốt</span>
             </div>
           </div>
         </div>
@@ -205,12 +242,14 @@ export default function TaskManagement() {
                   <Plus className="h-4 w-4 mr-1" />
                   Thêm mới
                 </Button>
-                <Button size="sm" variant="ghost" className="ml-2">
+                <Button size="sm" variant="ghost" className="ml-2" onClick={refreshTasks}>
                   <RefreshCw className="h-4 w-4" />
                 </Button>
-                <Button size="sm" variant="ghost">
-                  <Settings className="h-4 w-4" />
-                </Button>
+                <Dropdown menu={{ items: itemsPerPageMenuItems }} trigger={["click"]} placement="bottomRight">
+                  <Button size="sm" variant="ghost">
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </Dropdown>
               </div>
 
               <div className="overflow-x-auto">

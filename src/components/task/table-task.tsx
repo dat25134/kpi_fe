@@ -25,7 +25,7 @@ export default function TableTask({ tasks, onRowClick, pagination }: { tasks: Ta
                         </TableRow>
                     ) : (
                         tasks?.map((task: Task) => (
-                            <TableRow key={task.id} onClick={() => onRowClick && onRowClick(task)} className={onRowClick ? 'cursor-pointer hover:bg-blue-50' : ''}>
+                            <TableRow key={task.id} className='hover:bg-blue-50'>
                                 <TableCell>
                                     <input type="checkbox" className="rounded" />
                                 </TableCell>
@@ -84,7 +84,13 @@ export default function TableTask({ tasks, onRowClick, pagination }: { tasks: Ta
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="break-words whitespace-normal flex-1">
+                                        <div
+                                            className="break-words whitespace-normal flex-1 cursor-pointer hover:underline"
+                                            onClick={e => {
+                                                e.stopPropagation();
+                                                onRowClick && onRowClick(task);
+                                            }}
+                                        >
                                             {task.content}
                                         </div>
                                     </div>
