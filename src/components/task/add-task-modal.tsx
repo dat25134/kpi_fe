@@ -30,6 +30,8 @@ import { Category } from "@/types/category"
 import { useEmployees } from "@/hooks/useEmployees"
 import { toast } from "sonner"
 import { getErrorMessage, getValidationErrors } from "@/services/errorHandler"
+import { Timeline } from "antd"
+import TaskProgressPanel from "./TaskProgressPanel"
 
 type AddTaskModalProps = {
   open: boolean
@@ -54,6 +56,19 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
   const [startDateError, setStartDateError] = useState("")
   const { allUsers, loading } = useEmployees()
   const [errorMsg, setErrorMsg] = useState<Record<string, string[]> | null>(null)
+  const [status, setStatus] = useState("pending")
+  const [progressHistory, setProgressHistory] = useState([
+    {
+      time: "2025-04-21 07:41",
+      user: "Đỗ Thị Hồng Loan",
+      content: "chờ KH của Sở ban hành, căn cứ thực hiện",
+    },
+    {
+      time: "2025-05-07 08:19",
+      user: "Đỗ Thị Hồng Loan",
+      content: "Chuyển công việc cho Mỹ Khánh thực hiện dự thảo",
+    },
+  ])
 
   // Dữ liệu mẫu cho người phối hợp
   const collaborators = allUsers?.map((employee) => ({
@@ -74,6 +89,8 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
       setMainHandler(editingTask.mainHandler?.id)
       setMainHandlerError("")
       setStartDateError("")
+      setStatus(editingTask.status || "pending")
+      setProgressHistory(editingTask.progressHistory || progressHistory)
     } else {
       resetForm()
     }
@@ -91,7 +108,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
     // Chuẩn bị dữ liệu
     const taskData = {
       content,
-      status: editingTask ? editingTask.status : "ongoing",
+      status,
       category: priority,
       assignees: selectedCollaborators.map(Number),
       count: Number.parseInt(weight),
@@ -101,6 +118,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
       assigner: assigner ?? undefined,
       mainHandler: mainHandler ?? undefined,
       description: editingTask ? editingTask.description : "",
+      progressHistory,
     }
     try {
       if (editingTask && onEditTask) {
@@ -132,6 +150,19 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
     setAssigner(undefined)
     setMainHandler(undefined)
     setMainHandlerError("")
+    setStatus("pending")
+    setProgressHistory([
+      {
+        time: "2025-04-21 07:41",
+        user: "Đỗ Thị Hồng Loan",
+        content: "chờ KH của Sở ban hành, căn cứ thực hiện",
+      },
+      {
+        time: "2025-05-07 08:19",
+        user: "Đỗ Thị Hồng Loan",
+        content: "Chuyển công việc cho Mỹ Khánh thực hiện dự thảo",
+      },
+    ])
   }
 
   const collaboratorOptions = collaborators.map(c => ({
@@ -145,10 +176,9 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
     ),
     value: c.value,
   }));
-  console.log(editingTask)
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className={`w-full max-w-full sm:max-w-[${editingTask ? "1000px" : "600px"}] max-h-[90vh] overflow-y-auto`}>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{editingTask ? "Chỉnh sửa công việc" : "Thêm mới công việc"}</DialogTitle>
@@ -157,148 +187,162 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
           {errorMsg?.general && (
             <div className="text-red-600 text-sm mb-2">{errorMsg.general.join(" ")}</div>
           )}
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="content">Nội dung công việc</Label>
-              <Textarea
-                id="content"
-                placeholder="Nhập nội dung công việc"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="min-h-[100px] resize-none"
-                required
-              />
-              {errorMsg?.content && <span className="text-red-500 text-xs">{errorMsg.content.join(" ")}</span>}
-            </div>
-            <div className="grid grid-cols-2 gap-4 items-start">
-              <div className="grid gap-2">
-                <Label htmlFor="startDate">Ngày bắt đầu</Label>
-                <Input 
-                  type="date" 
-                  className="w-full block" 
-                  value={startDate instanceof Date && !isNaN(startDate.getTime()) ? format(startDate, "yyyy-MM-dd") : ""} 
-                  onChange={(e) => setStartDate(new Date(e.target.value))} 
-                  required 
-                />
-                {startDateError && <span className="text-red-500 text-xs">{startDateError}</span>}
-                {errorMsg?.startDate && <span className="text-red-500 text-xs">{errorMsg.startDate.join(" ")}</span>}
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="deadline">Hạn xử lý</Label>
-                <Input
-                  type="date"
-                  className="w-full block"
-                  value={deadline instanceof Date && !isNaN(deadline.getTime()) ? format(deadline, "yyyy-MM-dd") : ""}
-                  onChange={(e) => setDeadline(new Date(e.target.value))}
-                />
-                {errorMsg?.deadline && <span className="text-red-500 text-xs">{errorMsg.deadline.join(" ")}</span>}
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="priority">Phân loại</Label>
-                <Select value={priority} onValueChange={setPriority}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Chọn phân loại" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Phân loại</SelectLabel>
-                      {categories?.map((category: Category) => (
-                        <SelectItem key={category.id} value={category.id.toString()}>
-                          {category.display_name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                {errorMsg?.category && <span className="text-red-500 text-xs">{errorMsg.category.join(" ")}</span>}
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="weight">Trọng số</Label>
-                <Select value={weight} onValueChange={setWeight}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Chọn trọng số" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Trọng số</SelectLabel>
-                      <SelectItem value="1">1</SelectItem>
-                      <SelectItem value="2">2</SelectItem>
-                      <SelectItem value="3">3</SelectItem>
-                      <SelectItem value="4">4</SelectItem>
-                      <SelectItem value="5">5</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                {errorMsg?.count && <span className="text-red-500 text-xs">{errorMsg.count.join(" ")}</span>}
-              </div>
-            </div>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col md:flex-row gap-6 py-4">
+            {/* Cột trái: Thông tin công việc */}
+            <div className="flex-1 min-w-0">
+              <div className="grid gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="assigner">Người giao:</Label>
+                  <Label htmlFor="content">Nội dung công việc</Label>
+                  <Textarea
+                    id="content"
+                    placeholder="Nhập nội dung công việc"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    className="min-h-[100px] resize-none"
+                    required
+                  />
+                  {errorMsg?.content && <span className="text-red-500 text-xs">{errorMsg.content.join(" ")}</span>}
+                </div>
+                <div className="grid grid-cols-2 gap-4 items-start">
+                  <div className="grid gap-2">
+                    <Label htmlFor="startDate">Ngày bắt đầu</Label>
+                    <Input 
+                      type="date" 
+                      className="w-full block" 
+                      value={startDate instanceof Date && !isNaN(startDate.getTime()) ? format(startDate, "yyyy-MM-dd") : ""} 
+                      onChange={(e) => setStartDate(new Date(e.target.value))} 
+                      required 
+                    />
+                    {startDateError && <span className="text-red-500 text-xs">{startDateError}</span>}
+                    {errorMsg?.startDate && <span className="text-red-500 text-xs">{errorMsg.startDate.join(" ")}</span>}
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="deadline">Hạn xử lý</Label>
+                    <Input
+                      type="date"
+                      className="w-full block"
+                      value={deadline instanceof Date && !isNaN(deadline.getTime()) ? format(deadline, "yyyy-MM-dd") : ""}
+                      onChange={(e) => setDeadline(new Date(e.target.value))}
+                    />
+                    {errorMsg?.deadline && <span className="text-red-500 text-xs">{errorMsg.deadline.join(" ")}</span>}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="priority">Phân loại</Label>
+                    <Select value={priority} onValueChange={setPriority}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Chọn phân loại" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Phân loại</SelectLabel>
+                          {categories?.map((category: Category) => (
+                            <SelectItem key={category.id} value={category.id.toString()}>
+                              {category.display_name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {errorMsg?.category && <span className="text-red-500 text-xs">{errorMsg.category.join(" ")}</span>}
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="weight">Trọng số</Label>
+                    <Select value={weight} onValueChange={setWeight}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Chọn trọng số" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Trọng số</SelectLabel>
+                          <SelectItem value="1">1</SelectItem>
+                          <SelectItem value="2">2</SelectItem>
+                          <SelectItem value="3">3</SelectItem>
+                          <SelectItem value="4">4</SelectItem>
+                          <SelectItem value="5">5</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {errorMsg?.count && <span className="text-red-500 text-xs">{errorMsg.count.join(" ")}</span>}
+                  </div>
+                </div>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="assigner">Người giao:</Label>
+                      <AntdSelect
+                        id="assigner"
+                        style={{ width: "100%" }}
+                        placeholder="Vui lòng chọn"
+                        value={assigner}
+                        onChange={setAssigner}
+                        options={collaborators.map(c => ({ label: c.label, value: c.value }))}
+                        allowClear
+                        getPopupContainer={triggerNode => triggerNode.parentNode}
+                        showSearch
+                        filterOption={(input, option: any) => {
+                          const opt = option as { label: string; value: number };
+                          if (!opt || !opt.label) return false;
+                          return opt.label.toLowerCase().includes(input.toLowerCase());
+                        }}
+                      />
+                      {errorMsg?.assigner && <span className="text-red-500 text-xs">{errorMsg.assigner.join(" ")}</span>}
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="mainHandler">Người xử lý chính:</Label>
+                      <AntdSelect
+                        id="mainHandler"
+                        style={{ width: "100%" }}
+                        placeholder="Vui lòng chọn"
+                        value={mainHandler}
+                        onChange={setMainHandler}
+                        options={collaborators.map(c => ({ label: c.label, value: c.value }))}
+                        allowClear
+                        getPopupContainer={triggerNode => triggerNode.parentNode}
+                        showSearch
+                        filterOption={(input, option: any) => {
+                          const opt = option as { label: string; value: number };
+                          if (!opt || !opt.label) return false;
+                          return opt.label.toLowerCase().includes(input.toLowerCase());
+                        }}
+                      />
+                      {mainHandlerError && <span className="text-red-500 text-xs">{mainHandlerError}</span>}
+                      {errorMsg?.mainHandler && <span className="text-red-500 text-xs">{errorMsg.mainHandler.join(" ")}</span>}
+                    </div>
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Người phối hợp</Label>
                   <AntdSelect
-                    id="assigner"
+                    mode="multiple"
                     style={{ width: "100%" }}
-                    placeholder="Vui lòng chọn"
-                    value={assigner}
-                    onChange={setAssigner}
-                    options={collaborators.map(c => ({ label: c.label, value: c.value }))}
-                    allowClear
+                    placeholder="Chọn người phối hợp"
+                    value={selectedCollaborators}
+                    onChange={setSelectedCollaborators}
+                    options={collaboratorOptions}
+                    optionLabelProp="label"
                     getPopupContainer={triggerNode => triggerNode.parentNode}
-                    showSearch
+                    allowClear
                     filterOption={(input, option: any) => {
                       const opt = option as { label: string; value: number };
                       if (!opt || !opt.label) return false;
                       return opt.label.toLowerCase().includes(input.toLowerCase());
                     }}
                   />
-                  {errorMsg?.assigner && <span className="text-red-500 text-xs">{errorMsg.assigner.join(" ")}</span>}
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="mainHandler">Người xử lý chính:</Label>
-                  <AntdSelect
-                    id="mainHandler"
-                    style={{ width: "100%" }}
-                    placeholder="Vui lòng chọn"
-                    value={mainHandler}
-                    onChange={setMainHandler}
-                    options={collaborators.map(c => ({ label: c.label, value: c.value }))}
-                    allowClear
-                    getPopupContainer={triggerNode => triggerNode.parentNode}
-                    showSearch
-                    filterOption={(input, option: any) => {
-                      const opt = option as { label: string; value: number };
-                      if (!opt || !opt.label) return false;
-                      return opt.label.toLowerCase().includes(input.toLowerCase());
-                    }}
-                  />
-                  {mainHandlerError && <span className="text-red-500 text-xs">{mainHandlerError}</span>}
-                  {errorMsg?.mainHandler && <span className="text-red-500 text-xs">{errorMsg.mainHandler.join(" ")}</span>}
+                  {errorMsg?.assignees && <span className="text-red-500 text-xs">{errorMsg.assignees.join(" ")}</span>}
                 </div>
               </div>
             </div>
-            <div className="grid gap-2">
-              <Label>Người phối hợp</Label>
-              <AntdSelect
-                mode="multiple"
-                style={{ width: "100%" }}
-                placeholder="Chọn người phối hợp"
-                value={selectedCollaborators}
-                onChange={setSelectedCollaborators}
-                options={collaboratorOptions}
-                optionLabelProp="label"
-                getPopupContainer={triggerNode => triggerNode.parentNode}
-                allowClear
-                filterOption={(input, option: any) => {
-                  const opt = option as { label: string; value: number };
-                  if (!opt || !opt.label) return false;
-                  return opt.label.toLowerCase().includes(input.toLowerCase());
-                }}
+            {/* Cột phải: Tiến độ & Trạng thái, chỉ hiển thị khi update */}
+            {editingTask && (
+              <TaskProgressPanel
+                progressHistory={progressHistory}
+                status={status}
+                setStatus={setStatus}
+                onAddProgress={(item) => setProgressHistory(prev => [...prev, item])}
               />
-              {errorMsg?.assignees && <span className="text-red-500 text-xs">{errorMsg.assignees.join(" ")}</span>}
-            </div>
+            )}
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleCloseModal}>
