@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CircleDot, Home, Plus, RefreshCw, Search, Settings, User } from "lucide-react"
+import { ChevronLeft, ChevronRight, CircleDot, Home, Plus, RefreshCw, Search, Settings, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import AddTaskModal from "./add-task-modal"
 import { useCategories } from "@/hooks/userCategories"
@@ -15,22 +15,69 @@ import { Task } from "@/types/task"
 import { Tooltip } from "antd"
 import LoadingSpinner from "../ui/loading-spinner"
 import TableTask from "./table-task"
+import { addMonths, format } from "date-fns"
 
 export default function TaskManagement() {
   const [activeTab, setActiveTab] = useState("ongoing")
-  const [startDate, setStartDate] = useState("2024-12-13")
-  const [endDate, setEndDate] = useState("2025-06-13")
+  const today = format(new Date(), "yyyy-MM-dd")
+  const twoMonthsAgo = format(addMonths(new Date(), -2), "yyyy-MM-dd")
+  const [inputStartDate, setInputStartDate] = useState(twoMonthsAgo)
+  const [inputEndDate, setInputEndDate] = useState(today)
+  const [inputSearchTerm, setInputSearchTerm] = useState("")
+  const [inputCategory, setInputCategory] = useState("")
+  const [startDate, setStartDate] = useState(twoMonthsAgo)
+  const [endDate, setEndDate] = useState(today)
   const [searchTerm, setSearchTerm] = useState("")
   const [category, setCategory] = useState("")
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
   const { categories, isLoading, error } = useCategories()
-  const { tasks, isLoading: tasksLoading, error: tasksError } = useTasks()
+  const {
+    tasks,
+    pagination,
+    isLoading: tasksLoading,
+    error: tasksError
+  } = useTasks({
+    page: currentPage,
+    search: searchTerm,
+    startDate,
+    endDate,
+    category,
+    status: activeTab === "completed" ? "completed" : ""
+  })
+  
+  const handleSearch = () => {
+    setStartDate(inputStartDate)
+    setEndDate(inputEndDate)
+    setSearchTerm(inputSearchTerm)
+    setCategory(inputCategory)
+    setCurrentPage(1)
+  }
+
+  const handleResetFilters = () => {
+    setInputStartDate(twoMonthsAgo)
+    setInputEndDate(today)
+    setInputSearchTerm("")
+    setInputCategory("")
+    setStartDate(twoMonthsAgo)
+    setEndDate(today)
+    setSearchTerm("")
+    setCategory("")
+    setCurrentPage(1)
+  }
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [activeTab])
 
   const handleAddTask = (newTask: Task) => {
     console.log(newTask)
   }
 
-  const taskCompleted = tasks?.filter((task: Task) => task.status === "completed")
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
 
   return (
     <div className="mx-auto w-full">
@@ -63,29 +110,29 @@ export default function TaskManagement() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-4 mb-4 w-full">
           <div>
             <label className="text-sm font-medium mb-1 block">Nội dung:</label>
-            <Input className="w-full" placeholder="Nhập dữ liệu" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <Input className="w-full" placeholder="Nhập dữ liệu" value={inputSearchTerm} onChange={(e) => setInputSearchTerm(e.target.value)} />
           </div>
           <div>
             <label className="text-sm font-medium mb-1 block">Thời gian:</label>
             <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                value={inputStartDate}
+                onChange={(e) => setInputStartDate(e.target.value)}
                 className="w-full block"
               />
               <span className="hidden sm:inline">-</span>
               <Input
                 type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                value={inputEndDate}
+                onChange={(e) => setInputEndDate(e.target.value)}
                 className="w-full block"
               />
             </div>
           </div>
           <div>
             <label className="text-sm font-medium mb-1 block">Phân loại:</label>
-            <Select value={category} onValueChange={setCategory}>
+            <Select value={inputCategory} onValueChange={setInputCategory}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Vui lòng chọn" />
               </SelectTrigger>
@@ -99,8 +146,8 @@ export default function TaskManagement() {
             </Select>
           </div>
           <div className="flex flex-col md:flex-row gap-2 items-end justify-end">
-            <Button variant="outline" className="w-full md:w-auto">Làm lại</Button>
-            <Button className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
+            <Button variant="outline" className="w-full md:w-auto" onClick={handleResetFilters}>Làm lại</Button>
+            <Button className="w-full md:w-auto bg-blue-600 hover:bg-blue-700" onClick={handleSearch}>
               <Search className="h-4 w-4 mr-2" />
               Tìm kiếm
             </Button>
@@ -167,16 +214,32 @@ export default function TaskManagement() {
                 )}
               </div>
 
-              <div className="flex justify-between items-center p-4 text-sm">
-                <div>
-                  1-{tasks?.length} / tổng {tasks?.length} công việc
-                </div>
-                <div className="flex items-center">
-                  <Button variant="outline" size="icon" className="h-8 w-8 rounded-full">
-                    1
+              {/* Phân trang */}
+              {pagination && pagination.totalPages > 1 && (
+                <div className="flex items-center justify-end space-x-2 py-4">
+                  <span className="text-sm text-muted-foreground">
+                    Trang {pagination.currentPage} / {pagination.totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(pagination.currentPage - 1)}
+                    disabled={pagination.currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Trước
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(pagination.currentPage + 1)}
+                    disabled={pagination.currentPage === pagination.totalPages}
+                  >
+                    Sau
+                    <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
-              </div>
+              )}
             </TabsContent>
             <TabsContent value="completed">
               <div className="overflow-x-auto">
@@ -185,7 +248,7 @@ export default function TaskManagement() {
                     <LoadingSpinner />
                   </div>
                 ) : (
-                  <TableTask tasks={taskCompleted} />
+                  <TableTask tasks={tasks?.filter((task: Task) => task.status === "completed")} />
                 )}
               </div>
             </TabsContent>

@@ -13,7 +13,10 @@ const getConfig = () => {
   };
 }
 
-export async function fetchTasks() {
-  const response = await apiClient.get(API_ENDPOINTS.TASKS.LIST, getConfig());
+export async function fetchTasks(params = {}) {
+  const response = await apiClient.get(API_ENDPOINTS.TASKS.LIST, {
+    ...getConfig(),
+    params,
+  });
   return response.data.data;
 }
