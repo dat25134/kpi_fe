@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import type { LoadingContextType } from '@/types/loading';
+import { toast } from "sonner";
 
 const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
@@ -10,9 +11,26 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const loadingTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
-  const showLoading = () => setIsLoading(true);
-  const hideLoading = () => setIsLoading(false);
+  const showLoading = () => {
+    setIsLoading(true);
+    // Nếu đã có timeout cũ thì clear
+    if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+    // Đặt timeout mới
+    loadingTimeoutRef.current = setTimeout(() => {
+      setIsLoading(false);
+      toast.error("Có lỗi xảy ra, vui lòng thử lại!");
+    }, 30000); // 30 giây
+  };
+
+  const hideLoading = () => {
+    setIsLoading(false);
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = null;
+    }
+  };
 
   // Reset loading state on route change
   useEffect(() => {
