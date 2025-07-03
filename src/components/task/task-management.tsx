@@ -37,14 +37,7 @@ export default function TaskManagement() {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(20)
   const { categories, isLoading, error } = useCategories()
-  const {
-    tasks,
-    pagination,
-    isLoading: tasksLoading,
-    error: tasksError,
-    addTask,
-    editTask
-  } = useTasks({
+  const params = {
     page: currentPage,
     search: searchTerm,
     startDate,
@@ -52,7 +45,15 @@ export default function TaskManagement() {
     category,
     status: activeTab === "completed" ? "completed" : "",
     itemsPerPage
-  })
+  };
+  const {
+    tasks,
+    pagination,
+    isLoading: tasksLoading,
+    error: tasksError,
+    addTask,
+    editTask
+  } = useTasks(params)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   
   const handleSearch = () => {
@@ -92,14 +93,7 @@ export default function TaskManagement() {
   }
 
   const refreshTasks = () => {
-    mutate(["tasks", {
-      page: currentPage,
-      search: searchTerm,
-      startDate,
-      endDate,
-      category,
-      status: activeTab === "completed" ? "completed" : ""
-    }]);
+    mutate(["tasks", params]);
   }
 
   const handleChangeItemsPerPage = (value: number) => {
@@ -314,6 +308,7 @@ export default function TaskManagement() {
         onEditTask={handleEditTask}
         editingTask={editingTask}
         categories={categories}
+        refreshTasks={refreshTasks}
       />
     </div>
   )
