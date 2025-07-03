@@ -32,6 +32,8 @@ import { toast } from "sonner"
 import { getErrorMessage, getValidationErrors } from "@/services/errorHandler"
 import { Timeline } from "antd"
 import TaskProgressPanel from "./TaskProgressPanel"
+import { ProgressItem } from "@/types/task"
+import { useProgress } from "@/hooks/useProgress"
 
 type AddTaskModalProps = {
   open: boolean
@@ -40,9 +42,10 @@ type AddTaskModalProps = {
   onEditTask?: (id: number, task: any) => Promise<void>
   editingTask?: any
   categories: Category[]
+  refreshTasks: () => void
 }
 
-export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask, editingTask, categories }: AddTaskModalProps) {
+export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask, editingTask, categories, refreshTasks }: AddTaskModalProps) {
   const [content, setContent] = useState("")
   const [deadline, setDeadline] = useState<Date | undefined>(new Date())
   const [priority, setPriority] = useState("")
@@ -57,18 +60,8 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
   const { allUsers, loading } = useEmployees()
   const [errorMsg, setErrorMsg] = useState<Record<string, string[]> | null>(null)
   const [status, setStatus] = useState("pending")
-  const [progressHistory, setProgressHistory] = useState([
-    {
-      time: "2025-04-21 07:41",
-      user: "Đỗ Thị Hồng Loan",
-      content: "chờ KH của Sở ban hành, căn cứ thực hiện",
-    },
-    {
-      time: "2025-05-07 08:19",
-      user: "Đỗ Thị Hồng Loan",
-      content: "Chuyển công việc cho Mỹ Khánh thực hiện dự thảo",
-    },
-  ])
+  const [progressHistory, setProgressHistory] = useState<ProgressItem[]>([])
+  const { updateProgress } = useProgress()
 
   // Dữ liệu mẫu cho người phối hợp
   const collaborators = allUsers?.map((employee) => ({
@@ -90,7 +83,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
       setMainHandlerError("")
       setStartDateError("")
       setStatus(editingTask.status || "pending")
-      setProgressHistory(editingTask.progressHistory || progressHistory)
+      setProgressHistory(editingTask?.progressHistory || [])
     } else {
       resetForm()
     }
@@ -101,7 +94,14 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
     onOpenChange(false)
     resetForm()
   }
-  console.log(editingTask)
+
+  const handleAddProgress = async (item: ProgressItem) => {
+    if (!editingTask?.id) return;
+    const newProgress = await updateProgress(editingTask.id, item.contentProgress)
+    setProgressHistory(prev => [...prev, newProgress])
+    refreshTasks()
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -135,7 +135,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
       const msg = getErrorMessage(error)
       setErrorMsg(getValidationErrors(error) || { general: [msg] })
       toast.error(msg)
-      
+
     }
   }
 
@@ -151,18 +151,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
     setMainHandler(undefined)
     setMainHandlerError("")
     setStatus("pending")
-    setProgressHistory([
-      {
-        time: "2025-04-21 07:41",
-        user: "Đỗ Thị Hồng Loan",
-        content: "chờ KH của Sở ban hành, căn cứ thực hiện",
-      },
-      {
-        time: "2025-05-07 08:19",
-        user: "Đỗ Thị Hồng Loan",
-        content: "Chuyển công việc cho Mỹ Khánh thực hiện dự thảo",
-      },
-    ])
+    setProgressHistory([])
   }
 
   const collaboratorOptions = collaborators.map(c => ({
@@ -206,12 +195,12 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                 <div className="grid grid-cols-2 gap-4 items-start">
                   <div className="grid gap-2">
                     <Label htmlFor="startDate">Ngày bắt đầu</Label>
-                    <Input 
-                      type="date" 
-                      className="w-full block" 
-                      value={startDate instanceof Date && !isNaN(startDate.getTime()) ? format(startDate, "yyyy-MM-dd") : ""} 
-                      onChange={(e) => setStartDate(new Date(e.target.value))} 
-                      required 
+                    <Input
+                      type="date"
+                      className="w-full block"
+                      value={startDate instanceof Date && !isNaN(startDate.getTime()) ? format(startDate, "yyyy-MM-dd") : ""}
+                      onChange={(e) => setStartDate(new Date(e.target.value))}
+                      required
                     />
                     {startDateError && <span className="text-red-500 text-xs">{startDateError}</span>}
                     {errorMsg?.startDate && <span className="text-red-500 text-xs">{errorMsg.startDate.join(" ")}</span>}
@@ -340,7 +329,10 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                 progressHistory={progressHistory}
                 status={status}
                 setStatus={setStatus}
-                onAddProgress={(item) => setProgressHistory((prev: any) => [...prev, item])}
+                onAddProgress={handleAddProgress}
+                refreshTasks={refreshTasks}
+                setErrorMsg={setErrorMsg}
+                errorMsg={errorMsg || {}}
               />
             )}
           </div>

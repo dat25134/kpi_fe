@@ -54,6 +54,7 @@ export const API_ENDPOINTS = {
     UPDATE: (id: number) => `${API_URL}/tasks/${id}`,
     DELETE: (id: number) => `${API_URL}/tasks/${id}`,
     DETAIL: (id: number) => `${API_URL}/tasks/${id}`,
+    PROGRESS: (id: number) => `${API_URL}/tasks/${id}/progress`,
   },
   // Thêm các nhóm API khác ở đây
 } as const;

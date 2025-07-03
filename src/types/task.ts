@@ -33,7 +33,7 @@ export interface ProgressItem {
     id?: number
     user: ProgressUser | string
     time: string
-    content: string
+    contentProgress: string
 }
 
 export interface TaskProgressPanelProps {
@@ -41,4 +41,7 @@ export interface TaskProgressPanelProps {
     status: string
     setStatus: (status: string) => void
     onAddProgress: (item: ProgressItem) => void
+    refreshTasks: () => void
+    setErrorMsg: (errorMsg: Record<string, string[]>) => void
+    errorMsg: Record<string, string[]>
 }
