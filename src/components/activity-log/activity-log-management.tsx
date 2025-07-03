@@ -31,380 +31,88 @@ import {
 } from "lucide-react"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
-
-// Types
-interface ActivityLog {
-  id: number
-  log_name: string
-  description: string
-  subject_type: string
-  subject_id: number
-  causer_type: string | null
-  causer_id: number | null
-  properties: {
-    attributes: any
-  }
-  created_at: string
-  updated_at: string
-}
-
-interface ApiResponse {
-  success: boolean
-  message: string
-  data: {
-    logs: ActivityLog[]
-    pagination: {
-      currentPage: number
-      totalPages: number
-      totalItems: number
-      itemsPerPage: number
-    }
-  }
-}
-
-interface Filters {
-  search: string
-  subject_type: string
-  description: string
-  log_name: string
-  causer_id: string
-  date_from: Date | undefined
-  date_to: Date | undefined
-  event: string
-}
-
-// Mock data based on API structure
-const mockApiResponse: ApiResponse = {
-  success: true,
-  message: "Lấy danh sách log thành công",
-  data: {
-    logs: [
-      {
-        id: 256,
-        log_name: "default",
-        description: "created",
-        subject_type: "App\\Models\\TaskProgress",
-        subject_id: 109,
-        causer_type: null,
-        causer_id: null,
-        properties: {
-          attributes: {
-            content: "Đã điều chỉnh theo yêu cầu, gửi lại cho KH review",
-            task_id: 33,
-            user_id: 4,
-            created_at: "2025-07-02T13:14:14.000000Z",
-            updated_at: "2025-06-30T13:14:14.000000Z",
-          },
-        },
-        created_at: "2025-07-03T13:14:14.000000Z",
-        updated_at: "2025-07-03T13:14:14.000000Z",
-      },
-      {
-        id: 247,
-        log_name: "default",
-        description: "created",
-        subject_type: "App\\Models\\TaskProgress",
-        subject_id: 100,
-        causer_type: null,
-        causer_id: null,
-        properties: {
-          attributes: {
-            content: "Nhận được phản hồi từ KH, cần điều chỉnh một số điểm",
-            task_id: 31,
-            user_id: 6,
-            created_at: "2025-07-01T13:14:14.000000Z",
-            updated_at: "2025-07-01T13:14:14.000000Z",
-          },
-        },
-        created_at: "2025-07-03T13:14:14.000000Z",
-        updated_at: "2025-07-03T13:14:14.000000Z",
-      },
-      {
-        id: 50,
-        log_name: "default",
-        description: "created",
-        subject_type: "App\\Models\\User",
-        subject_id: 24,
-        causer_type: null,
-        causer_id: null,
-        properties: {
-          attributes: {
-            cccd: null,
-            name: "Bác. Bàng Đinh Hiếu",
-            email: "tien.doi@example.net",
-            phone: "066 388 4312",
-            status: "active",
-            password: "$2y$12$llzuZvziVt3z4yt5Bh4tWe.HWUSh7NVEzyCUPbGlHB7D47FSCJgyK",
-            join_date: "2025-06-26T00:00:00.000000Z",
-            employee_id: "EMP025",
-            department_id: 17,
-          },
-        },
-        created_at: "2025-07-03T13:14:09.000000Z",
-        updated_at: "2025-07-03T13:14:09.000000Z",
-      },
-      {
-        id: 248,
-        log_name: "default",
-        description: "updated",
-        subject_type: "App\\Models\\TaskProgress",
-        subject_id: 101,
-        causer_type: "App\\Models\\User",
-        causer_id: 20,
-        properties: {
-          attributes: {
-            content: "Đã điều chỉnh theo yêu cầu, gửi lại cho KH review",
-            task_id: 31,
-            user_id: 20,
-            created_at: "2025-07-02T13:14:14.000000Z",
-            updated_at: "2025-06-30T13:14:14.000000Z",
-          },
-        },
-        created_at: "2025-07-03T13:14:14.000000Z",
-        updated_at: "2025-07-03T13:14:14.000000Z",
-      },
-      {
-        id: 249,
-        log_name: "default",
-        description: "deleted",
-        subject_type: "App\\Models\\TaskProgress",
-        subject_id: 102,
-        causer_type: "App\\Models\\User",
-        causer_id: 25,
-        properties: {
-          attributes: {
-            content: "KH đã duyệt, chuẩn bị bàn giao",
-            task_id: 31,
-            user_id: 25,
-            created_at: "2025-07-03T13:14:14.000000Z",
-            updated_at: "2025-07-02T13:14:14.000000Z",
-          },
-        },
-        created_at: "2025-07-03T13:14:14.000000Z",
-        updated_at: "2025-07-03T13:14:14.000000Z",
-      },
-      {
-        id: 250,
-        log_name: "default",
-        description: "created",
-        subject_type: "App\\Models\\TaskProgress",
-        subject_id: 103,
-        causer_type: "App\\Models\\User",
-        causer_id: 3,
-        properties: {
-          attributes: {
-            content: "Bắt đầu thực hiện công việc theo kế hoạch",
-            task_id: 32,
-            user_id: 3,
-            created_at: "2025-06-28T13:14:14.000000Z",
-            updated_at: "2025-06-28T13:14:14.000000Z",
-          },
-        },
-        created_at: "2025-07-03T13:14:14.000000Z",
-        updated_at: "2025-07-03T13:14:14.000000Z",
-      },
-      {
-        id: 251,
-        log_name: "default",
-        description: "created",
-        subject_type: "App\\Models\\TaskProgress",
-        subject_id: 104,
-        causer_type: "App\\Models\\User",
-        causer_id: 29,
-        properties: {
-          attributes: {
-            content: "Đã hoàn thành 50% công việc, đang chờ phản hồi từ khách hàng",
-            task_id: 32,
-            user_id: 29,
-            created_at: "2025-06-29T13:14:14.000000Z",
-            updated_at: "2025-06-29T13:14:14.000000Z",
-          },
-        },
-        created_at: "2025-07-03T13:14:14.000000Z",
-        updated_at: "2025-07-03T13:14:14.000000Z",
-      },
-      {
-        id: 252,
-        log_name: "default",
-        description: "created",
-        subject_type: "App\\Models\\TaskProgress",
-        subject_id: 105,
-        causer_type: "App\\Models\\User",
-        causer_id: 16,
-        properties: {
-          attributes: {
-            content: "KH đã duyệt, chuẩn bị bàn giao",
-            task_id: 32,
-            user_id: 16,
-            created_at: "2025-07-03T13:14:14.000000Z",
-            updated_at: "2025-07-02T13:14:14.000000Z",
-          },
-        },
-        created_at: "2025-07-03T13:14:14.000000Z",
-        updated_at: "2025-07-03T13:14:14.000000Z",
-      },
-      {
-        id: 253,
-        log_name: "default",
-        description: "created",
-        subject_type: "App\\Models\\TaskProgress",
-        subject_id: 106,
-        causer_type: "App\\Models\\User",
-        causer_id: 30,
-        properties: {
-          attributes: {
-            content: "Đã hoàn thành dự thảo, chờ phê duyệt",
-            task_id: 32,
-            user_id: 30,
-            created_at: "2025-06-30T13:14:14.000000Z",
-            updated_at: "2025-07-02T13:14:14.000000Z",
-          },
-        },
-        created_at: "2025-07-03T13:14:14.000000Z",
-        updated_at: "2025-07-03T13:14:14.000000Z",
-      },
-      {
-        id: 254,
-        log_name: "default",
-        description: "created",
-        subject_type: "App\\Models\\TaskProgress",
-        subject_id: 107,
-        causer_type: "App\\Models\\User",
-        causer_id: 26,
-        properties: {
-          attributes: {
-            content: "Cần bổ sung thêm tài liệu hỗ trợ",
-            task_id: 32,
-            user_id: 26,
-            created_at: "2025-07-03T13:14:14.000000Z",
-            updated_at: "2025-07-02T13:14:14.000000Z",
-          },
-        },
-        created_at: "2025-07-03T13:14:14.000000Z",
-        updated_at: "2025-07-03T13:14:14.000000Z",
-      },
-      {
-        id: 263,
-        log_name: "default",
-        description: "updated",
-        subject_type: "App\\Models\\TaskProgress",
-        subject_id: 116,
-        causer_type: "App\\Models\\User",
-        causer_id: 15,
-        properties: {
-          attributes: {
-            content: "Đã bổ sung đầy đủ tài liệu, gửi lên cấp trên",
-            task_id: 34,
-            user_id: 15,
-            created_at: "2025-07-03T13:14:14.000000Z",
-            updated_at: "2025-07-02T13:14:14.000000Z",
-          },
-        },
-        created_at: "2025-07-03T13:14:14.000000Z",
-        updated_at: "2025-07-03T13:14:14.000000Z",
-      },
-      {
-        id: 255,
-        log_name: "default",
-        description: "created",
-        subject_type: "App\\Models\\User",
-        subject_id: 108,
-        causer_type: null,
-        causer_id: null,
-        properties: {
-          attributes: {
-            name: "Nguyễn Văn Minh",
-            email: "minh.nguyen@example.com",
-            phone: "0987654321",
-            status: "active",
-            employee_id: "EMP108",
-            department_id: 13,
-            created_at: "2025-06-26T13:14:14.000000Z",
-            updated_at: "2025-06-26T13:14:14.000000Z",
-          },
-        },
-        created_at: "2025-07-03T13:14:14.000000Z",
-        updated_at: "2025-07-03T13:14:14.000000Z",
-      },
-    ],
-    pagination: {
-      currentPage: 1,
-      totalPages: 17,
-      totalItems: 322,
-      itemsPerPage: 20,
-    },
-  },
-}
-
-// Mock users data
-const mockUsers = [
-  { id: 3, name: "Lê Thị Hoa", employee_id: "EMP003" },
-  { id: 4, name: "Bà. Điền Hiểu Nguyệt", employee_id: "EMP005" },
-  { id: 6, name: "Nguyễn Văn A", employee_id: "EMP006" },
-  { id: 15, name: "Trần Văn Đức", employee_id: "EMP015" },
-  { id: 16, name: "Phạm Thị Lan", employee_id: "EMP016" },
-  { id: 20, name: "Trần Thị B", employee_id: "EMP020" },
-  { id: 25, name: "Lê Văn C", employee_id: "EMP025" },
-  { id: 26, name: "Hoàng Thị Mai", employee_id: "EMP026" },
-  { id: 29, name: "Vũ Văn Nam", employee_id: "EMP029" },
-  { id: 30, name: "Đỗ Thị Hương", employee_id: "EMP030" },
-]
+import { useActivityLog } from "@/hooks/useActivityLog"
+import { ActivityLog, ActivityLogPagination } from "@/types/activity-log"
+import { ActivityLogTable } from "./ActivityLogTable"
+import { Select as AntdSelect } from "antd"
+import { useEmployees } from "@/hooks/useEmployees"
 
 export function ActivityLogManagement() {
-  const [logs, setLogs] = useState<ActivityLog[]>([])
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    totalPages: 17,
-    totalItems: 322,
-    itemsPerPage: 20,
-  })
-  const [loading, setLoading] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
+  const { allUsers, loading: loadingUsers } = useEmployees()
+  const employees = allUsers
 
-  const [filters, setFilters] = useState<Filters>({
+  // Chuyển đổi filter mặc định sang dạng string hoặc undefined cho API
+  const initialFilters = {
     search: "",
-    subject_type: "all",
-    description: "",
-    log_name: "all",
-    causer_id: "all",
+    subject_type: undefined,
+    description: undefined,
+    log_name: undefined,
+    causer_id: undefined,
     date_from: undefined,
     date_to: undefined,
-    event: "all",
-  })
+    event: undefined,
+    page: 1,
+    per_page: 20,
+  }
 
-  // Load data on component mount
+  const {
+    logs,
+    pagination,
+    filters,
+    setFilters,
+    loading,
+    error,
+    loadLogs,
+  } = useActivityLog(initialFilters)
+
+  // Load data on mount
   useEffect(() => {
-    loadLogs()
+    (async () => {
+      try {
+        await loadLogs()
+      } catch (err) {
+        // Xử lý lỗi ở đây nếu cần
+        console.error("Error loading logs:", err)
+      }
+    })()
   }, [])
 
-  const loadLogs = async () => {
-    setLoading(true)
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      setLogs(mockApiResponse.data.logs)
-      setPagination(mockApiResponse.data.pagination)
-    } catch (error) {
-      console.error("Error loading logs:", error)
-    } finally {
-      setLoading(false)
+  // Khi filter thay đổi, tự động load lại logs
+  useEffect(() => {
+    (async () => {
+      try {
+        await loadLogs()
+      } catch (err) {
+        console.error("Error loading logs:", err)
+      }
+    })()
+  }, [filters])
+
+  // Xử lý thay đổi filter
+  const handleFilterChange = (key: string, value: any) => {
+    let v = value
+    // Chuyển đổi giá trị filter cho API
+    if (key === "date_from" || key === "date_to") {
+      v = value ? (typeof value === "string" ? value : value.toISOString().slice(0, 10)) : undefined
     }
+    if (v === "all") v = undefined
+    setFilters((prev: any) => ({ ...prev, [key]: v }))
   }
 
-  const handleFilterChange = (key: keyof Filters, value: any) => {
-    setFilters((prev) => ({ ...prev, [key]: value }))
-  }
-
+  // Xóa filter
   const clearFilters = () => {
     setFilters({
       search: "",
-      subject_type: "all",
-      description: "",
-      log_name: "all",
-      causer_id: "all",
+      subject_type: undefined,
+      description: undefined,
+      log_name: undefined,
+      causer_id: undefined,
       date_from: undefined,
       date_to: undefined,
-      event: "all",
+      event: undefined,
+      page: 1,
+      per_page: 20,
     })
   }
 
@@ -451,7 +159,7 @@ export function ActivityLogManagement() {
 
   const getUserName = (userId: number | null) => {
     if (!userId) return "Hệ thống"
-    const user = mockUsers.find((u) => u.id === userId)
+    const user = employees.find((u) => u.id === userId)
     return user ? user.name : `User #${userId}`
   }
 
@@ -483,6 +191,20 @@ export function ActivityLogManagement() {
     }
   }
 
+  // Thêm hàm tạo mảng số trang cần hiển thị
+  function getPageNumbers(current: number, total: number) {
+    const delta = 2;
+    const range: (number | string)[] = [];
+    for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+      range.push(i);
+    }
+    if (current - delta > 2) range.unshift('...');
+    if (current + delta < total - 1) range.push('...');
+    range.unshift(1);
+    if (total > 1) range.push(total);
+    return range;
+  }
+
   return (
     <div className="container mx-auto p-6 space-y-6">       
     <div className="space-y-6">
@@ -499,7 +221,7 @@ export function ActivityLogManagement() {
               <Activity className="h-5 w-5 text-blue-600" />
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Tổng hoạt động</p>
-                <p className="text-2xl font-bold">{pagination.totalItems}</p>
+                <p className="text-2xl font-bold">{pagination ? pagination.totalItems : 0}</p>
               </div>
             </div>
           </CardContent>
@@ -511,7 +233,7 @@ export function ActivityLogManagement() {
               <Plus className="h-5 w-5 text-green-600" />
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Tạo mới</p>
-                <p className="text-2xl font-bold">{logs.filter((l) => l.description === "created").length}</p>
+                <p className="text-2xl font-bold">{pagination ? pagination.create_count : 0}</p>
               </div>
             </div>
           </CardContent>
@@ -523,7 +245,7 @@ export function ActivityLogManagement() {
               <Edit className="h-5 w-5 text-blue-600" />
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Cập nhật</p>
-                <p className="text-2xl font-bold">{logs.filter((l) => l.description === "updated").length}</p>
+                <p className="text-2xl font-bold">{pagination ? pagination.update_count : 0}</p>
               </div>
             </div>
           </CardContent>
@@ -535,7 +257,7 @@ export function ActivityLogManagement() {
               <Trash2 className="h-5 w-5 text-red-600" />
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Xóa</p>
-                <p className="text-2xl font-bold">{logs.filter((l) => l.description === "deleted").length}</p>
+                <p className="text-2xl font-bold">{pagination ? pagination.delete_count : 0}</p>
               </div>
             </div>
           </CardContent>
@@ -564,7 +286,7 @@ export function ActivityLogManagement() {
                   </>
                 )}
               </Button>
-              <Button variant="outline" size="sm" onClick={loadLogs} disabled={loading}>
+              <Button variant="outline" size="sm" onClick={async () => { try { await loadLogs() } catch (err) { console.error(err) } }} disabled={loading}>
                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
                 Làm mới
               </Button>
@@ -575,117 +297,112 @@ export function ActivityLogManagement() {
             </div>
           </div>
         </CardHeader>
-
-        {showFilters && (
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {/* Search */}
-              <div className="space-y-2">
-                <Label>Tìm kiếm</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Tìm kiếm trong nội dung..."
-                    value={filters.search}
-                    onChange={(e) => handleFilterChange("search", e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              {/* Subject Type */}
-              <div className="space-y-2">
-                <Label>Loại đối tượng</Label>
-                <Select
-                  value={filters.subject_type}
-                  onValueChange={(value) => handleFilterChange("subject_type", value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Chọn loại đối tượng" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tất cả</SelectItem>
-                    <SelectItem value="App\\Models\\TaskProgress">Tiến độ công việc</SelectItem>
-                    <SelectItem value="App\\Models\\User">Người dùng</SelectItem>
-                    <SelectItem value="App\\Models\\Task">Công việc</SelectItem>
-                    <SelectItem value="App\\Models\\Department">Phòng ban</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Action */}
-              <div className="space-y-2">
-                <Label>Hành động</Label>
-                <Select value={filters.event} onValueChange={(value) => handleFilterChange("event", value)}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Chọn hành động" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tất cả</SelectItem>
-                    <SelectItem value="created">Tạo mới</SelectItem>
-                    <SelectItem value="updated">Cập nhật</SelectItem>
-                    <SelectItem value="deleted">Xóa</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* User */}
-              <div className="space-y-2">
-                <Label>Người thực hiện</Label>
-                <Select value={filters.causer_id} onValueChange={(value) => handleFilterChange("causer_id", value)}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Chọn người thực hiện" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tất cả</SelectItem>
-                    <SelectItem value="system">Hệ thống</SelectItem>
-                    {mockUsers.map((user) => (
-                      <SelectItem key={user.id} value={user.id.toString()}>
-                        {user.name} ({user.employee_id})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Date From */}
-              <div className="space-y-2">
-                <Label>Từ ngày</Label>
-                <Input className="w-full block" type="date" value={filters.date_from ? format(filters.date_from, "yyyy-MM-dd", { locale: vi }) : ""} onChange={(e) => handleFilterChange("date_from", e.target.value)} />
-              </div>
-
-              {/* Date To */}
-              <div className="space-y-2">
-                <Label>Đến ngày</Label>
-                <Input className="w-full block" type="date" value={filters.date_to ? format(filters.date_to, "yyyy-MM-dd", { locale: vi }) : ""} onChange={(e) => handleFilterChange("date_to", e.target.value)} />
-              </div>
-
-              {/* Log Name */}
-              <div className="space-y-2">
-                <Label>Tên log</Label>
-                <Select value={filters.log_name} onValueChange={(value) => handleFilterChange("log_name", value)}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Chọn tên log" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tất cả</SelectItem>
-                    <SelectItem value="default">Default</SelectItem>
-                    <SelectItem value="auth">Authentication</SelectItem>
-                    <SelectItem value="task">Task</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Clear Filters */}
-              <div className="space-y-2">
-                <Label>&nbsp;</Label>
-                <Button variant="outline" onClick={clearFilters} className="w-full bg-transparent">
-                  Xóa bộ lọc
-                </Button>
+        <CardContent
+          className={`transition-all duration-300 ease-in-out overflow-hidden ${showFilters ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}`}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {/* Search */}
+            <div className="space-y-2">
+              <Label>Tìm kiếm</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Tìm kiếm trong nội dung..."
+                  value={filters.search ?? ""}
+                  onChange={(e) => handleFilterChange("search", e.target.value)}
+                  className="pl-10"
+                />
               </div>
             </div>
-          </CardContent>
-        )}
+
+            {/* Subject Type */}
+            <div className="space-y-2">
+              <Label>Loại đối tượng</Label>
+              <AntdSelect
+                value={filters.subject_type ?? "all"}
+                onChange={value => handleFilterChange("subject_type", value)}
+                style={{ width: "100%" }}
+                options={[
+                  { value: "all", label: "Tất cả" },
+                  { value: "App\\Models\\TaskProgress", label: "Tiến độ công việc" },
+                  { value: "App\\Models\\User", label: "Người dùng" },
+                  { value: "App\\Models\\Task", label: "Công việc" },
+                  { value: "App\\Models\\Department", label: "Phòng ban" },
+                  { value: "App\\Models\\Role", label: "Vai trò" },
+                ]}
+              />
+            </div>
+
+            {/* Action */}
+            <div className="space-y-2">
+              <Label>Hành động</Label>
+              <AntdSelect
+                value={filters.event ?? "all"}
+                onChange={value => handleFilterChange("event", value)}
+                style={{ width: "100%" }}
+                options={[
+                  { value: "all", label: "Tất cả" },
+                  { value: "created", label: "Tạo mới" },
+                  { value: "updated", label: "Cập nhật" },
+                  { value: "deleted", label: "Xóa" },
+                ]}
+              />
+            </div>
+
+            {/* User */}
+            <div className="space-y-2">
+              <Label>Người thực hiện</Label>
+              <AntdSelect
+                value={filters.causer_id ?? "all"}
+                onChange={value => handleFilterChange("causer_id", value)}
+                style={{ width: "100%" }}
+                options={[
+                  { value: "all", label: "Tất cả" },
+                  { value: "system", label: "Hệ thống" },
+                  ...employees.map(user => ({ value: user.id.toString(), label: `${user.name} (${user.employee_id})` }))
+                ]}
+                showSearch
+                filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+              />
+            </div>
+
+            {/* Date From */}
+            <div className="space-y-2">
+              <Label>Từ ngày</Label>
+              <Input className="w-full block" type="date" value={filters.date_from ?? ""} onChange={(e) => handleFilterChange("date_from", e.target.value)} />
+            </div>
+
+            {/* Date To */}
+            <div className="space-y-2">
+              <Label>Đến ngày</Label>
+              <Input className="w-full block" type="date" value={filters.date_to ?? ""} onChange={(e) => handleFilterChange("date_to", e.target.value)} />
+            </div>
+
+            {/* Log Name */}
+            <div className="space-y-2">
+              <Label>Tên log</Label>
+              <AntdSelect
+                value={filters.log_name ?? "all"}
+                onChange={value => handleFilterChange("log_name", value)}
+                style={{ width: "100%" }}
+                options={[
+                  { value: "all", label: "Tất cả" },
+                  { value: "default", label: "Default" },
+                  { value: "auth", label: "Authentication" },
+                  { value: "task", label: "Task" },
+                ]}
+              />
+            </div>
+
+            {/* Clear Filters */}
+            <div className="space-y-2">
+              <Label>&nbsp;</Label>
+              <Button variant="outline" onClick={clearFilters} className="w-full bg-transparent">
+                Xóa bộ lọc
+              </Button>
+            </div>
+          </div>
+        </CardContent>
       </Card>
 
       {/* Activity Log Table */}
@@ -694,122 +411,56 @@ export function ActivityLogManagement() {
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
             Danh sách hoạt động
-            <Badge variant="secondary">{pagination.totalItems} hoạt động</Badge>
+            <Badge variant="secondary">{pagination ? pagination.totalItems : 0} hoạt động</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <RefreshCw className="h-6 w-6 animate-spin mr-2" />
-              Đang tải dữ liệu...
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[80px]">ID</TableHead>
-                    <TableHead className="w-[120px]">Hành động</TableHead>
-                    <TableHead className="w-[150px]">Loại đối tượng</TableHead>
-                    <TableHead className="w-[80px]">Đối tượng</TableHead>
-                    <TableHead>Nội dung</TableHead>
-                    <TableHead className="w-[150px]">Người thực hiện</TableHead>
-                    <TableHead className="w-[140px]">Thời gian</TableHead>
-                    <TableHead className="w-[80px]">Log</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {logs.map((log) => (
-                    <TableRow key={log.id} className="hover:bg-muted/50">
-                      <TableCell className="font-medium">#{log.id}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {getActionIcon(log.description)}
-                          <Badge className={`${getActionColor(log.description)} text-xs`}>
-                            {getActionText(log.description)}
-                          </Badge>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-xs">
-                          {getModelName(log.subject_type)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">#{log.subject_id}</TableCell>
-                      <TableCell>
-                        <div className="max-w-[300px] truncate text-sm" title={getLogContent(log)}>
-                          {getLogContent(log)}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1 text-sm">
-                          <User className="h-3 w-3 text-muted-foreground" />
-                          <span className="truncate max-w-[120px]" title={getUserName(log.causer_id)}>
-                            {getUserName(log.causer_id)}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          {formatDate(log.created_at)}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className="text-xs">
-                          {log.log_name}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+          <ActivityLogTable
+            logs={logs}
+            loading={loading}
+            getActionIcon={getActionIcon}
+            getActionColor={getActionColor}
+            getActionText={getActionText}
+            getModelName={getModelName}
+            getLogContent={getLogContent}
+            getUserName={getUserName}
+            formatDate={formatDate}
+            pagination={pagination as ActivityLogPagination}
+          />
         </CardContent>
-      </Card>
+      </Card>   
 
       {/* Pagination */}
       <Card>
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
-              Hiển thị {(pagination.currentPage - 1) * pagination.itemsPerPage + 1} -{" "}
-              {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} trong tổng số{" "}
-              {pagination.totalItems} hoạt động
+              Hiển thị {pagination ? (pagination.currentPage - 1) * pagination.itemsPerPage + 1 : 0} - {pagination ? Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems) : 0} trong tổng số {pagination ? pagination.totalItems : 0} hoạt động
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" disabled={pagination.currentPage === 1}>
+              <Button variant="outline" size="sm" disabled={pagination ? pagination.currentPage === 1 : true} onClick={() => setFilters({ ...filters, page: (pagination?.currentPage || 1) - 1 })}>
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Trước
               </Button>
 
               <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                  const page = i + 1
-                  return (
-                    <Button
-                      key={page}
-                      variant={page === pagination.currentPage ? "default" : "outline"}
-                      size="sm"
-                      className="w-8 h-8 p-0"
-                    >
-                      {page}
-                    </Button>
-                  )
-                })}
-                {pagination.totalPages > 5 && (
-                  <>
-                    <span className="text-muted-foreground">...</span>
-                    <Button variant="outline" size="sm" className="w-8 h-8 p-0 bg-transparent">
-                      {pagination.totalPages}
-                    </Button>
-                  </>
+                {pagination && getPageNumbers(pagination.currentPage, pagination.totalPages).map((page, idx) =>
+                  page === '...'
+                    ? <span key={"ellipsis-" + idx} className="text-muted-foreground">...</span>
+                    : <Button
+                        key={page}
+                        variant={page === pagination.currentPage ? "default" : "outline"}
+                        size="sm"
+                        className="w-8 h-8 p-0"
+                        onClick={() => typeof page === 'number' && setFilters({ ...filters, page })}
+                      >
+                        {page}
+                      </Button>
                 )}
               </div>
 
-              <Button variant="outline" size="sm" disabled={pagination.currentPage === pagination.totalPages}>
+              <Button variant="outline" size="sm" disabled={pagination ? pagination.currentPage === pagination.totalPages : true} onClick={() => setFilters({ ...filters, page: (pagination?.currentPage || 1) + 1 })}>
                 Sau
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>

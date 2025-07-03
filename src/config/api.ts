@@ -56,6 +56,11 @@ export const API_ENDPOINTS = {
     DETAIL: (id: number) => `${API_URL}/tasks/${id}`,
     PROGRESS: (id: number) => `${API_URL}/tasks/${id}/progress`,
   },
+
+  ACTIVITY_LOG: {
+    LIST: `${API_URL}/activity-log`,
+  },
+
   // Thêm các nhóm API khác ở đây
 } as const;
 
