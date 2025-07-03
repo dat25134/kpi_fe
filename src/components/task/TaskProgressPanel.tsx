@@ -4,19 +4,9 @@ import { Label } from "../ui/label"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../ui/select"
 import { Textarea } from "../ui/textarea"
 import { Button } from "../ui/button"
-
-interface ProgressItem {
-  time: string
-  user: string
-  content: string
-}
-
-interface TaskProgressPanelProps {
-  progressHistory: ProgressItem[]
-  status: string
-  setStatus: (status: string) => void
-  onAddProgress: (item: ProgressItem) => void
-}
+import { formatDate } from "@/lib/utils"
+import { TaskProgressPanelProps } from "@/types/task"
+import { ProgressItem } from "@/types/task"
 
 export default function TaskProgressPanel({ progressHistory, status, setStatus, onAddProgress }: TaskProgressPanelProps) {
   const [progressInput, setProgressInput] = useState("")
@@ -28,7 +18,7 @@ export default function TaskProgressPanel({ progressHistory, status, setStatus, 
     // Fake user và thời gian
     const now = new Date()
     const item: ProgressItem = {
-      user: "Người dùng demo",
+      user: { id: 0, name: "Người dùng demo" },
       time: now.toLocaleString("vi-VN", { hour12: false }),
       content: progressInput.trim(),
     }
@@ -47,8 +37,8 @@ export default function TaskProgressPanel({ progressHistory, status, setStatus, 
               color: idx === progressHistory.length - 1 ? "blue" : "gray",
               children: (
                 <div>
-                  <div className="font-semibold">{item.user}</div>
-                  <div className="text-xs text-gray-500">{item.time}</div>
+                  <div className="font-semibold">{typeof item.user === 'object' && item.user !== null ? item.user.name : item.user}</div>
+                  <div className="text-xs text-gray-500">{formatDate(item.time, "DD/MM/YYYY HH:mm")}</div>
                   <div>{item.content}</div>
                 </div>
               ),
@@ -62,7 +52,7 @@ export default function TaskProgressPanel({ progressHistory, status, setStatus, 
             onChange={e => setProgressInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); handleAddProgress() } }}
             disabled={loading}
-            className="min-h-[60px] resize-none"
+            className="min-h-[60px]"
           />
           <Button type="button" onClick={handleAddProgress} disabled={!progressInput.trim() || loading}>
             Cập nhật tiến độ

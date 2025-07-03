@@ -40,10 +40,12 @@ export function getAvatarFromName(name: string): string {
     : name.substring(0, 2).toUpperCase()
 }
 
-export function formatDate(date: string): string {
+export function formatDate(date: string, format: string = "DD/MM/YYYY"): string {
   const dateObj = new Date(date);
   const day = String(dateObj.getDate()).padStart(2, '0');
   const month = String(dateObj.getMonth() + 1).padStart(2, '0');
   const year = dateObj.getFullYear();
-  return `${day}/${month}/${year}`;
+  const hour = String(dateObj.getHours()).padStart(2, '0');
+  const minute = String(dateObj.getMinutes()).padStart(2, '0');
+  return format.replace("DD", day).replace("MM", month).replace("YYYY", year.toString()).replace("HH", hour).replace("mm", minute);
 }

@@ -340,7 +340,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                 progressHistory={progressHistory}
                 status={status}
                 setStatus={setStatus}
-                onAddProgress={(item) => setProgressHistory(prev => [...prev, item])}
+                onAddProgress={(item) => setProgressHistory((prev: any) => [...prev, item])}
               />
             )}
           </div>
