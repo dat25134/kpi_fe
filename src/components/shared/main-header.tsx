@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Bell, FileText, LayoutDashboard, Building2, Users, Menu } from "lucide-react"
+import { Bell, FileText, LayoutDashboard, Building2, Users, Menu, Shield, FileChartColumn, Activity } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -105,7 +105,7 @@ export default function MainHeader() {
                   pathname === "/roles" ? "bg-blue-600 text-white hover:bg-blue-700" : "text-white hover:bg-blue-800",
                 )}
               >
-                <Users className="h-4 w-4 mr-2" />
+                <Shield className="h-4 w-4 mr-2" />
                 <span className="hidden xl:inline">Quản lý vai trò</span>
               </Button>
             </Link>
@@ -124,6 +124,32 @@ export default function MainHeader() {
               <FileText className="h-4 w-4 mr-2" />
               <span className="hidden xl:inline">Phiếu đánh giá</span>
             </Button>
+          </Link>
+
+          <Link href="/reports">
+            <Button
+              variant={pathname === "/reports" ? "secondary" : "ghost"}
+              className={cn(
+                "h-9 px-3 text-xs md:text-sm",
+                pathname === "/reports" ? "bg-blue-600 text-white hover:bg-blue-700" : "text-white hover:bg-blue-800",
+              )}
+            >
+              <FileChartColumn className="h-4 w-4 mr-2" />
+              <span className="hidden xl:inline">Báo cáo</span>
+              </Button>
+          </Link>
+
+          <Link href="/activity-log">
+            <Button
+              variant={pathname === "/activity-log" ? "secondary" : "ghost"}
+              className={cn(
+                "h-9 px-3 text-xs md:text-sm",
+                pathname === "/activity-log" ? "bg-blue-600 text-white hover:bg-blue-700" : "text-white hover:bg-blue-800",
+              )}
+            >
+              <Activity className="h-4 w-4 mr-2" />
+              <span className="hidden xl:inline">Nhật ký hoạt động</span>
+              </Button>
           </Link>
         </nav>
 
