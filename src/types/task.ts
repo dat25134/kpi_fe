@@ -22,3 +22,23 @@ export type Task = {
     },
     description: string,
 }
+
+export interface ProgressUser {
+    id: number
+    name: string
+    avatar?: string
+}
+
+export interface ProgressItem {
+    id?: number
+    user: ProgressUser | string
+    time: string
+    content: string
+}
+
+export interface TaskProgressPanelProps {
+    progressHistory: ProgressItem[]
+    status: string
+    setStatus: (status: string) => void
+    onAddProgress: (item: ProgressItem) => void
+}
