@@ -3,13 +3,28 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip } from "antd";
 import { formatDate, getAvatarFromName } from "@/lib/utils";
 
-export default function TableTask({ tasks, onRowClick, pagination }: { tasks: Task[], onRowClick?: (task: Task) => void, pagination?: any }) {
+export default function TableTask({ tasks, onRowClick, pagination, selectedTaskIds = [], onSelectTaskIds }: { tasks: Task[], onRowClick?: (task: Task) => void, pagination?: any, selectedTaskIds?: number[], onSelectTaskIds?: (ids: number[]) => void }) {
     return (
         <div className="overflow-x-auto w-full">
             <Table className="min-w-[700px]">
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-10"></TableHead>
+                        <TableHead className="w-10">
+                            <input
+                                type="checkbox"
+                                className="rounded"
+                                checked={tasks.length > 0 && selectedTaskIds.length === tasks.length}
+                                indeterminate={selectedTaskIds.length > 0 && selectedTaskIds.length < tasks.length}
+                                onChange={e => {
+                                    if (!onSelectTaskIds) return;
+                                    if (e.target.checked) {
+                                        onSelectTaskIds(tasks.map(task => task.id))
+                                    } else {
+                                        onSelectTaskIds([])
+                                    }
+                                }}
+                            />
+                        </TableHead>
                         <TableHead className="w-10">#</TableHead>
                         <TableHead>Nội dung</TableHead>
                         <TableHead className="w-24 text-center hidden md:table-cell">Trọng số</TableHead>
@@ -27,7 +42,19 @@ export default function TableTask({ tasks, onRowClick, pagination }: { tasks: Ta
                         tasks?.map((task: Task) => (
                             <TableRow key={task.id} className='hover:bg-blue-50'>
                                 <TableCell>
-                                    <input type="checkbox" className="rounded" />
+                                    <input
+                                        type="checkbox"
+                                        className="rounded"
+                                        checked={selectedTaskIds.includes(task.id)}
+                                        onChange={e => {
+                                            if (!onSelectTaskIds) return;
+                                            if (e.target.checked) {
+                                                onSelectTaskIds([...selectedTaskIds, task.id])
+                                            } else {
+                                                onSelectTaskIds(selectedTaskIds.filter(id => id !== task.id))
+                                            }
+                                        }}
+                                    />
                                 </TableCell>
                                 <TableCell>
                                     {pagination && pagination.currentPage && pagination.itemsPerPage

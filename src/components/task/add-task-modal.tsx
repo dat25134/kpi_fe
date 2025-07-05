@@ -34,6 +34,7 @@ import { Timeline } from "antd"
 import TaskProgressPanel from "./TaskProgressPanel"
 import { ProgressItem } from "@/types/task"
 import { useProgress } from "@/hooks/useProgress"
+import { useDepartmentsListSelect } from "@/hooks/useDepartments"
 
 type AddTaskModalProps = {
   open: boolean
@@ -57,7 +58,9 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
   const [mainHandlerError, setMainHandlerError] = useState("")
   const [startDate, setStartDate] = useState<Date | undefined>(new Date())
   const [startDateError, setStartDateError] = useState("")
+  const [departmentId, setDepartmentId] = useState<number | undefined>(undefined)
   const { allUsers, loading } = useEmployees()
+  const { data: departments, isLoading: loadingDepartments } = useDepartmentsListSelect()
   const [errorMsg, setErrorMsg] = useState<Record<string, string[]> | null>(null)
   const [status, setStatus] = useState("pending")
   const [progressHistory, setProgressHistory] = useState<ProgressItem[]>([])
@@ -80,6 +83,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
       setSelectedCollaborators(editingTask.assignees?.map((a: any) => Number(a.id)) || [])
       setAssigner(editingTask.assigner?.id)
       setMainHandler(editingTask.mainHandler?.id)
+      setDepartmentId(editingTask.department?.id)
       setMainHandlerError("")
       setStartDateError("")
       setStatus(editingTask.status || "pending")
@@ -117,6 +121,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
       createdAt: editingTask ? editingTask.createdAt : new Date().toISOString(),
       assigner: assigner ?? undefined,
       mainHandler: mainHandler ?? undefined,
+      department: departmentId ?? undefined,
       description: editingTask ? editingTask.description : "",
       progressHistory,
     }
@@ -149,6 +154,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
     setSelectedCollaborators([])
     setAssigner(undefined)
     setMainHandler(undefined)
+    setDepartmentId(undefined)
     setMainHandlerError("")
     setStatus("pending")
     setProgressHistory([])
@@ -236,6 +242,29 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                     </Select>
                     {errorMsg?.category && <span className="text-red-500 text-xs">{errorMsg.category.join(" ")}</span>}
                   </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="department">Phòng ban</Label>
+                    <AntdSelect
+                      id="department"
+                      style={{ width: "100%" }}
+                      placeholder="Chọn phòng ban"
+                      value={departmentId}
+                      onChange={setDepartmentId}
+                      options={departments?.map((dept: any) => ({ label: dept.name, value: dept.id }))}
+                      allowClear
+                      getPopupContainer={triggerNode => triggerNode.parentNode}
+                      showSearch
+                      filterOption={(input, option: any) => {
+                        const opt = option as { label: string; value: number };
+                        if (!opt || !opt.label) return false;
+                        return opt.label.toLowerCase().includes(input.toLowerCase());
+                      }}
+                      loading={loadingDepartments}
+                    />
+                    {errorMsg?.department && <span className="text-red-500 text-xs">{errorMsg.department.join(" ")}</span>}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="weight">Trọng số</Label>
                     <Select value={weight} onValueChange={setWeight}>

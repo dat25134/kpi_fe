@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ChevronLeft, ChevronRight, CircleDot, Home, Plus, RefreshCw, Search, Settings, User } from "lucide-react"
+import { ChevronLeft, ChevronRight, CircleDot, Home, Plus, RefreshCw, Search, Settings, User, Download } from "lucide-react"
 import { cn } from "@/lib/utils"
 import AddTaskModal from "./add-task-modal"
 import { useCategories } from "@/hooks/userCategories"
@@ -37,6 +37,7 @@ export default function TaskManagement() {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(20)
   const { categories, isLoading, error } = useCategories()
+  const [departmentId, setDepartmentId] = useState<number | undefined>(undefined)
   const params = {
     page: currentPage,
     search: searchTerm,
@@ -44,17 +45,20 @@ export default function TaskManagement() {
     endDate,
     category,
     status: activeTab === "completed" ? "completed" : "",
-    itemsPerPage
+    itemsPerPage,
+    departmentId,
   };
   const {
     tasks,
     pagination,
     isLoading: tasksLoading,
     error: tasksError,
+    departments,
     addTask,
     editTask
   } = useTasks(params)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const [selectedTaskIds, setSelectedTaskIds] = useState<number[]>([])
   
   const handleSearch = () => {
     setStartDate(inputStartDate)
@@ -118,6 +122,12 @@ export default function TaskManagement() {
       onClick: () => handleChangeItemsPerPage(50),
     },
   ]
+
+  const handleExportWord = () => {
+    const selectedTasks = tasks.filter((task: any) => selectedTaskIds.includes(task.id))
+    // TODO: Xử lý xuất file Word với selectedTasks
+    alert(`Sẽ export ${selectedTasks.length} công việc sang Word!`)
+  }
 
   return (
     <div className="mx-auto w-full">
@@ -205,10 +215,35 @@ export default function TaskManagement() {
           </div>
           <div>
             <h3 className="text-sm font-medium text-gray-500 mb-2">Phòng ban phụ trách</h3>
-            <Button variant="ghost" className="w-full justify-start">
+            <Button
+              variant={departmentId === undefined ? "default" : "ghost"}
+              className="w-full justify-start mb-1"
+              onClick={() => {
+                setCurrentPage(1)
+                setDepartmentId(undefined)
+              }}
+            >
               <Home className="h-4 w-4 mr-2" />
-              <span className="truncate">Phòng Quản trị nền tảng số và VTTT</span>
+              <span className="truncate">Tất cả</span>
             </Button>
+            {departments && departments.length > 0 ? (
+              departments.map((dept: any) => (
+                <Button
+                  key={dept.id}
+                  variant={departmentId === dept.id ? "default" : "ghost"}
+                  className="w-full justify-start"
+                  onClick={() => {
+                    setCurrentPage(1)
+                    setDepartmentId(dept.id)
+                  }}
+                >
+                  <Home className="h-4 w-4 mr-2" />
+                  <span className="truncate">{dept.name}</span>
+                </Button>
+              ))
+            ) : (
+              <span className="text-muted-foreground text-sm">Chưa có phòng ban</span>
+            )}
           </div>
         </div>
         <div className="flex-1 border rounded-r-lg md:rounded-l-none md:rounded-r-lg overflow-x-auto">
@@ -231,19 +266,29 @@ export default function TaskManagement() {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="ongoing" className="p-0 m-0">
-              <div className="flex justify-end p-2 border-b">
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => setIsAddModalOpen(true)}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Thêm mới
+              <div className="flex justify-between p-2 border-b">
+                <Button
+                  className="bg-green-600 hover:bg-green-700"
+                  disabled={selectedTaskIds.length === 0}
+                  onClick={handleExportWord}
+                >
+                  <Download className="h-4 w-4 mr-1" />
+                  Export WORD
                 </Button>
-                <Button size="sm" variant="ghost" className="ml-2" onClick={refreshTasks}>
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-                <Dropdown menu={{ items: itemsPerPageMenuItems }} trigger={["click"]} placement="bottomRight">
-                  <Button size="sm" variant="ghost">
-                    <Settings className="h-4 w-4" />
+                <div className="flex items-center gap-2">
+                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => setIsAddModalOpen(true)}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    Thêm mới
                   </Button>
-                </Dropdown>
+                  <Button size="sm" variant="ghost" onClick={refreshTasks}>
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                  <Dropdown menu={{ items: itemsPerPageMenuItems }} trigger={["click"]} placement="bottomRight">
+                    <Button size="sm" variant="ghost">
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </Dropdown>
+                </div>
               </div>
 
               <div className="overflow-x-auto">
@@ -252,7 +297,13 @@ export default function TaskManagement() {
                     <LoadingSpinner />
                   </div>
                 ) : (
-                  <TableTask pagination={pagination} tasks={tasks} onRowClick={(task) => { setEditingTask(task); setIsAddModalOpen(true); }} />
+                  <TableTask
+                    pagination={pagination}
+                    tasks={tasks}
+                    selectedTaskIds={selectedTaskIds}
+                    onSelectTaskIds={setSelectedTaskIds}
+                    onRowClick={(task) => { setEditingTask(task); setIsAddModalOpen(true); }}
+                  />
                 )}
               </div>
 
