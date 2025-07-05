@@ -27,6 +27,7 @@ export function useTasks(params: Record<string, any>) {
     pagination: data?.pagination,
     isLoading,
     error,
+    departments: data?.departments, 
     addTask,
     editTask
   }
