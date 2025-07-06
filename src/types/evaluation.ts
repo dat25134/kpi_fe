@@ -189,6 +189,7 @@ export const EVALUATION_CRITERIA: EvaluationCriteria[] = [
 
 // Loại đối tượng đánh giá
 export enum EvaluationTargetType {
+  EMPLOYEE = "employee",           // Nhân viên (cán sự, văn thư, kế toán...)
   DEPARTMENT = "department",      // Phòng/bộ phận/đơn vị
   DEPARTMENT_HEAD = "head",       // Trưởng phòng
   DEPARTMENT_DEPUTY = "deputy",   // Phó phòng
@@ -205,10 +206,10 @@ export enum CompletionLevel {
 
 // Xếp loại chất lượng
 export enum QualityRating {
-  EXCELLENT = "excellent",     // Hoàn thành xuất sắc (90+ điểm)
-  GOOD = "good",               // Hoàn thành tốt (70-89 điểm)
-  ACHIEVED = "achieved",       // Hoàn thành (50-69 điểm)
-  NOT_ACHIEVED = "not_achieved" // Không hoàn thành (<50 điểm)
+  EXCELLENT = "A",     // Hoàn thành xuất sắc (90+ điểm)
+  GOOD = "B",               // Hoàn thành tốt (70-89 điểm)
+  ACHIEVED = "C",       // Hoàn thành (50-69 điểm)
+  NOT_ACHIEVED = "D" // Không hoàn thành (<50 điểm)
 }
 
 // Trọng số phức tạp
@@ -324,3 +325,31 @@ export interface EvaluationReport {
   averageScore: number;
   evaluations: EvaluationForm[];
 } 
+
+export interface EvaluationUser {
+  id: number
+  name: string
+  department: string
+  role: string
+}
+
+export interface Evaluation {
+  id: number
+  user: EvaluationUser
+  month: number
+  year: number
+  status: string
+  final_grade: string
+  total_score: string
+}
+
+export interface EvaluationResponse {
+  message: string
+  data: Evaluation[]
+  pagination: {
+    currentPage: number
+    totalPages: number
+    totalItems: number
+    itemsPerPage: number
+  }
+}

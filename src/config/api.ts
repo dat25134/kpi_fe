@@ -61,6 +61,14 @@ export const API_ENDPOINTS = {
     LIST: `${API_URL}/activity-log`,
   },
 
+  EVALUATIONS: {
+    LIST: `${API_URL}/evaluations`,
+    CREATE: `${API_URL}/evaluations`,
+    UPDATE: (id: number) => `${API_URL}/evaluations/${id}`,
+    DELETE: (id: number) => `${API_URL}/evaluations/${id}`,
+    DETAIL: (id: number) => `${API_URL}/evaluations/${id}`,
+  },
+
   // Thêm các nhóm API khác ở đây
 } as const;
 
