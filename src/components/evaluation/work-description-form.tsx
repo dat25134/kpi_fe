@@ -34,43 +34,46 @@ export default function WorkDescriptionForm({
 }: WorkDescriptionFormProps) {
   const [workItems, setWorkItems] = useState<WorkDescriptionItem[]>([
     {
-      id: "1",
-      taskName: "Báo cáo công tác chuyển đổi số định kỳ hàng tháng",
+      id: 1,
+      task_status: "completed",
+      task_start_date: "2024-01-01",
+      task_due_date: "2024-06-25",
+      task_weight: 4,
+      task_title: "Báo cáo công tác chuyển đổi số định kỳ hàng tháng",
+      task_description: "Báo cáo được Lãnh đạo UBND phê duyệt",
       unit: "Thời gian HT",
       target: "25/6/24",
-      complexityWeight: ComplexityWeight.LEVEL_4,
-      qualityWeight: QualityWeight.LEVEL_4,
-      completionLevel: CompletionLevel.ACHIEVED,
-      result: "đạt",
-      points: 3,
-      weightedQualityPoints: 2.4,
-      finalPoints: 9.6,
-      explanation: "Báo cáo được Lãnh đạo UBND phê duyệt"
+      complexity_weight: ComplexityWeight.LEVEL_4,
+      quality_weight: QualityWeight.LEVEL_4,
+      result_level: 3,
+      result_score: "3",
+      final_score: "9.6",
+      explanation: "Báo cáo được Lãnh đạo UBND phê duyệt",
+      order: 1
     }
   ])
 
   const [newItem, setNewItem] = useState({
-    taskName: "",
+    task_title: "",
     unit: "",
     target: "",
-    complexityWeight: ComplexityWeight.LEVEL_2,
-    qualityWeight: QualityWeight.LEVEL_3,
-    completionLevel: CompletionLevel.ACHIEVED,
-    result: "",
+    complexity_weight: ComplexityWeight.LEVEL_2,
+    quality_weight: QualityWeight.LEVEL_3,
+    result_level: 3,
     explanation: ""
   })
 
   const [showAddForm, setShowAddForm] = useState(false)
 
-  const calculatePoints = (completionLevel: CompletionLevel): number => {
-    switch (completionLevel) {
-      case CompletionLevel.NOT_ACHIEVED:
+  const calculatePoints = (resultLevel: number): number => {
+    switch (resultLevel) {
+      case 1:
         return 1
-      case CompletionLevel.ACHIEVED_WITH_LIMITATIONS:
+      case 2:
         return 2
-      case CompletionLevel.ACHIEVED:
+      case 3:
         return 3
-      case CompletionLevel.EXCEEDED:
+      case 4:
         return 4
       default:
         return 3
@@ -85,112 +88,118 @@ export default function WorkDescriptionForm({
     return weightedQualityPoints * complexityWeight
   }
 
-  const getCompletionLevelLabel = (level: CompletionLevel) => {
+  const getCompletionLevelLabel = (level: number) => {
     switch (level) {
-      case CompletionLevel.NOT_ACHIEVED:
+      case 1:
         return "Chưa đạt"
-      case CompletionLevel.ACHIEVED_WITH_LIMITATIONS:
+      case 2:
         return "Đạt, còn hạn chế"
-      case CompletionLevel.ACHIEVED:
+      case 3:
         return "Đạt"
-      case CompletionLevel.EXCEEDED:
+      case 4:
         return "Đạt vượt mức"
       default:
         return "Không xác định"
     }
   }
 
-  const getCompletionLevelBadge = (level: CompletionLevel) => {
+  const getCompletionLevelBadge = (level: number) => {
     const variants = {
-      [CompletionLevel.NOT_ACHIEVED]: "bg-red-100 text-red-800",
-      [CompletionLevel.ACHIEVED_WITH_LIMITATIONS]: "bg-yellow-100 text-yellow-800",
-      [CompletionLevel.ACHIEVED]: "bg-green-100 text-green-800",
-      [CompletionLevel.EXCEEDED]: "bg-blue-100 text-blue-800"
+      1: "bg-red-100 text-red-800",
+      2: "bg-yellow-100 text-yellow-800",
+      3: "bg-green-100 text-green-800",
+      4: "bg-blue-100 text-blue-800"
     }
 
     return (
-      <Badge className={cn("font-normal", variants[level])}>
+      <Badge className={cn("font-normal", variants[level as keyof typeof variants])}>
         {getCompletionLevelLabel(level)}
       </Badge>
     )
   }
 
   const addWorkItem = () => {
-    const points = calculatePoints(newItem.completionLevel)
-    const weightedQualityPoints = calculateWeightedQualityPoints(points, newItem.qualityWeight)
-    const finalPoints = calculateFinalPoints(weightedQualityPoints, newItem.complexityWeight)
+    const points = calculatePoints(newItem.result_level)
+    const weightedQualityPoints = calculateWeightedQualityPoints(points, newItem.quality_weight)
+    const finalPoints = calculateFinalPoints(weightedQualityPoints, newItem.complexity_weight)
 
     const item: WorkDescriptionItem = {
-      id: Date.now().toString(),
-      taskName: newItem.taskName,
+      id: Date.now(),
+      task_status: "active",
+      task_start_date: new Date().toISOString().split('T')[0],
+      task_due_date: new Date().toISOString().split('T')[0],
+      task_weight: newItem.complexity_weight,
+      task_title: newItem.task_title,
+      task_description: newItem.explanation,
       unit: newItem.unit,
       target: newItem.target,
-      complexityWeight: newItem.complexityWeight,
-      qualityWeight: newItem.qualityWeight,
-      completionLevel: newItem.completionLevel,
-      result: newItem.result,
-      points,
-      weightedQualityPoints,
-      finalPoints,
-      explanation: newItem.explanation
+      complexity_weight: newItem.complexity_weight,
+      quality_weight: newItem.quality_weight,
+      result_level: newItem.result_level,
+      result_score: points.toString(),
+      final_score: finalPoints.toFixed(1),
+      explanation: newItem.explanation,
+      order: workItems.length + 1
     }
 
     setWorkItems([...workItems, item])
     setNewItem({
-      taskName: "",
+      task_title: "",
       unit: "",
       target: "",
-      complexityWeight: ComplexityWeight.LEVEL_2,
-      qualityWeight: QualityWeight.LEVEL_3,
-      completionLevel: CompletionLevel.ACHIEVED,
-      result: "",
+      complexity_weight: ComplexityWeight.LEVEL_2,
+      quality_weight: QualityWeight.LEVEL_3,
+      result_level: 3,
       explanation: ""
     })
     setShowAddForm(false)
   }
 
-  const removeWorkItem = (id: string) => {
+  const removeWorkItem = (id: number) => {
     setWorkItems(workItems.filter(item => item.id !== id))
   }
 
-  const updateWorkItem = (id: string, field: keyof WorkDescriptionItem, value: any) => {
+  const updateWorkItem = (id: number, field: keyof WorkDescriptionItem, value: any) => {
     setWorkItems(workItems.map(item => {
       if (item.id === id) {
         const updatedItem = { ...item, [field]: value }
         
-        // Recalculate points if completion level changed
-        if (field === 'completionLevel') {
+        // Recalculate points if result level changed
+        if (field === 'result_level') {
           const points = calculatePoints(value)
-          const weightedQualityPoints = calculateWeightedQualityPoints(points, updatedItem.qualityWeight)
-          const finalPoints = calculateFinalPoints(weightedQualityPoints, updatedItem.complexityWeight)
+          const weightedQualityPoints = calculateWeightedQualityPoints(points, updatedItem.quality_weight)
+          const finalPoints = calculateFinalPoints(weightedQualityPoints, updatedItem.complexity_weight)
           
           return {
             ...updatedItem,
-            points,
-            weightedQualityPoints,
-            finalPoints
+            result_score: points.toString(),
+            final_score: finalPoints.toFixed(1)
           }
         }
         
         // Recalculate if quality weight changed
-        if (field === 'qualityWeight') {
-          const weightedQualityPoints = calculateWeightedQualityPoints(updatedItem.points, value)
-          const finalPoints = calculateFinalPoints(weightedQualityPoints, updatedItem.complexityWeight)
+        if (field === 'quality_weight') {
+          const points = calculatePoints(updatedItem.result_level)
+          const weightedQualityPoints = calculateWeightedQualityPoints(points, value)
+          const finalPoints = calculateFinalPoints(weightedQualityPoints, updatedItem.complexity_weight)
           
           return {
             ...updatedItem,
-            weightedQualityPoints,
-            finalPoints
+            result_score: points.toString(),
+            final_score: finalPoints.toFixed(1)
           }
         }
         
         // Recalculate if complexity weight changed
-        if (field === 'complexityWeight') {
-          const finalPoints = calculateFinalPoints(updatedItem.weightedQualityPoints, value)
+        if (field === 'complexity_weight') {
+          const points = calculatePoints(updatedItem.result_level)
+          const weightedQualityPoints = calculateWeightedQualityPoints(points, updatedItem.quality_weight)
+          const finalPoints = calculateFinalPoints(weightedQualityPoints, value)
           
           return {
             ...updatedItem,
-            finalPoints
+            task_weight: value,
+            final_score: finalPoints.toFixed(1)
           }
         }
         
@@ -200,8 +209,8 @@ export default function WorkDescriptionForm({
     }))
   }
 
-  const totalFinalPoints = workItems.reduce((sum, item) => sum + item.finalPoints, 0)
-  const totalComplexityWeight = workItems.reduce((sum, item) => sum + item.complexityWeight, 0)
+  const totalFinalPoints = workItems.reduce((sum, item) => sum + parseFloat(item.final_score || "0"), 0)
+  const totalComplexityWeight = workItems.reduce((sum, item) => sum + item.complexity_weight, 0)
   const kpiScore = totalComplexityWeight > 0 ? totalFinalPoints / totalComplexityWeight : 0
 
   const getKPIRating = (score: number) => {
@@ -210,7 +219,7 @@ export default function WorkDescriptionForm({
     if (score < 3.4) return "Đạt"
     return "Đạt vượt mức"
   }
-
+  console.log(workItems)
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
@@ -278,8 +287,8 @@ export default function WorkDescriptionForm({
                         <TableCell className="text-center">{index + 1}</TableCell>
                         <TableCell className="max-w-xs">
                           <Input
-                            value={item.taskName}
-                            onChange={(e) => updateWorkItem(item.id, 'taskName', e.target.value)}
+                            value={item.task_title}
+                            onChange={(e) => updateWorkItem(item.id, 'task_title', e.target.value)}
                             className="border-0 p-0 h-auto"
                           />
                         </TableCell>
@@ -299,8 +308,8 @@ export default function WorkDescriptionForm({
                         </TableCell>
                         <TableCell>
                           <Select
-                            value={item.complexityWeight.toString()}
-                            onValueChange={(value) => updateWorkItem(item.id, 'complexityWeight', Number(value))}
+                            value={item.complexity_weight.toString()}
+                            onValueChange={(value) => updateWorkItem(item.id, 'complexity_weight', Number(value))}
                           >
                             <SelectTrigger className="h-8">
                               <SelectValue />
@@ -315,25 +324,25 @@ export default function WorkDescriptionForm({
                         </TableCell>
                         <TableCell>
                           <Select
-                            value={item.completionLevel}
-                            onValueChange={(value) => updateWorkItem(item.id, 'completionLevel', value as CompletionLevel)}
+                            value={item.result_level.toString()}
+                            onValueChange={(value) => updateWorkItem(item.id, 'result_level', Number(value))}
                           >
                             <SelectTrigger className="h-8">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value={CompletionLevel.NOT_ACHIEVED}>Chưa đạt</SelectItem>
-                              <SelectItem value={CompletionLevel.ACHIEVED_WITH_LIMITATIONS}>Đạt, còn hạn chế</SelectItem>
-                              <SelectItem value={CompletionLevel.ACHIEVED}>Đạt</SelectItem>
-                              <SelectItem value={CompletionLevel.EXCEEDED}>Đạt vượt mức</SelectItem>
+                              <SelectItem value="1">Chưa đạt</SelectItem>
+                              <SelectItem value="2">Đạt, còn hạn chế</SelectItem>
+                              <SelectItem value="3">Đạt</SelectItem>
+                              <SelectItem value="4">Đạt vượt mức</SelectItem>
                             </SelectContent>
                           </Select>
                         </TableCell>
-                        <TableCell className="text-center font-medium">{item.points}</TableCell>
+                        <TableCell className="text-center font-medium">{item.result_score}</TableCell>
                         <TableCell>
                           <Select
-                            value={item.qualityWeight.toString()}
-                            onValueChange={(value) => updateWorkItem(item.id, 'qualityWeight', Number(value))}
+                            value={item.quality_weight.toString()}
+                            onValueChange={(value) => updateWorkItem(item.id, 'quality_weight', Number(value))}
                           >
                             <SelectTrigger className="h-8">
                               <SelectValue />
@@ -347,8 +356,10 @@ export default function WorkDescriptionForm({
                             </SelectContent>
                           </Select>
                         </TableCell>
-                        <TableCell className="text-center">{item.weightedQualityPoints.toFixed(1)}</TableCell>
-                        <TableCell className="text-center font-medium">{item.finalPoints.toFixed(1)}</TableCell>
+                        <TableCell className="text-center">
+                          {((parseFloat(item.result_score || "0") * item.quality_weight) / 5).toFixed(1)}
+                        </TableCell>
+                        <TableCell className="text-center font-medium">{item.final_score}</TableCell>
                         <TableCell>
                           <Button
                             size="sm"
@@ -417,8 +428,8 @@ export default function WorkDescriptionForm({
               <div>
                 <Label>Tên công việc, nhiệm vụ</Label>
                 <Textarea
-                  value={newItem.taskName}
-                  onChange={(e) => setNewItem({...newItem, taskName: e.target.value})}
+                  value={newItem.task_title}
+                  onChange={(e) => setNewItem({...newItem, task_title: e.target.value})}
                   placeholder="Nhập tên công việc..."
                 />
               </div>
@@ -444,8 +455,8 @@ export default function WorkDescriptionForm({
                 <div>
                   <Label>Trọng số phức tạp</Label>
                   <Select
-                    value={newItem.complexityWeight.toString()}
-                    onValueChange={(value) => setNewItem({...newItem, complexityWeight: Number(value)})}
+                    value={newItem.complexity_weight.toString()}
+                    onValueChange={(value) => setNewItem({...newItem, complexity_weight: Number(value)})}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -461,8 +472,8 @@ export default function WorkDescriptionForm({
                 <div>
                   <Label>Trọng số chất lượng</Label>
                   <Select
-                    value={newItem.qualityWeight.toString()}
-                    onValueChange={(value) => setNewItem({...newItem, qualityWeight: Number(value)})}
+                    value={newItem.quality_weight.toString()}
+                    onValueChange={(value) => setNewItem({...newItem, quality_weight: Number(value)})}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -480,17 +491,17 @@ export default function WorkDescriptionForm({
               <div>
                 <Label>Kết quả đạt được</Label>
                 <Select
-                  value={newItem.completionLevel}
-                  onValueChange={(value) => setNewItem({...newItem, completionLevel: value as CompletionLevel})}
+                  value={newItem.result_level.toString()}
+                  onValueChange={(value) => setNewItem({...newItem, result_level: Number(value)})}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={CompletionLevel.NOT_ACHIEVED}>Chưa đạt</SelectItem>
-                    <SelectItem value={CompletionLevel.ACHIEVED_WITH_LIMITATIONS}>Đạt, còn hạn chế</SelectItem>
-                    <SelectItem value={CompletionLevel.ACHIEVED}>Đạt</SelectItem>
-                    <SelectItem value={CompletionLevel.EXCEEDED}>Đạt vượt mức</SelectItem>
+                    <SelectItem value="1">Chưa đạt</SelectItem>
+                    <SelectItem value="2">Đạt, còn hạn chế</SelectItem>
+                    <SelectItem value="3">Đạt</SelectItem>
+                    <SelectItem value="4">Đạt vượt mức</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

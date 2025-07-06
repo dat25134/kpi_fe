@@ -1,4 +1,4 @@
-import { Evaluation, EvaluationResponse } from '@/types/evaluation'
+import { Evaluation, EvaluationResponse, EvaluationDetail } from '@/types/evaluation'
 import apiClient from './apiClient'
 import { API_ENDPOINTS } from '@/config/api'
 
@@ -17,9 +17,9 @@ export const evaluationService = {
   },
 
   // Lấy chi tiết phiếu đánh giá
-  getEvaluationById: async (id: number): Promise<Evaluation> => {
+  getEvaluationById: async (id: number): Promise<EvaluationDetail> => {
     const response = await apiClient.get(API_ENDPOINTS.EVALUATIONS.DETAIL(id))
-    return response.data
+    return response.data.data
   },
 
   // Tạo phiếu đánh giá mới

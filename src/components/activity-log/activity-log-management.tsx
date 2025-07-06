@@ -35,11 +35,11 @@ import { useActivityLog } from "@/hooks/useActivityLog"
 import { ActivityLog, ActivityLogPagination } from "@/types/activity-log"
 import { ActivityLogTable } from "./ActivityLogTable"
 import { Select as AntdSelect } from "antd"
-import { useEmployees } from "@/hooks/useEmployees"
+import { useAllUsers } from "@/hooks/useEmployees"
 
 export function ActivityLogManagement() {
   const [showFilters, setShowFilters] = useState(false)
-  const { allUsers, loading: loadingUsers } = useEmployees()
+  const { allUsers, loading: loadingUsers } = useAllUsers()
   const employees = allUsers
 
   // Chuyển đổi filter mặc định sang dạng string hoặc undefined cho API
@@ -159,7 +159,7 @@ export function ActivityLogManagement() {
 
   const getUserName = (userId: number | null) => {
     if (!userId) return "Hệ thống"
-    const user = employees.find((u) => u.id === userId)
+    const user = employees.find((u: any) => u.id === userId)
     return user ? user.name : `User #${userId}`
   }
 
@@ -359,7 +359,7 @@ export function ActivityLogManagement() {
                 options={[
                   { value: "all", label: "Tất cả" },
                   { value: "system", label: "Hệ thống" },
-                  ...employees.map(user => ({ value: user.id.toString(), label: `${user.name} (${user.employee_id})` }))
+                  ...employees.map((user: any) => ({ value: user.id.toString(), label: `${user.name} (${user.employee_id})` }))
                 ]}
                 showSearch
                 filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}

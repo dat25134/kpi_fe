@@ -14,7 +14,11 @@ export default function TableTask({ tasks, onRowClick, pagination, selectedTaskI
                                 type="checkbox"
                                 className="rounded"
                                 checked={tasks.length > 0 && selectedTaskIds.length === tasks.length}
-                                indeterminate={selectedTaskIds.length > 0 && selectedTaskIds.length < tasks.length}
+                                ref={(input) => {
+                                    if (input) {
+                                        input.indeterminate = selectedTaskIds.length > 0 && selectedTaskIds.length < tasks.length;
+                                    }
+                                }}
                                 onChange={e => {
                                     if (!onSelectTaskIds) return;
                                     if (e.target.checked) {

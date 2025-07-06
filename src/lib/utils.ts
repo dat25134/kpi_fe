@@ -148,3 +148,18 @@ export function getStatusBadgeVariant(statusType: string) {
       return "bg-gray-100 text-gray-800 hover:bg-gray-100"
   }
 }
+
+export function getResultLevelName(resultLevel: string) {
+  switch (resultLevel) {
+    case "1":
+      return "Chưa đạt (1 điểm)"
+    case "2":
+      return "Đạt, còn hạn chế (2 điểm)"
+    case "3":
+      return "Đạt (3 điểm)"
+    case "4":
+      return "Đạt vượt mức (4 điểm)"
+    default:
+      return "Không xác định"
+  }
+}

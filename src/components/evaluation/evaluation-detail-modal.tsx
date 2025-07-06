@@ -22,32 +22,23 @@ import {
   type EvaluationForm,
   type WorkDescriptionItem
 } from "@/types/evaluation"
-import { cn } from "@/lib/utils"
+import { cn, getResultLevelName, getRoleLabel } from "@/lib/utils"
+import { useEvaluationDetail } from "@/hooks/useEvaluationDetail"
+import EvaluationCriteriaList from "./evaluation-criteria-list"
 
 interface EvaluationDetailModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  evaluation?: EvaluationForm
+  evaluationId?: number | string
 }
 
 export default function EvaluationDetailModal({ 
   open, 
   onOpenChange, 
-  evaluation 
+  evaluationId
 }: EvaluationDetailModalProps) {
+  const { data, isLoading, error } = useEvaluationDetail(evaluationId, open)
   const [activeTab, setActiveTab] = useState("criteria")
-  const [formData, setFormData] = useState({
-    politicalPoints: 5,
-    ethicsPoints: 5,
-    workStylePoints: 5,
-    disciplinePoints: 5,
-    digitalTransformationPoints: 10,
-    leadershipPoints: 10,
-    taskPerformancePoints: 70,
-    deductionPoints: 0
-  })
-
-  const totalPoints = Object.values(formData).reduce((sum, points) => sum + points, 0)
 
   const getQualityRating = (points: number): QualityRating => {
     if (points >= 90) return QualityRating.EXCELLENT
@@ -93,57 +84,27 @@ export default function EvaluationDetailModal({
     )
   }
 
-  const handlePointsChange = (field: string, value: number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
+  // Calculate total score from details
+  const calculateTotalScore = () => {
+    if (!data?.details) return 0
+    return data?.details?.reduce((total, item) => {
+      return total + (parseFloat(item.final_score || "0"))
+    }, 0)
   }
 
-  const mockWorkDescriptionItems: WorkDescriptionItem[] = [
-    {
-      id: "1",
-      taskName: "Báo cáo công tác chuyển đổi số định kỳ hàng tháng",
-      unit: "Thời gian HT",
-      target: "25/6/24",
-      complexityWeight: ComplexityWeight.LEVEL_4,
-      qualityWeight: QualityWeight.LEVEL_4,
-      completionLevel: CompletionLevel.ACHIEVED,
-      result: "đạt",
-      points: 3,
-      weightedQualityPoints: 2.4,
-      finalPoints: 9.6,
-      explanation: "Báo cáo được Lãnh đạo UBND phê duyệt"
-    },
-    {
-      id: "2",
-      taskName: "Cập nhật số liệu của phòng lên hệ thống báo cáo của Sở/tỉnh",
-      unit: "Thời gian HT",
-      target: "29/6/24",
-      complexityWeight: ComplexityWeight.LEVEL_2,
-      qualityWeight: QualityWeight.LEVEL_3,
-      completionLevel: CompletionLevel.NOT_ACHIEVED,
-      result: "chưa đạt",
-      points: 1,
-      weightedQualityPoints: 0.6,
-      finalPoints: 1.2,
-      explanation: "VB được LĐ phòng phê duyệt"
-    },
-    {
-      id: "3",
-      taskName: "Xây dựng KH ngày CĐS Quốc gia năm 2024",
-      unit: "Thời gian HT",
-      target: "25/6/24",
-      complexityWeight: ComplexityWeight.LEVEL_4,
-      qualityWeight: QualityWeight.LEVEL_5,
-      completionLevel: CompletionLevel.EXCEEDED,
-      result: "đạt vượt",
-      points: 4,
-      weightedQualityPoints: 4,
-      finalPoints: 16,
-      explanation: "VB được LĐ UBND phê duyệt"
-    }
-  ]
+  const totalScore = calculateTotalScore()
+  const totalWorkDescriptionScore = data?.work_descriptions?.reduce((sum, item) => sum + parseFloat(item?.final_score || "0"), 0) || 0
+  const totalWorkDescriptionWeight = data?.work_descriptions?.reduce((sum, item) => sum + parseFloat(item?.task_weight?.toString() || "0"), 0) || 0
+  const kpiScore = totalWorkDescriptionScore ? totalWorkDescriptionScore / totalWorkDescriptionWeight : 0
+  const kpiQualityRating = getQualityRating(kpiScore)
+  if (!open) return null;
+  if (isLoading) return (
+    <div className="flex items-center justify-center p-8">Đang tải chi tiết...</div>
+  );
+  if (error) return (
+    <div className="flex items-center justify-center p-8 text-red-500">Lỗi: {error}</div>
+  );
+  if (!data) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -153,7 +114,7 @@ export default function EvaluationDetailModal({
             PHIẾU ĐÁNH GIÁ, XẾP LOẠI HÀNG THÁNG
           </DialogTitle>
           <DialogDescription>
-            Tháng: 4/2025 - Họ và tên: Phan Vinh Khang - Đơn vị: Phòng Quản trị nền tảng số và VTTT
+            Tháng: {data?.month}/{data?.year} - Họ và tên: {data?.user?.name} - Đơn vị: {data?.user?.department}
           </DialogDescription>
         </DialogHeader>
 
@@ -167,19 +128,19 @@ export default function EvaluationDetailModal({
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <Label className="text-sm font-medium">Họ và tên</Label>
-                  <Input value="Phan Vinh Khang" readOnly className="mt-1" />
+                  <Input value={data?.user?.name} readOnly className="mt-1" />
                 </div>
                 <div>
                   <Label className="text-sm font-medium">Đơn vị công tác</Label>
-                  <Input value="Phòng Quản trị nền tảng số và VTTT" readOnly className="mt-1" />
+                  <Input value={data?.user?.department} readOnly className="mt-1" />
                 </div>
                 <div>
                   <Label className="text-sm font-medium">Chức vụ</Label>
-                  <Input value="Chuyên viên" readOnly className="mt-1" />
+                  <Input value={getRoleLabel(data?.user?.role)} readOnly className="mt-1" />
                 </div>
                 <div>
                   <Label className="text-sm font-medium">Tháng đánh giá</Label>
-                  <Input value="4/2025" readOnly className="mt-1" />
+                  <Input value={`${data?.month}/${data?.year}`} readOnly className="mt-1" />
                 </div>
               </div>
             </CardContent>
@@ -194,97 +155,10 @@ export default function EvaluationDetailModal({
             </TabsList>
 
             <TabsContent value="criteria" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Nhóm chỉ tiêu về chính trị, tư tưởng; Đạo đức, lối sống; Tác phong, lề lối làm việc; Ý thức tổ chức kỷ luật; Thực hiện chuyển đổi số và cải cách hành chính</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {EVALUATION_CRITERIA.slice(0, 5).map((criteria) => (
-                    <div key={criteria.id} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <Label className="text-sm font-medium">
-                          {criteria.name} ({criteria.maxPoints} điểm)
-                        </Label>
-                        <div className="flex items-center gap-2">
-                          <Input
-                            type="number"
-                            min="0"
-                            max={criteria.maxPoints}
-                            value={formData[`${criteria.id}Points` as keyof typeof formData] || 0}
-                            onChange={(e) => handlePointsChange(`${criteria.id}Points`, Number(e.target.value))}
-                            className="w-20"
-                          />
-                          <span className="text-sm text-gray-500">/ {criteria.maxPoints}</span>
-                        </div>
-                      </div>
-                      {criteria.description && (
-                        <p className="text-sm text-gray-600">{criteria.description}</p>
-                      )}
-                      {criteria.subCriteria && (
-                        <div className="ml-4 space-y-1">
-                          {criteria.subCriteria.map((sub) => (
-                            <div key={sub.id} className="text-sm text-gray-600">
-                              • {sub.name} ({sub.maxPoints} điểm)
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Nhóm các tiêu chí về kết quả thực hiện nhiệm vụ, chức trách được giao</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {EVALUATION_CRITERIA.slice(5).map((criteria) => (
-                    <div key={criteria.id} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <Label className="text-sm font-medium">
-                          {criteria.name} ({criteria.maxPoints} điểm)
-                        </Label>
-                        <div className="flex items-center gap-2">
-                          <Input
-                            type="number"
-                            min="0"
-                            max={criteria.maxPoints}
-                            value={formData[`${criteria.id}Points` as keyof typeof formData] || 0}
-                            onChange={(e) => handlePointsChange(`${criteria.id}Points`, Number(e.target.value))}
-                            className="w-20"
-                          />
-                          <span className="text-sm text-gray-500">/ {criteria.maxPoints}</span>
-                        </div>
-                      </div>
-                      {criteria.description && (
-                        <p className="text-sm text-gray-600">{criteria.description}</p>
-                      )}
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Điểm trừ</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between items-center">
-                    <Label className="text-sm font-medium">Điểm trừ</Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        min="0"
-                        value={formData.deductionPoints}
-                        onChange={(e) => handlePointsChange("deductionPoints", Number(e.target.value))}
-                        className="w-20"
-                      />
-                      <span className="text-sm text-gray-500">điểm</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <EvaluationCriteriaList 
+                details={data?.details} 
+                isReadOnly={true}
+              />
             </TabsContent>
 
             <TabsContent value="workDescription" className="space-y-4">
@@ -300,35 +174,35 @@ export default function EvaluationDetailModal({
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>TT</TableHead>
-                          <TableHead>Nhiệm vụ, công việc</TableHead>
-                          <TableHead>ĐVT</TableHead>
-                          <TableHead>Mục tiêu</TableHead>
-                          <TableHead>Trọng số phức tạp</TableHead>
-                          <TableHead>Kết quả</TableHead>
-                          <TableHead>Điểm</TableHead>
-                          <TableHead>Trọng số chất lượng</TableHead>
-                          <TableHead>Điểm có trọng số</TableHead>
-                          <TableHead>Điểm cuối cùng</TableHead>
+                          <TableHead className="text-center">TT</TableHead>
+                          <TableHead className="text-center">Nhiệm vụ, công việc</TableHead>
+                          <TableHead className="text-center">ĐVT</TableHead>
+                          <TableHead className="text-center">Mục tiêu</TableHead>
+                          <TableHead className="text-center">Trọng số phức tạp</TableHead>
+                          <TableHead className="text-center">Kết quả</TableHead>
+                          <TableHead className="text-center">Điểm</TableHead>
+                          <TableHead className="text-center">Trọng số chất lượng</TableHead>
+                          <TableHead className="text-center">Điểm có trọng số</TableHead>
+                          <TableHead className="text-center">Điểm cuối cùng</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {mockWorkDescriptionItems.map((item, index) => (
+                        {data?.work_descriptions?.map((item, index) => (
                           <TableRow key={item.id}>
                             <TableCell>{index + 1}</TableCell>
-                            <TableCell className="max-w-xs">{item.taskName}</TableCell>
-                            <TableCell>{item.unit}</TableCell>
-                            <TableCell>{item.target}</TableCell>
-                            <TableCell className="text-center">{item.complexityWeight}</TableCell>
+                            <TableCell className="max-w-xs truncate" title={item?.task_title}>{item?.task_title}</TableCell>
+                            <TableCell>{item?.unit}</TableCell>
+                            <TableCell>{item?.target}</TableCell>
+                            <TableCell className="text-center">{item?.task_weight}</TableCell>
                             <TableCell>
                               <Badge variant="outline" className="text-xs">
-                                {item.result}
+                                {getResultLevelName(item?.result_level.toString())}
                               </Badge>
                             </TableCell>
-                            <TableCell className="text-center">{item.points}</TableCell>
-                            <TableCell className="text-center">{item.qualityWeight}</TableCell>
-                            <TableCell className="text-center">{item.weightedQualityPoints}</TableCell>
-                            <TableCell className="text-center font-medium">{item.finalPoints}</TableCell>
+                            <TableCell className="text-center">{item?.result_level}</TableCell>
+                            <TableCell className="text-center">{item?.quality_weight}</TableCell>
+                            <TableCell className="text-center">{item?.result_score}</TableCell>
+                            <TableCell className="text-center font-medium">{item?.final_score}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -337,10 +211,10 @@ export default function EvaluationDetailModal({
                   
                   <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg mt-4">
                     <div className="text-lg font-semibold">
-                      Tổng điểm: 26.8
+                      Tổng điểm: {data?.work_descriptions?.reduce((sum, item) => sum + parseFloat(item.final_score || "0"), 0)}
                     </div>
                     <div className="text-lg font-semibold">
-                      Điểm KPI: 2.68 (Đạt)
+                      Điểm KPI: {kpiScore.toFixed(2)} ({getQualityRatingLabel(kpiQualityRating)})
                     </div>
                   </div>
                 </CardContent>
@@ -358,42 +232,13 @@ export default function EvaluationDetailModal({
                       <h4 className="font-semibold">Chi tiết điểm</h4>
                       <div className="space-y-2">
                         <div className="flex justify-between">
-                          <span>Chính trị tư tưởng:</span>
-                          <span className="font-medium">{formData.politicalPoints}/5</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Đạo đức, lối sống:</span>
-                          <span className="font-medium">{formData.ethicsPoints}/5</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Tác phong, lề lối làm việc:</span>
-                          <span className="font-medium">{formData.workStylePoints}/5</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Ý thức tổ chức kỷ luật:</span>
-                          <span className="font-medium">{formData.disciplinePoints}/5</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Chuyển đổi số và cải cách hành chính:</span>
-                          <span className="font-medium">{formData.digitalTransformationPoints}/10</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Năng lực lãnh đạo, quản lý:</span>
-                          <span className="font-medium">{formData.leadershipPoints}/10</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Kết quả thực hiện nhiệm vụ:</span>
-                          <span className="font-medium">{formData.taskPerformancePoints}/70</span>
-                        </div>
-                        <Separator />
-                        <div className="flex justify-between">
-                          <span>Điểm trừ:</span>
-                          <span className="font-medium text-red-600">-{formData.deductionPoints}</span>
+                          <span>Tổng điểm tiêu chí:</span>
+                          <span className="font-medium">{totalScore.toFixed(2)}/100</span>
                         </div>
                         <Separator />
                         <div className="flex justify-between text-lg font-bold">
                           <span>Tổng điểm:</span>
-                          <span>{totalPoints}/100</span>
+                          <span>{totalScore.toFixed(2)}/100</span>
                         </div>
                       </div>
                     </div>
@@ -402,14 +247,14 @@ export default function EvaluationDetailModal({
                       <h4 className="font-semibold">Kết quả xếp loại</h4>
                       <div className="space-y-4">
                         <div className="text-center p-4 bg-gray-50 rounded-lg">
-                          <div className="text-2xl font-bold text-blue-600">{totalPoints}</div>
+                          <div className="text-2xl font-bold text-blue-600">{totalScore.toFixed(2)}</div>
                           <div className="text-sm text-gray-600">Tổng điểm</div>
                         </div>
                         
                         <div className="text-center">
-                          {getQualityRatingBadge(getQualityRating(totalPoints))}
+                          {getQualityRatingBadge(getQualityRating(totalScore))}
                           <div className="mt-2 text-sm text-gray-600">
-                            {getQualityRatingLabel(getQualityRating(totalPoints))}
+                            {getQualityRatingLabel(getQualityRating(totalScore))}
                           </div>
                         </div>
 

@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ArrowLeft, Home, RefreshCw, Settings, User, FileText, Plus, Trash2, Calculator, ChevronLeft, ChevronRight, Calendar } from "lucide-react"
 import { cn, getQualityRatingFromGrade, getRoleLabel, getStatusLabel, getStatusType } from "@/lib/utils"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -26,7 +28,83 @@ import EvaluationTable from "./EvaluationTable"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import { vi } from "date-fns/locale"
+import EvaluationFilterBar from "./EvaluationFilterBar"
+import { toast } from "sonner"
 
+// Component form tạo phiếu đánh giá
+function CreateEvaluationForm({ 
+  onConfirm, 
+  onCancel 
+}: { 
+  onConfirm: (month: number, year: number) => void
+  onCancel: () => void 
+}) {
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+
+  const months = [
+    { value: 1, label: "Tháng 1" },
+    { value: 2, label: "Tháng 2" },
+    { value: 3, label: "Tháng 3" },
+    { value: 4, label: "Tháng 4" },
+    { value: 5, label: "Tháng 5" },
+    { value: 6, label: "Tháng 6" },
+    { value: 7, label: "Tháng 7" },
+    { value: 8, label: "Tháng 8" },
+    { value: 9, label: "Tháng 9" },
+    { value: 10, label: "Tháng 10" },
+    { value: 11, label: "Tháng 11" },
+    { value: 12, label: "Tháng 12" }
+  ]
+
+  const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i)
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Tháng</Label>
+          <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(Number(value))}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {months.map((month) => (
+                <SelectItem key={month.value} value={month.value.toString()}>
+                  {month.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Năm</Label>
+          <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(Number(value))}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map((year) => (
+                <SelectItem key={year} value={year.toString()}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      <div className="flex justify-end gap-2 pt-4">
+        <Button variant="outline" onClick={onCancel}>
+          Hủy
+        </Button>
+        <Button onClick={() => onConfirm(selectedMonth, selectedYear)}>
+          Tạo phiếu đánh giá
+        </Button>
+      </div>
+    </div>
+  )
+}
 
 export default function EvaluationForm() {
   const [activeTab, setActiveTab] = useState("personal")
@@ -45,7 +123,7 @@ export default function EvaluationForm() {
   const [showWorkDescription, setShowWorkDescription] = useState(false)
   const [showEvaluationDetail, setShowEvaluationDetail] = useState(false)
   const [showWorkDescriptionForm, setShowWorkDescriptionForm] = useState(false)
-  const [showCreateEvaluation, setShowCreateEvaluation] = useState(false)
+  const [showCreateEvaluationModal, setShowCreateEvaluationModal] = useState(false)
 
   // Get current user
   const { user } = useUser()
@@ -71,6 +149,7 @@ export default function EvaluationForm() {
     error, 
     pagination, 
     refetch,
+    createEvaluation,
     deleteEvaluation 
   } = useEvaluation({
     page: currentPage,
@@ -131,8 +210,29 @@ export default function EvaluationForm() {
   }
 
   const handleCreateEvaluation = () => {
-    setSelectedEvaluation(null)
-    setShowCreateEvaluation(true)
+    setShowCreateEvaluationModal(true)
+  }
+
+  const handleConfirmCreateEvaluation = async (month: number, year: number) => {
+    try {
+      const evaluationData = {
+        month: month,
+        year: year,
+        status: "draft",
+        final_grade: "",
+        total_score: "0"
+      }
+      
+      const newEvaluation = await createEvaluation(evaluationData)
+      console.log("Đã tạo phiếu đánh giá mới:", newEvaluation)
+      toast.success("Đã tạo phiếu đánh giá mới thành công!")
+      setShowCreateEvaluationModal(false)
+      
+    } catch (error) {
+      console.error("Lỗi khi tạo phiếu đánh giá:", error)
+      toast.error("Không thể tạo phiếu đánh giá. Vui lòng thử lại!")
+      refetch()
+    }
   }
 
   // Handle delete evaluation
@@ -207,20 +307,33 @@ export default function EvaluationForm() {
           <Tabs defaultValue="personal" className="w-full" onValueChange={setActiveTab}>
             <TabsList className="border-b w-full justify-start rounded-none h-auto p-0 overflow-x-auto">
               {visibleTabs.map((tab) => (
-                <TabsTrigger
+              <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className={cn(
-                    "rounded-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:shadow-none py-2 px-4",
+                className={cn(
+                  "rounded-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:shadow-none py-2 px-4",
                     activeTab === tab.value ? "text-blue-600" : "",
-                  )}
-                >
+                )}
+              >
                   {tab.label}
-                </TabsTrigger>
+              </TabsTrigger>
               ))}
             </TabsList>
 
             <TabsContent value="personal" className="space-y-4">
+              {/* Filter Bar dùng chung */}
+              <EvaluationFilterBar
+                filterNameInput={filterNameInput}
+                setFilterNameInput={setFilterNameInput}
+                filterStatusInput={filterStatusInput}
+                setFilterStatusInput={setFilterStatusInput}
+                filterRatingInput={filterRatingInput}
+                setFilterRatingInput={setFilterRatingInput}
+                filterPeriodInput={filterPeriodInput}
+                setFilterPeriodInput={setFilterPeriodInput}
+                onApply={handleApplyFilter}
+                onClear={handleClearFilter}
+              />
               {/* Header Actions */}
               <div className="flex justify-between items-center p-2 border-b">
                 <div className="flex items-center gap-2">
@@ -258,55 +371,6 @@ export default function EvaluationForm() {
                 </div>
               </div>
 
-              {/* Bộ lọc filter */}
-              <div className="flex flex-wrap gap-2 items-center p-2 border-b bg-gray-50">
-                <Input
-                  placeholder="Tìm theo tên..."
-                  value={filterNameInput}
-                  onChange={e => setFilterNameInput(e.target.value)}
-                  className="w-40"
-                />
-                <Select value={filterStatusInput} onValueChange={setFilterStatusInput}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Lọc theo trạng thái" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                    <SelectItem value="waiting">Chờ tự đánh giá</SelectItem>
-                    <SelectItem value="review1">Chờ đánh giá cấp 1</SelectItem>
-                    <SelectItem value="review2">Chờ đánh giá cấp 2</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={filterRatingInput} onValueChange={setFilterRatingInput}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Lọc theo xếp loại" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tất cả xếp loại</SelectItem>
-                    <SelectItem value="A">Hoàn thành xuất sắc (A)</SelectItem>
-                    <SelectItem value="B">Hoàn thành tốt (B)</SelectItem>
-                    <SelectItem value="C">Hoàn thành nhiệm vụ (C)</SelectItem>
-                    <SelectItem value="D">Không hoàn thành (D)</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="relative">
-                  <DatePicker
-                    selected={filterPeriodInput}
-                    onChange={date => setFilterPeriodInput(date)}
-                    dateFormat="MM/yyyy"
-                    showMonthYearPicker
-                    placeholderText="Chọn tháng/năm"
-                    className="w-full border rounded px-8 py-1 text-sm"
-                    locale={vi}
-                  />
-                  <span className="left-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none absolute">
-                    <Calendar className="h-4 w-4" />
-                  </span>
-                </div>
-                <Button className="bg-blue-600 text-white" size="sm" variant="outline" onClick={handleApplyFilter}>Tìm kiếm</Button>
-                <Button size="sm" variant="outline" onClick={handleClearFilter}>Xóa lọc</Button>
-              </div>
-
               {/* Evaluation Table */}
               <div className="overflow-x-auto">
                 <EvaluationTable
@@ -316,7 +380,7 @@ export default function EvaluationForm() {
                   onView={handleViewEvaluation}
                   onDelete={handleDeleteEvaluation}
                 />
-              </div>
+                            </div>
 
               {/* Phân trang */}
               {pagination && pagination.totalPages > 1 && (
@@ -324,34 +388,103 @@ export default function EvaluationForm() {
                   <span className="text-sm text-muted-foreground">
                     Trang {pagination.currentPage} / {pagination.totalPages}
                   </span>
-                  <Button
+                            <Button 
                     variant="outline"
-                    size="sm"
+                              size="sm" 
                     onClick={() => setCurrentPage(pagination.currentPage - 1)}
                     disabled={pagination.currentPage === 1}
-                  >
+                            >
                     <ChevronLeft className="h-4 w-4" />
                     Trước
-                  </Button>
-                  <Button
+                            </Button>
+                            <Button 
                     variant="outline"
-                    size="sm"
+                              size="sm" 
                     onClick={() => setCurrentPage(pagination.currentPage + 1)}
                     disabled={pagination.currentPage === pagination.totalPages}
-                  >
+                            >
                     Sau
                     <ChevronRight className="h-4 w-4" />
-                  </Button>
+                            </Button>
                 </div>
               )}
             </TabsContent>
 
             {visibleTabs.slice(1).map((tab) => (
-              <TabsContent key={tab.value} value={tab.value}>
-                <div className="p-8 text-center text-gray-500">
-                  Không có phiếu đánh giá {tab.label.toLowerCase()}
-                </div>
-              </TabsContent>
+              <TabsContent key={tab.value} value={tab.value} className="space-y-4">
+                {/* Filter Bar dùng chung */}
+                <EvaluationFilterBar
+                  filterNameInput={filterNameInput}
+                  setFilterNameInput={setFilterNameInput}
+                  filterStatusInput={filterStatusInput}
+                  setFilterStatusInput={setFilterStatusInput}
+                  filterRatingInput={filterRatingInput}
+                  setFilterRatingInput={setFilterRatingInput}
+                  filterPeriodInput={filterPeriodInput}
+                  setFilterPeriodInput={setFilterPeriodInput}
+                  onApply={handleApplyFilter}
+                  onClear={handleClearFilter}
+                />
+                {/* Header Actions */}
+                <div className="flex justify-end items-center p-2 border-b">
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      onClick={async () => {
+                        try {
+                          await refetch();
+                        } catch (error) {
+                          console.error("Error refetching evaluations:", error);
+                        }
+                      }}
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="ghost">
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </div>
+              </div>
+
+                {/* Evaluation Table */}
+                <div className="overflow-x-auto">
+                  <EvaluationTable
+                    evaluations={evaluations}
+                    loading={loading}
+                    error={error}
+                    onView={handleViewEvaluation}
+                    onDelete={handleDeleteEvaluation}
+                  />
+              </div>
+
+                {/* Phân trang */}
+                {pagination && pagination.totalPages > 1 && (
+                  <div className="flex items-center justify-end space-x-2 py-4">
+                    <span className="text-sm text-muted-foreground">
+                      Trang {pagination.currentPage} / {pagination.totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(pagination.currentPage - 1)}
+                      disabled={pagination.currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      Trước
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(pagination.currentPage + 1)}
+                      disabled={pagination.currentPage === pagination.totalPages}
+                    >
+                      Sau
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+              </div>
+                )}
+            </TabsContent>
             ))}
           </Tabs>
         </div>
@@ -361,10 +494,10 @@ export default function EvaluationForm() {
       <EvaluationDetailModal
         open={showEvaluationDetail}
         onOpenChange={setShowEvaluationDetail}
-        evaluation={undefined}
+        evaluationId={selectedEvaluation || undefined}
       />
 
-      {/* Work Description Form Modal */}
+            {/* Work Description Form Modal */}
       <WorkDescriptionForm
         open={showWorkDescriptionForm}
         onOpenChange={setShowWorkDescriptionForm}
@@ -372,12 +505,22 @@ export default function EvaluationForm() {
         department={currentUser?.department}
       />
 
-      {/* Evaluation Detail Modal (Tạo mới) */}
-      <EvaluationDetailModal
-        open={showCreateEvaluation}
-        onOpenChange={setShowCreateEvaluation}
-        evaluation={undefined}
-      />
+      {/* Create Evaluation Modal */}
+      <Dialog open={showCreateEvaluationModal} onOpenChange={setShowCreateEvaluationModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Tạo phiếu đánh giá mới</DialogTitle>
+            <DialogDescription>
+              Chọn tháng và năm để tạo phiếu đánh giá
+            </DialogDescription>
+          </DialogHeader>
+          
+          <CreateEvaluationForm 
+            onConfirm={handleConfirmCreateEvaluation}
+            onCancel={() => setShowCreateEvaluationModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
