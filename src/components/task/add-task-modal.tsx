@@ -27,7 +27,7 @@ import { format } from "date-fns"
 import { Input } from "../ui/input"
 import { Select as AntdSelect } from "antd"
 import { Category } from "@/types/category"
-import { useEmployees } from "@/hooks/useEmployees"
+import { useAllUsers } from "@/hooks/useEmployees"
 import { toast } from "sonner"
 import { getErrorMessage, getValidationErrors } from "@/services/errorHandler"
 import { Timeline } from "antd"
@@ -59,7 +59,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
   const [startDate, setStartDate] = useState<Date | undefined>(new Date())
   const [startDateError, setStartDateError] = useState("")
   const [departmentId, setDepartmentId] = useState<number | undefined>(undefined)
-  const { allUsers, loading } = useEmployees()
+  const { allUsers, loading } = useAllUsers()
   const { data: departments, isLoading: loadingDepartments } = useDepartmentsListSelect()
   const [errorMsg, setErrorMsg] = useState<Record<string, string[]> | null>(null)
   const [status, setStatus] = useState("pending")
@@ -67,7 +67,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
   const { updateProgress } = useProgress()
 
   // Dữ liệu mẫu cho người phối hợp
-  const collaborators = allUsers?.map((employee) => ({
+  const collaborators = allUsers?.map((employee: any) => ({
     value: employee.id,
     label: employee.name,
     avatar: employee.avatar,
@@ -160,7 +160,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
     setProgressHistory([])
   }
 
-  const collaboratorOptions = collaborators.map(c => ({
+  const collaboratorOptions = collaborators.map((c: any) => ({
     label: (
       <div className="flex items-center gap-2">
         <div className="h-5 w-5 rounded-full bg-gray-200 text-gray-600 text-xs flex items-center justify-center">
@@ -232,9 +232,9 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                       <SelectContent>
                         <SelectGroup>
                           <SelectLabel>Phân loại</SelectLabel>
-                          {categories?.map((category: Category) => (
-                            <SelectItem key={category.id} value={category.id.toString()}>
-                              {category.display_name}
+                          {categories?.map((c: Category) => (
+                            <SelectItem key={c.id} value={c.id.toString()}>
+                              {c.display_name}
                             </SelectItem>
                           ))}
                         </SelectGroup>
@@ -295,7 +295,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                         placeholder="Vui lòng chọn"
                         value={assigner}
                         onChange={setAssigner}
-                        options={collaborators.map(c => ({ label: c.label, value: c.value }))}
+                        options={collaborators.map((c: any) => ({ label: c.label, value: c.value }))}
                         allowClear
                         getPopupContainer={triggerNode => triggerNode.parentNode}
                         showSearch
@@ -315,7 +315,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                         placeholder="Vui lòng chọn"
                         value={mainHandler}
                         onChange={setMainHandler}
-                        options={collaborators.map(c => ({ label: c.label, value: c.value }))}
+                        options={collaborators.map((c: any) => ({ label: c.label, value: c.value }))}
                         allowClear
                         getPopupContainer={triggerNode => triggerNode.parentNode}
                         showSearch

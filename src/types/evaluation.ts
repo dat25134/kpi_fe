@@ -231,18 +231,22 @@ export enum QualityWeight {
 
 // Interface cho bảng mô tả công việc (KPI)
 export interface WorkDescriptionItem {
-  id: string;
-  taskName: string;
+  id: number;
+  task_status: string;
+  task_start_date: string;
+  task_due_date: string;
+  task_weight: number;
+  task_title: string;
+  task_description: string | null;
   unit: string;
   target: string;
-  complexityWeight: ComplexityWeight;
-  qualityWeight: QualityWeight;
-  completionLevel: CompletionLevel;
-  result: string;
-  points: number;
-  weightedQualityPoints: number;
-  finalPoints: number;
+  complexity_weight: number;
+  quality_weight: number;
+  result_level: number;
+  result_score: string;
+  final_score: string;
   explanation: string;
+  order: number;
 }
 
 // Interface cho phiếu đánh giá
@@ -352,4 +356,44 @@ export interface EvaluationResponse {
     totalItems: number
     itemsPerPage: number
   }
+}
+
+// Interface cho chi tiết đánh giá từ API
+export interface EvaluationCriteriaDetail {
+  id: number
+  criteria: {
+    id: number
+    name: string
+    category: string
+    max_score: string
+  }
+  self_score: string | null
+  self_comment: string | null
+  level1_score: string | null
+  level1_comment: string | null
+  level2_score: string | null
+  level2_comment: string | null
+  final_score: string | null
+}
+
+export interface EvaluationDetail {
+  id: number
+  user: EvaluationUser
+  month: number
+  year: number
+  status: string
+  final_grade: string
+  total_score: string
+  details: EvaluationCriteriaDetail[]
+  work_descriptions: WorkDescriptionItem[]
+}
+
+// Mapping category names to Vietnamese
+export const CATEGORY_LABELS: Record<string, string> = {
+  chinh_tri: "Chính trị, tư tưởng",
+  dao_duc: "Đạo đức, lối sống", 
+  tac_phong: "Tác phong, lề lối làm việc",
+  y_thuc: "Ý thức tổ chức kỷ luật",
+  chuyen_doi_so: "Chuyển đổi số và cải cách hành chính",
+  ket_qua: "Kết quả thực hiện nhiệm vụ"
 }

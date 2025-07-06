@@ -18,7 +18,6 @@ export function useEmployees() {
   const [summary, setSummary] = useState<EmployeeSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [summaryLoading, setSummaryLoading] = useState(true);
-  const [allUsers, setAllUsers] = useState<Employee[]>([]);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -52,15 +51,6 @@ export function useEmployees() {
     };
     loadEmployees();
   }, [JSON.stringify(filters), refetchIndex]);
-
-  // Fetch all users
-  useEffect(() => {
-    const loadAllUsers = async () => {
-      const data = await fetchAllUsers();
-      setAllUsers(data);
-    };
-    loadAllUsers();
-  }, []);
 
   // Add new employee
   const addEmployee = useCallback(async (employeeData: Omit<Employee, 'id' | 'joinDate' | 'projects'>) => {
@@ -129,7 +119,6 @@ export function useEmployees() {
     summaryLoading,
     pagination,
     filters,
-    allUsers,
     
     // Actions
     addEmployee,
@@ -150,5 +139,15 @@ export function useManagers() {
     data: data || [],
     isLoading,
     isError: error,
+  };
+}
+
+// Hook lấy toàn bộ user cho selection, dùng SWR
+export function useAllUsers() {
+  const { data, isLoading, error } = useSWR("all-users", fetchAllUsers);
+  return {
+    allUsers: data || [],
+    loading: isLoading,
+    error,
   };
 } 
