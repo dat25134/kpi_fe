@@ -1,7 +1,6 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CATEGORY_LABELS } from "@/types/evaluation"
 import type { EvaluationCriteriaDetail } from "@/types/evaluation"
 import CriteriaItem from "./CriteriaItem"
 
@@ -24,21 +23,11 @@ export default function CriteriaCategory({
     <Card>
       <CardHeader>
         <CardTitle className="text-lg">
-          {CATEGORY_LABELS[category] || category}
+          Tên Nhóm tiêu chí
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {criteria.map((item, index) => (
-          <CriteriaItem
-            key={item.id}
-            item={item}
-            index={index}
-            isReadOnly={isReadOnly}
-            onScoreChange={onScoreChange}
-            onCommentChange={onCommentChange}
-            showSeparator={index < criteria.length - 1}
-          />
-        ))}
+        Hiển thị list tiêu chí đánh giá theo tên nhóm tiêu chí
       </CardContent>
     </Card>
   )

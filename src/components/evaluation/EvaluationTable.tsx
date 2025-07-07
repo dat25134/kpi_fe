@@ -4,8 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { FileText, Trash2 } from "lucide-react";
-import { cn, getQualityRatingFromGrade, getRoleLabel, getStatusBadgeVariant, getStatusLabel, getStatusType } from "@/lib/utils";
-import { QualityRating } from "@/types/evaluation";
+import { cn, getRoleLabel, getStatusBadgeVariant, getStatusLabel, getStatusType } from "@/lib/utils";
 import React from "react";
 
 interface EvaluationTableProps {
@@ -16,29 +15,29 @@ interface EvaluationTableProps {
   onDelete: (id: number) => void;
 }
 
-const getQualityRatingBadge = (rating: QualityRating) => {
+const getQualityRatingBadge = (rating: string) => {
   const variants = {
-    [QualityRating.EXCELLENT]: "bg-green-100 text-green-800",
-    [QualityRating.GOOD]: "bg-blue-100 text-blue-800", 
-    [QualityRating.ACHIEVED]: "bg-yellow-100 text-yellow-800",
-    [QualityRating.NOT_ACHIEVED]: "bg-red-100 text-red-800"
+    "A": "bg-green-100 text-green-800",
+    "B": "bg-blue-100 text-blue-800", 
+    "C": "bg-yellow-100 text-yellow-800",
+    "D": "bg-red-100 text-red-800"
   }
   const labels = {
-    [QualityRating.EXCELLENT]: "Hoàn thành xuất sắc nhiệm vụ (A)",
-    [QualityRating.GOOD]: "Hoàn thành tốt nhiệm vụ (B)",
-    [QualityRating.ACHIEVED]: "Hoàn thành nhiệm vụ (C)",
-    [QualityRating.NOT_ACHIEVED]: "Không hoàn thành nhiệm vụ (D)"
+    "A": "Hoàn thành xuất sắc nhiệm vụ (A)",
+    "B": "Hoàn thành tốt nhiệm vụ (B)",
+    "C": "Hoàn thành nhiệm vụ (C)",
+    "D": "Không hoàn thành nhiệm vụ (D)"
   }
   const shortLabels = {
-    [QualityRating.EXCELLENT]: "A",
-    [QualityRating.GOOD]: "B",
-    [QualityRating.ACHIEVED]: "C",
-    [QualityRating.NOT_ACHIEVED]: "D"
+    "A": "A",
+    "B": "B",
+    "C": "C",
+    "D": "D"
   }
   return (
-    <Badge className={cn("font-normal px-2 py-1 text-xs flex flex-col items-center", variants[rating])}>
-      <span className="font-bold text-base">{shortLabels[rating]}</span>
-      <span className="block whitespace-nowrap">{labels[rating]}</span>
+    <Badge className={cn("font-normal px-2 py-1 text-xs flex flex-col items-center", variants[rating as keyof typeof variants])}>
+      <span className="font-bold text-base">{shortLabels[rating as keyof typeof shortLabels]}</span>
+      <span className="block whitespace-nowrap">{labels[rating as keyof typeof labels]}</span>
     </Badge>
   )
 }
@@ -104,7 +103,7 @@ export default function EvaluationTable({ evaluations, loading, error, onView, o
                 {item.total_score}/100
               </TableCell>
               <TableCell>
-                {getQualityRatingBadge(getQualityRatingFromGrade(item.final_grade))}
+                {getQualityRatingBadge(item.final_grade)}
               </TableCell>
               <TableCell>
                 <Badge className={cn("font-normal", getStatusBadgeVariant(getStatusType(item.status)))}>

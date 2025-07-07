@@ -28,16 +28,7 @@ export default function EvaluationCriteriaList({
 
   return (
     <div className="space-y-6">
-      {Object.entries(groupedCriteria).map(([category, criteria]) => (
-        <CriteriaCategory
-          key={category}
-          category={category}
-          criteria={criteria}
-          isReadOnly={isReadOnly}
-          onScoreChange={onScoreChange}
-          onCommentChange={onCommentChange}
-        />
-      ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> Hiển thị list tiêu chí đánh giá</div>
     </div>
   )
 } 
