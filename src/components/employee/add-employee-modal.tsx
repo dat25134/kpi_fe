@@ -23,6 +23,7 @@ import { toast } from "sonner"
 import { formatVND } from "@/lib/utils"
 import AddEmployeeFormFields from "./AddEmployeeFormFields"
 import { getErrorMessage, getValidationErrors } from "@/services/errorHandler"
+import dayjs from "dayjs"
 
 type AddEmployeeModalProps = {
   open: boolean
@@ -72,9 +73,9 @@ export default function AddEmployeeModal({
         roleName: editingEmployee.role?.name || "",
         departmentId: editingEmployee.department?.id?.toString() || "",
         status: editingEmployee.status,
-        joinDate: editingEmployee.joinDate || "",
+        joinDate: editingEmployee.joinDate ? dayjs(editingEmployee.joinDate).format("YYYY-MM-DD") : "",
         address: editingEmployee.address,
-        birthDate: editingEmployee.birthDate,
+        birthDate: editingEmployee.birthDate ? dayjs(editingEmployee.birthDate).format("YYYY-MM-DD") : "",
         gender: editingEmployee.gender,
         education: editingEmployee.education,
         experience: editingEmployee.experience,
