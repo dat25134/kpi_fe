@@ -44,7 +44,7 @@ export interface EvaluationForm {
   position: string;
   evaluationMonth: string;
   evaluationYear: string;
-  targetType: EvaluationTargetType;
+  targetType: any;
   
   // Điểm đánh giá
   politicalPoints: number;
@@ -62,7 +62,7 @@ export interface EvaluationForm {
   totalPoints: number;
   
   // Xếp loại
-  qualityRating: QualityRating;
+  qualityRating: any;
   
   // Bảng mô tả công việc
   workDescriptionItems: WorkDescriptionItem[];
@@ -97,7 +97,7 @@ export interface KPICalculation {
   totalComplexityWeight: number;
   kpiScore: number;
   kpiRating: string;
-  qualityLevel: CompletionLevel;
+  qualityLevel: any;
 }
 
 // Interface cho báo cáo tổng hợp
