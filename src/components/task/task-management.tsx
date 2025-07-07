@@ -20,6 +20,11 @@ import { toast } from "sonner"
 import { getErrorMessage, getValidationErrors } from "@/services/errorHandler"
 import { mutate } from "swr"
 import { Dropdown, Menu } from "antd"
+import { DatePicker, ConfigProvider } from "antd"
+import viVN from "antd/es/locale/vi_VN"
+import dayjs from "dayjs"
+import "dayjs/locale/vi"
+dayjs.locale("vi")
 
 export default function TaskManagement() {
   const [activeTab, setActiveTab] = useState("ongoing")
@@ -165,19 +170,25 @@ export default function TaskManagement() {
           <div>
             <label className="text-sm font-medium mb-1 block">Thời gian:</label>
             <div className="flex flex-col sm:flex-row gap-2">
-              <Input
-                type="date"
-                value={inputStartDate}
-                onChange={(e) => setInputStartDate(e.target.value)}
-                className="w-full block"
-              />
+              <ConfigProvider locale={viVN}>
+                <DatePicker
+                  value={inputStartDate ? dayjs(inputStartDate) : null}
+                  onChange={(date) => setInputStartDate(date ? date.format("YYYY-MM-DD") : "")}
+                  format="DD/MM/YYYY"
+                  placeholder="Từ ngày"
+                  className="w-full block"
+                />
+              </ConfigProvider>
               <span className="hidden sm:inline">-</span>
-              <Input
-                type="date"
-                value={inputEndDate}
-                onChange={(e) => setInputEndDate(e.target.value)}
-                className="w-full block"
-              />
+              <ConfigProvider locale={viVN}>
+                <DatePicker
+                  value={inputEndDate ? dayjs(inputEndDate) : null}
+                  onChange={(date) => setInputEndDate(date ? date.format("YYYY-MM-DD") : "")}
+                  format="DD/MM/YYYY"
+                  placeholder="Đến ngày"
+                  className="w-full block"
+                />
+              </ConfigProvider>
             </div>
           </div>
           <div>

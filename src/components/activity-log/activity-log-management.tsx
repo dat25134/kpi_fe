@@ -36,6 +36,11 @@ import { ActivityLog, ActivityLogPagination } from "@/types/activity-log"
 import { ActivityLogTable } from "./ActivityLogTable"
 import { Select as AntdSelect } from "antd"
 import { useAllUsers } from "@/hooks/useEmployees"
+import { DatePicker, ConfigProvider } from "antd"
+import viVN from "antd/es/locale/vi_VN"
+import dayjs from "dayjs"
+import "dayjs/locale/vi"
+dayjs.locale("vi")
 
 export function ActivityLogManagement() {
   const [showFilters, setShowFilters] = useState(false)
@@ -369,13 +374,29 @@ export function ActivityLogManagement() {
             {/* Date From */}
             <div className="space-y-2">
               <Label>Từ ngày</Label>
-              <Input className="w-full block" type="date" value={filters.date_from ?? ""} onChange={(e) => handleFilterChange("date_from", e.target.value)} />
+              <ConfigProvider locale={viVN}>
+                <DatePicker
+                  value={filters.date_from ? dayjs(filters.date_from) : null}
+                  onChange={(date) => handleFilterChange("date_from", date ? date.format("YYYY-MM-DD") : "")}
+                  format="DD/MM/YYYY"
+                  placeholder="Từ ngày"
+                  className="w-full block"
+                />
+              </ConfigProvider>
             </div>
 
             {/* Date To */}
             <div className="space-y-2">
               <Label>Đến ngày</Label>
-              <Input className="w-full block" type="date" value={filters.date_to ?? ""} onChange={(e) => handleFilterChange("date_to", e.target.value)} />
+              <ConfigProvider locale={viVN}>
+                <DatePicker
+                  value={filters.date_to ? dayjs(filters.date_to) : null}
+                  onChange={(date) => handleFilterChange("date_to", date ? date.format("YYYY-MM-DD") : "")}
+                  format="DD/MM/YYYY"
+                  placeholder="Đến ngày"
+                  className="w-full block"
+                />
+              </ConfigProvider>
             </div>
 
             {/* Log Name */}
