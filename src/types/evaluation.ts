@@ -395,5 +395,6 @@ export const CATEGORY_LABELS: Record<string, string> = {
   tac_phong: "Tác phong, lề lối làm việc",
   y_thuc: "Ý thức tổ chức kỷ luật",
   chuyen_doi_so: "Chuyển đổi số và cải cách hành chính",
-  ket_qua: "Kết quả thực hiện nhiệm vụ"
+  ket_qua: "Kết quả thực hiện nhiệm vụ",
+  lanh_dao: "Năng lực lãnh đạo, quản lý"
 }

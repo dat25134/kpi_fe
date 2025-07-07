@@ -20,7 +20,8 @@ import {
   ComplexityWeight,
   QualityWeight,
   type EvaluationForm,
-  type WorkDescriptionItem
+  type WorkDescriptionItem,
+  CATEGORY_LABELS
 } from "@/types/evaluation"
 import { cn, getResultLevelName, getRoleLabel } from "@/lib/utils"
 import { useEvaluationDetail } from "@/hooks/useEvaluationDetail"
@@ -229,16 +230,33 @@ export default function EvaluationDetailModal({
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
-                      <h4 className="font-semibold">Chi tiết điểm</h4>
+                      <h4 className="font-semibold">Chi tiết điểm theo tiêu chí</h4>
                       <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span>Tổng điểm tiêu chí:</span>
-                          <span className="font-medium">{totalScore.toFixed(2)}/100</span>
-                        </div>
+                        {/* Group details by category and sum scores */}
+                        {(() => {
+                          const categoryScores: Record<string, { label: string, total: number, max: number }> = {};
+                          data?.details?.forEach(detail => {
+                            const category = detail.criteria.category;
+                            const label = CATEGORY_LABELS[category] || detail.criteria.name;
+                            const score = parseFloat(detail.final_score || "0");
+                            const max = parseFloat(detail.criteria.max_score);
+                            if (!categoryScores[category]) {
+                              categoryScores[category] = { label, total: 0, max: 0 };
+                            }
+                            categoryScores[category].total += score;
+                            categoryScores[category].max += max;
+                          });
+                          return Object.values(categoryScores).map(cat => (
+                            <div key={cat.label} className="flex justify-between">
+                              <span>{cat.label}:</span>
+                              <span className="font-medium">{cat.total.toFixed(1)}/{cat.max}</span>
+                            </div>
+                          ));
+                        })()}
                         <Separator />
                         <div className="flex justify-between text-lg font-bold">
                           <span>Tổng điểm:</span>
-                          <span>{totalScore.toFixed(2)}/100</span>
+                          <span>{totalScore.toFixed(1)}/100</span>
                         </div>
                       </div>
                     </div>
