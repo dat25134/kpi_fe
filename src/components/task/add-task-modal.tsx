@@ -35,6 +35,11 @@ import TaskProgressPanel from "./TaskProgressPanel"
 import { ProgressItem } from "@/types/task"
 import { useProgress } from "@/hooks/useProgress"
 import { useDepartmentsListSelect } from "@/hooks/useDepartments"
+import { DatePicker, ConfigProvider } from "antd"
+import viVN from "antd/es/locale/vi_VN"
+import dayjs from "dayjs"
+import "dayjs/locale/vi"
+dayjs.locale("vi")
 
 type AddTaskModalProps = {
   open: boolean
@@ -201,24 +206,32 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                 <div className="grid grid-cols-2 gap-4 items-start">
                   <div className="grid gap-2">
                     <Label htmlFor="startDate">Ngày bắt đầu</Label>
-                    <Input
-                      type="date"
-                      className="w-full block"
-                      value={startDate instanceof Date && !isNaN(startDate.getTime()) ? format(startDate, "yyyy-MM-dd") : ""}
-                      onChange={(e) => setStartDate(new Date(e.target.value))}
-                      required
-                    />
+                    <ConfigProvider locale={viVN}>
+                      <DatePicker
+                        id="startDate"
+                        value={startDate ? dayjs(startDate) : null}
+                        onChange={(date) => setStartDate(date ? date.toDate() : undefined)}
+                        format="DD/MM/YYYY"
+                        placeholder="Chọn ngày bắt đầu"
+                        className="w-full"
+                        required
+                      />
+                    </ConfigProvider>
                     {startDateError && <span className="text-red-500 text-xs">{startDateError}</span>}
                     {errorMsg?.startDate && <span className="text-red-500 text-xs">{errorMsg.startDate.join(" ")}</span>}
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="deadline">Hạn xử lý</Label>
-                    <Input
-                      type="date"
-                      className="w-full block"
-                      value={deadline instanceof Date && !isNaN(deadline.getTime()) ? format(deadline, "yyyy-MM-dd") : ""}
-                      onChange={(e) => setDeadline(new Date(e.target.value))}
-                    />
+                    <ConfigProvider locale={viVN}>
+                      <DatePicker
+                        id="deadline"
+                        value={deadline ? dayjs(deadline) : null}
+                        onChange={(date) => setDeadline(date ? date.toDate() : undefined)}
+                        format="DD/MM/YYYY"
+                        placeholder="Chọn hạn xử lý"
+                        className="w-full"
+                      />
+                    </ConfigProvider>
                     {errorMsg?.deadline && <span className="text-red-500 text-xs">{errorMsg.deadline.join(" ")}</span>}
                   </div>
                 </div>

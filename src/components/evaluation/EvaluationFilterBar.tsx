@@ -1,9 +1,14 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import DatePicker from "react-datepicker";
+import { DatePicker, ConfigProvider } from "antd";
+import viVN from "antd/es/locale/vi_VN";
+import dayjs from "dayjs";
+import "dayjs/locale/vi";
 import { Calendar } from "lucide-react";
 import { vi } from "date-fns/locale";
+
+dayjs.locale("vi");
 
 export default function EvaluationFilterBar({
   filterNameInput, setFilterNameInput,
@@ -57,18 +62,16 @@ export default function EvaluationFilterBar({
         </SelectContent>
       </Select>
       <div className="relative">
-        <DatePicker
-          selected={filterPeriodInput}
-          onChange={date => setFilterPeriodInput(date)}
-          dateFormat="MM/yyyy"
-          showMonthYearPicker
-          placeholderText="Chọn tháng/năm"
-          className="w-full border rounded px-8 py-1 text-sm"
-          locale={vi}
-        />
-        <span className="left-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none absolute">
-          <Calendar className="h-4 w-4" />
-        </span>
+        <ConfigProvider locale={viVN}>
+          <DatePicker
+            picker="month"
+            value={filterPeriodInput ? dayjs(filterPeriodInput) : null}
+            onChange={date => setFilterPeriodInput(date ? date.toDate() : null)}
+            format="MM/YYYY"
+            placeholder="Chọn tháng/năm"
+            className="w-full border rounded px-8 py-1 text-sm"
+          />
+        </ConfigProvider>
       </div>
       <Button className="bg-blue-600 text-white" size="sm" variant="outline" onClick={onApply}>Tìm kiếm</Button>
       <Button size="sm" variant="outline" onClick={onClear}>Xóa lọc</Button>
