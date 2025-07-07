@@ -28,6 +28,6 @@ export async function createTask(taskData: Omit<Task, 'id'>) {
 }
 
 export async function updateTask(id: number, taskData: Partial<Task>) {
-  const response = await apiClient.put(API_ENDPOINTS.TASKS.UPDATE(id), taskData, getConfig());
+  const response = await apiClient.post(API_ENDPOINTS.TASKS.UPDATE(id), taskData, getConfig());
   return response.data.data;
 }
