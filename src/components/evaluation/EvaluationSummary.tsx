@@ -3,14 +3,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { cn, calculateCategoryScores, getQualityRating, getQualityRatingLabel, getQualityRatingBadgeVariant } from "@/lib/utils"
-import { CATEGORY_LABELS } from "@/types/evaluation"
+import { cn, getQualityRating, getQualityRatingLabel, getQualityRatingBadgeVariant } from "@/lib/utils"
 import type { EvaluationSummaryProps } from "@/types/evaluation"
 
 export default function EvaluationSummary({ details, totalScore }: EvaluationSummaryProps) {
-  const categoryScores = calculateCategoryScores(details)
   const qualityRating = getQualityRating(totalScore)
-  console.log(categoryScores);
   return (
     <Card>
       <CardHeader>
@@ -21,12 +18,7 @@ export default function EvaluationSummary({ details, totalScore }: EvaluationSum
           <div className="space-y-4">
             <h4 className="font-semibold">Chi tiết điểm theo tiêu chí</h4>
             <div className="space-y-2">
-              {Object.entries(categoryScores).map(([category, cat]) => (
-                <div key={category} className="flex justify-between">
-                  <span>{CATEGORY_LABELS[category] || category}:</span>
-                  <span className="font-medium">{cat.total.toFixed(1)}/{cat.max}</span>
-                </div>
-              ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> Hiển thị list tiêu chí đánh giá</div>
               <Separator />
               <div className="flex justify-between text-lg font-bold">
                 <span>Tổng điểm:</span>

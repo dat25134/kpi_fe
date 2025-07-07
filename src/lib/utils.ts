@@ -1,8 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import React from "react"
-import { EvaluationTargetType, QualityRating } from "@/types/evaluation";
-import { Badge } from "@/components/ui/badge"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -85,36 +83,6 @@ export function getStatusType(status: string) {
       return "approved"
     default:
       return "unknown"
-  }
-}
-
-export function getQualityRatingFromGrade(grade: string): QualityRating {
-  switch (grade) {
-    case "A":
-      return QualityRating.EXCELLENT
-    case "B":
-      return QualityRating.GOOD
-    case "C":
-      return QualityRating.ACHIEVED
-    case "D":
-      return QualityRating.NOT_ACHIEVED
-    default:
-      return QualityRating.ACHIEVED
-  }
-}
-
-export function getTargetTypeFromRole(role: string): EvaluationTargetType {
-  switch (role) {
-    case "nhanvien":
-      return EvaluationTargetType.EMPLOYEE
-    case "chuyenvien":
-      return EvaluationTargetType.STAFF
-    case "phophong":
-      return EvaluationTargetType.DEPARTMENT_DEPUTY
-    case "truongphong":
-      return EvaluationTargetType.DEPARTMENT_HEAD
-    default:
-      return EvaluationTargetType.STAFF
   }
 }
 
@@ -226,54 +194,6 @@ export function getScoreColor(score: string | null, maxScore: string): string {
   return "text-red-600"
 }
 
-export function getScoreBadgeVariant(score: string | null, maxScore: string): string {
-  if (!score) return "secondary"
-  const percentage = (parseFloat(score) / parseFloat(maxScore)) * 100
-  if (percentage >= 90) return "default"
-  if (percentage >= 70) return "default"
-  if (percentage < 50) return "destructive"
-  return "secondary"
-}
-
-export function getScoreBadgeText(score: string | null, maxScore: string): string {
-  if (!score) return "Chưa đánh giá"
-  const percentage = (parseFloat(score) / parseFloat(maxScore)) * 100
-  if (percentage >= 90) return "Xuất sắc"
-  if (percentage >= 70) return "Tốt"
-  if (percentage >= 50) return "Đạt"
-  return "Không đạt"
-}
-
-export function getCompletionLevelLabel(level: number): string {
-  switch (level) {
-    case 1:
-      return "Chưa đạt"
-    case 2:
-      return "Đạt, còn hạn chế"
-    case 3:
-      return "Đạt"
-    case 4:
-      return "Đạt vượt mức"
-    default:
-      return "Không xác định"
-  }
-}
-
-export function getCompletionLevelBadgeVariant(level: number): string {
-  switch (level) {
-    case 1:
-      return "bg-red-100 text-red-800"
-    case 2:
-      return "bg-yellow-100 text-yellow-800"
-    case 3:
-      return "bg-green-100 text-green-800"
-    case 4:
-      return "bg-blue-100 text-blue-800"
-    default:
-      return "bg-gray-100 text-gray-800"
-  }
-}
-
 export function calculatePoints(resultLevel: number): number {
   switch (resultLevel) {
     case 1:
@@ -297,29 +217,3 @@ export function calculateFinalPoints(weightedQualityPoints: number, complexityWe
   return weightedQualityPoints * complexityWeight
 }
 
-export function groupCriteriaByCategory(details: any[]): Record<string, any[]> {
-  return details.reduce((acc, item) => {
-    const category = item.criteria.category
-    if (!acc[category]) {
-      acc[category] = []
-    }
-    acc[category].push(item)
-    return acc
-  }, {} as Record<string, any[]>)
-}
-
-export function calculateCategoryScores(details: any[]): Record<string, { label: string, total: number, max: number }> {
-  const categoryScores: Record<string, { label: string, total: number, max: number }> = {}
-  details?.forEach(detail => {
-    const category = detail.criteria.category
-    const label = detail.criteria.name
-    const score = parseFloat(detail.final_score || "0")
-    const max = parseFloat(detail.criteria.max_score)
-    if (!categoryScores[category]) {
-      categoryScores[category] = { label, total: 0, max: 0 }
-    }
-    categoryScores[category].total += score
-    categoryScores[category].max += max
-  })
-  return categoryScores
-}
