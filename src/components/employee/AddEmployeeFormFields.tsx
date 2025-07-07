@@ -11,8 +11,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatVietnamesePhoneNumber, formatVND } from "@/lib/utils";
+import { formatDate, formatVietnamesePhoneNumber, formatVND } from "@/lib/utils";
 import { AddEmployeeFormFieldsProps } from "@/types/employee";
+import { DatePicker, ConfigProvider } from "antd";
+import viVN from "antd/es/locale/vi_VN";
+import dayjs from "dayjs";
+import "dayjs/locale/vi";
+dayjs.locale("vi");
 
 export default function AddEmployeeFormFields({
   formData,
@@ -23,6 +28,7 @@ export default function AddEmployeeFormFields({
   editingEmployee,
   handleInputChange,
 }: AddEmployeeFormFieldsProps) {
+
   return (
     <Tabs defaultValue="basic" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
@@ -120,12 +126,17 @@ export default function AddEmployeeFormFields({
           {/* BirthDate - moved from detail tab */}
           <div className="space-y-2">
             <Label htmlFor="birthDate">Ngày sinh</Label>
-            <Input
+            <ConfigProvider locale={viVN}>
+            <DatePicker
               id="birthDate"
-              placeholder="dd/mm/yyyy"
-              value={formData.birthDate}
-              onChange={(e) => handleInputChange("birthDate", e.target.value)}
+              value={formData.birthDate ? dayjs(formData.birthDate) : null}
+              onChange={(date) => handleInputChange("birthDate", date ? date.format("YYYY-MM-DD") : "")}
+              format="DD/MM/YYYY"
+              placeholder="Chọn ngày sinh"
+              className="w-full"
+              required
             />
+            </ConfigProvider>
             <div className="min-h-[1.25rem]">
               {errors.birthDate && <p className="text-sm text-red-500">{errors.birthDate[0]}</p>}
             </div>
@@ -185,21 +196,22 @@ export default function AddEmployeeFormFields({
             </div>
           </div>
 
-          {/* Salary */}
+          {/* Join Date */}
           <div className="space-y-2">
-            <Label htmlFor="salary">Lương (VNĐ)</Label>
-            <Input
-              id="salary"
-              type="text"
-              placeholder="Nhập mức lương"
-              value={formData.salary}
-              onChange={(e) => {
-                const formatted = formatVND(e.target.value);
-                handleInputChange("salary", formatted);
-              }}
-            />
+            <Label htmlFor="joinDate">Ngày vào làm *</Label>
+            <ConfigProvider locale={viVN}>
+              <DatePicker
+                id="joinDate"
+                value={formData.joinDate ? dayjs(formData.joinDate) : null}
+                onChange={(date) => handleInputChange("joinDate", date ? date.format("YYYY-MM-DD") : "")}
+                format="DD/MM/YYYY"
+                placeholder="Chọn ngày vào làm"
+                className="w-full"
+                required
+              />
+            </ConfigProvider>
             <div className="min-h-[1.25rem]">
-              {errors.salary && <p className="text-sm text-red-500">{errors.salary[0]}</p>}
+              {errors.joinDate && <p className="text-sm text-red-500">{errors.joinDate[0]}</p>}
             </div>
           </div>
 

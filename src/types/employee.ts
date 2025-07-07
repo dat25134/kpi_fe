@@ -37,7 +37,7 @@ export interface EmployeeSummary {
   totalEmployees: number;
   activeEmployees: number;
   inactiveEmployees: number;
-  averageSalary: number;
+  joinedThisMonth: number;
   departmentStats: Array<{
     departmentId: number;
     departmentName: string;
