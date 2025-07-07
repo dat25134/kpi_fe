@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -39,6 +39,7 @@ import { DatePicker, ConfigProvider } from "antd"
 import viVN from "antd/es/locale/vi_VN"
 import dayjs from "dayjs"
 import "dayjs/locale/vi"
+import { UploadOutlined } from '@ant-design/icons';
 dayjs.locale("vi")
 
 type AddTaskModalProps = {
@@ -70,6 +71,8 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
   const [status, setStatus] = useState("pending")
   const [progressHistory, setProgressHistory] = useState<ProgressItem[]>([])
   const { updateProgress } = useProgress()
+  const [files, setFiles] = useState<File[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Dữ liệu mẫu cho người phối hợp
   const collaborators = allUsers?.map((employee: any) => ({
@@ -111,6 +114,17 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
     refreshTasks()
   }
 
+  const handleRemoveFile = (index: number) => {
+    setFiles((prev) => {
+      const newFiles = prev.filter((_, i) => i !== index);
+      // Reset input file để input hiển thị đúng số file đã chọn
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return newFiles;
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -129,13 +143,33 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
       department: departmentId ?? undefined,
       description: editingTask ? editingTask.description : "",
       progressHistory,
-    }
+    };
+
+    const formData = new FormData();
+    Object.entries(taskData).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        if (key === 'assignees') {
+          value.forEach((v) => formData.append('assignees[]', v));
+        } else if (key === 'progressHistory') {
+          value.forEach((v, idx) => formData.append(`progressHistory[${idx}]`, JSON.stringify(v)));
+        } else {
+          value.forEach((v) => formData.append(`${key}[]`, v));
+        }
+      } else if (value !== undefined && value !== null) {
+        formData.append(key, value);
+      }
+    });
+    formData.append('_method ', "PUT")
+    files.forEach((file) => {
+      formData.append('files[]', file);
+    });
+
     try {
       if (editingTask && onEditTask) {
-        await onEditTask(editingTask.id, taskData)
+        await onEditTask(editingTask.id, formData)
         toast.success("Cập nhật công việc thành công!")
       } else {
-        await onAddTask(taskData)
+        await onAddTask(formData)
         toast.success("Thêm công việc thành công!")
       }
       resetForm()
@@ -145,7 +179,6 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
       const msg = getErrorMessage(error)
       setErrorMsg(getValidationErrors(error) || { general: [msg] })
       toast.error(msg)
-
     }
   }
 
@@ -163,6 +196,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
     setMainHandlerError("")
     setStatus("pending")
     setProgressHistory([])
+    setFiles([])
   }
 
   const collaboratorOptions = collaborators.map((c: any) => ({
@@ -258,6 +292,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                   <div className="grid gap-2">
                     <Label htmlFor="department">Phòng ban</Label>
                     <AntdSelect
+                      className="w-full truncate"
                       id="department"
                       style={{ width: "100%" }}
                       placeholder="Chọn phòng ban"
@@ -362,6 +397,68 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                     }}
                   />
                   {errorMsg?.assignees && <span className="text-red-500 text-xs">{errorMsg.assignees.join(" ")}</span>}
+                </div>
+                <div className="grid gap-2">
+                  <Label>Đính kèm file</Label>
+                  <div className="relative w-full">
+                    <input
+                      type="file"
+                      multiple
+                      ref={fileInputRef}
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          setFiles(prev => [...prev, ...Array.from(e.target.files || [])]);
+                          if (fileInputRef.current) fileInputRef.current.value = "";
+                        }
+                      }}
+                      className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full"
+                      style={{ height: 40 }}
+                    />
+                    <button
+                      type="button"
+                      className="flex items-center gap-2 border rounded px-3 py-2 bg-white hover:bg-gray-50 w-full text-left"
+                      tabIndex={-1}
+                    >
+                      <UploadOutlined className="text-blue-500" />
+                      <span className="font-medium">Chọn file</span>
+                      <span className="ml-auto text-xs text-gray-400">{files.length > 0 ? `${files.length} file đã chọn` : "Không có file nào"}</span>
+                    </button>
+                  </div>
+                  {errorMsg && (
+                    (errorMsg.file || errorMsg.files || Object.keys(errorMsg).some(key => key.startsWith("files."))) && (
+                      <span className="text-red-500 text-xs">File không hợp lệ</span>
+                    )
+                  )}
+                  {files.length > 0 && (
+                    <ul className="mt-2 space-y-1 text-sm">
+                      {files.map((file, idx) => (
+                        <li key={idx} className="flex items-center gap-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 20 20" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 2a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V7.828a2 2 0 0 0-.586-1.414l-3.828-3.828A2 2 0 0 0 10.172 2H7z" />
+                          </svg>
+                          <span className="truncate max-w-[200px]">{file.name}</span>
+                          <button type="button" className="text-red-500 hover:underline" onClick={() => handleRemoveFile(idx)}>Xóa</button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {/* Hiển thị file đính kèm khi xem chi tiết task */}
+                  {editingTask && editingTask.files && editingTask.files.length > 0 && (
+                    <div className="mt-2">
+                      <Label className="text-xs text-gray-500">File đã đính kèm:</Label>
+                      <ul className="space-y-1 text-sm mt-1">
+                        {editingTask.files.map((file: any) => (
+                          <li key={file.id} className="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 20 20" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 2a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V7.828a2 2 0 0 0-.586-1.414l-3.828-3.828A2 2 0 0 0 10.172 2H7z" />
+                            </svg>
+                            <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate max-w-[200px]">{file.name}</a>
+                            <span className="text-gray-400 text-xs">({(file.size/1024).toFixed(1)} KB)</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

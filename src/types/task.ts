@@ -1,5 +1,13 @@
 import { Category } from "./category";
 
+export interface TaskFile {
+    id: number;
+    name: string;
+    url: string;
+    size: number;
+    mime_type: string;
+}
+
 export type Task = {
     id: number,
     content: string,
@@ -21,6 +29,7 @@ export type Task = {
         avatar: string,
     },
     description: string,
+    files?: TaskFile[],
 }
 
 export interface ProgressUser {
