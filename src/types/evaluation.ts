@@ -398,3 +398,113 @@ export const CATEGORY_LABELS: Record<string, string> = {
   ket_qua: "Kết quả thực hiện nhiệm vụ",
   lanh_dao: "Năng lực lãnh đạo, quản lý"
 }
+
+// New interfaces for component refactoring
+export interface EvaluationHeaderInfoProps {
+  user: EvaluationUser
+  month: number
+  year: number
+}
+
+export interface EvaluationTabsContainerProps {
+  activeTab: string
+  onTabChange: (tab: string) => void
+  children: React.ReactNode
+}
+
+export interface WorkDescriptionTableProps {
+  workDescriptions: WorkDescriptionItem[]
+}
+
+export interface EvaluationSummaryProps {
+  details: EvaluationCriteriaDetail[]
+  totalScore: number
+}
+
+export interface QualityRatingDisplayProps {
+  score: number
+  showLabel?: boolean
+  showBadge?: boolean
+}
+
+export interface EvaluationSidebarProps {
+  currentUserDepartment: string
+  activeTab: string
+  onTabChange: (tab: string) => void
+}
+
+export interface EvaluationActionsProps {
+  onCreateEvaluation: () => void
+  onRefresh: () => void
+  showCreateButton?: boolean
+}
+
+export interface EvaluationPaginationProps {
+  pagination: {
+    currentPage: number
+    totalPages: number
+    totalItems: number
+    itemsPerPage: number
+  }
+  onPageChange: (page: number) => void
+}
+
+export interface WorkItemFormProps {
+  item: Partial<WorkDescriptionItem>
+  onSave: (item: WorkDescriptionItem) => void
+  onCancel: () => void
+  isEditing?: boolean
+}
+
+export interface WorkItemTableProps {
+  items: WorkDescriptionItem[]
+  onEdit: (id: number, field?: string, value?: any) => void
+  onDelete: (id: number) => void
+  isReadOnly?: boolean
+}
+
+export interface CriteriaCategoryProps {
+  category: string
+  criteria: EvaluationCriteriaDetail[]
+  isReadOnly?: boolean
+  onScoreChange?: (id: number, field: string, value: string) => void
+  onCommentChange?: (id: number, field: string, value: string) => void
+}
+
+export interface CriteriaItemProps {
+  item: EvaluationCriteriaDetail
+  index: number
+  isReadOnly?: boolean
+  onScoreChange?: (id: number, field: string, value: string) => void
+  onCommentChange?: (id: number, field: string, value: string) => void
+}
+
+export interface ScoreInputProps {
+  value: string | null
+  maxScore: string
+  onChange: (value: string) => void
+  readOnly?: boolean
+  label: string
+  className?: string
+}
+
+export interface ScoreBadgeProps {
+  score: string | null
+  maxScore: string
+  className?: string
+}
+
+export interface CreateEvaluationFormProps {
+  onConfirm: (month: number, year: number) => void
+  onCancel: () => void
+}
+
+export interface EvaluationModalsProps {
+  showEvaluationDetail: boolean
+  setShowEvaluationDetail: (show: boolean) => void
+  selectedEvaluation: string | null
+  showCreateEvaluationModal: boolean
+  setShowCreateEvaluationModal: (show: boolean) => void
+  currentUser: any
+  onConfirmCreateEvaluation: (month: number, year: number) => void
+}
