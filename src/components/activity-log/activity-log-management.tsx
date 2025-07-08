@@ -173,13 +173,54 @@ export function ActivityLogManagement() {
   }
 
   const getLogContent = (log: ActivityLog) => {
+    const attrs = log.properties.attributes
+    
+    // Xử lý các trường hợp đặc biệt
     if (log.subject_type === "App\\Models\\TaskProgress") {
-      return log.properties.attributes.content || "Không có nội dung"
+      return attrs.content || "Không có nội dung"
     }
-    if (log.subject_type === "App\\Models\\User") {
-      const attrs = log.properties.attributes
-      return `${attrs.name} (${attrs.employee_id}) - ${attrs.email}`
+    
+    // Xử lý tổng quát cho tất cả các loại subject
+    if (attrs) {
+      const displayFields: string[] = []
+      
+      // Ưu tiên các trường có tên dễ hiểu
+      const priorityFields = ['name', 'title', 'content', 'description', 'subject']
+      const secondaryFields = ['email', 'employee_id', 'code', 'status']
+      
+      // Thêm các trường ưu tiên
+      for (const field of priorityFields) {
+        if (attrs[field] && typeof attrs[field] === 'string') {
+          displayFields.push(attrs[field])
+          break // Chỉ lấy trường đầu tiên có ý nghĩa
+        }
+      }
+      
+      // Nếu chưa có trường nào, thêm các trường phụ
+      if (displayFields.length === 0) {
+        for (const field of secondaryFields) {
+          if (attrs[field] && typeof attrs[field] === 'string') {
+            displayFields.push(attrs[field])
+            break
+          }
+        }
+      }
+      
+      // Nếu vẫn chưa có, hiển thị tất cả các trường string có ý nghĩa
+      if (displayFields.length === 0) {
+        for (const [key, value] of Object.entries(attrs)) {
+          if (typeof value === 'string' && value.trim() && key !== 'id' && key !== 'created_at' && key !== 'updated_at') {
+            displayFields.push(`${key}: ${value}`)
+            if (displayFields.length >= 3) break // Giới hạn 3 trường
+          }
+        }
+      }
+      
+      if (displayFields.length > 0) {
+        return displayFields.join(' - ')
+      }
     }
+    
     return "Không có nội dung chi tiết"
   }
 

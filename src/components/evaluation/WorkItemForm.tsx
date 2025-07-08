@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ComplexityWeight, QualityWeight, type WorkDescriptionItem } from "@/types/evaluation"
+import { type WorkDescriptionItem } from "@/types/evaluation"
 import { calculatePoints, calculateWeightedQualityPoints, calculateFinalPoints } from "@/lib/utils"
 import type { WorkItemFormProps } from "@/types/evaluation"
 
@@ -20,8 +20,8 @@ export default function WorkItemForm({
     task_title: item.task_title || "",
     unit: item.unit || "",
     target: item.target || "",
-    complexity_weight: item.complexity_weight || ComplexityWeight.LEVEL_2,
-    quality_weight: item.quality_weight || QualityWeight.LEVEL_3,
+    complexity_weight: item.complexity_weight || 2,
+    quality_weight: item.quality_weight || 3,
     result_level: item.result_level || 3,
     explanation: item.explanation || ""
   })
