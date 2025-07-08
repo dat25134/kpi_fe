@@ -49,7 +49,7 @@ export default function TaskManagement() {
     startDate,
     endDate,
     category,
-    status: activeTab === "completed" ? "completed" : "",
+    status: activeTab === "completed" ? "completed" : "ongoing",
     itemsPerPage,
     departmentId,
   };
@@ -352,7 +352,10 @@ export default function TaskManagement() {
                     <LoadingSpinner />
                   </div>
                 ) : (
-                  <TableTask tasks={tasks?.filter((task: Task) => task.status === "completed")} />
+                  <TableTask 
+                    tasks={tasks?.filter((task: Task) => task.status === "completed")}
+                    onRowClick={(task) => { setEditingTask(task); setIsAddModalOpen(true); }}
+                  />
                 )}
               </div>
             </TabsContent>

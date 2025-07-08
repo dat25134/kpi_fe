@@ -30,6 +30,7 @@ export type Task = {
     },
     description: string,
     files?: TaskFile[],
+    subtasks?: Task[],
 }
 
 export interface ProgressUser {
