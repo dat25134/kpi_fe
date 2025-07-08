@@ -34,7 +34,7 @@ import { useProgress } from "@/hooks/useProgress"
 import { useDepartmentsListSelect } from "@/hooks/useDepartments"
 import { DatePicker, ConfigProvider } from "antd"
 import viVN from "antd/es/locale/vi_VN"
-import dayjs from "dayjs"
+import dayjs, { Dayjs } from "dayjs"
 import "dayjs/locale/vi"
 import { UploadOutlined } from '@ant-design/icons';
 import { deleteTaskFile } from "@/services/task"
@@ -53,14 +53,14 @@ type AddTaskModalProps = {
 
 export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask, editingTask, categories, refreshTasks }: AddTaskModalProps) {
   const [content, setContent] = useState("")
-  const [deadline, setDeadline] = useState<Date | undefined>(new Date())
-  const [priority, setPriority] = useState("")
-  const [weight, setWeight] = useState("4")
+  const [deadline, setDeadline] = useState<Dayjs | null>(dayjs(new Date()))
+  const [priority, setPriority] = useState(null)
+  const [weight, setWeight] = useState(null)
   const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>([])
   const [assigner, setAssigner] = useState<number | undefined>(undefined)
   const [mainHandler, setMainHandler] = useState<number | undefined>(undefined)
   const [mainHandlerError, setMainHandlerError] = useState("")
-  const [startDate, setStartDate] = useState<Date | undefined>(new Date())
+  const [startDate, setStartDate] = useState<Dayjs | null>(dayjs(new Date()))
   const [startDateError, setStartDateError] = useState("")
   const [departmentId, setDepartmentId] = useState<number | undefined>(undefined)
   const { allUsers, loading } = useAllUsers()
@@ -93,8 +93,8 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
   useEffect(() => {
     if (open && editingTask) {
       setContent(editingTask.content || "");
-      setDeadline(editingTask.deadline ? new Date(editingTask.deadline) : new Date());
-      setStartDate(editingTask.startDate ? new Date(editingTask.startDate) : new Date());
+      setDeadline(editingTask.deadline ? dayjs(editingTask.deadline) : dayjs(new Date()));
+      setStartDate(editingTask.startDate ? dayjs(editingTask.startDate) : dayjs(new Date()));
       setPriority(editingTask.category?.id?.toString() || "");
       setWeight(editingTask.count?.toString() || "4");
       setSelectedCollaborators(editingTask.assignees?.map((a: any) => Number(a.id)) || []);
@@ -164,7 +164,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
       status,
       category: priority,
       assignees: selectedCollaborators.map(Number),
-      count: Number.parseInt(weight),
+      count: weight ? Number.parseInt(weight) : undefined,
       startDate: startDate ? startDate.toISOString() : "",
       deadline: deadline ? deadline.toISOString() : "",
       createdAt: editingTask ? editingTask.createdAt : new Date().toISOString(),
@@ -215,11 +215,11 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
 
   const resetForm = () => {
     setContent("")
-    setDeadline(new Date())
-    setStartDate(new Date())
+    setDeadline(dayjs(new Date()))
+    setStartDate(dayjs(new Date()))
     setStartDateError("")
-    setPriority("")
-    setWeight("")
+    setPriority(null)
+    setWeight(null)
     setSelectedCollaborators([])
     setAssigner(undefined)
     setMainHandler(undefined)
@@ -276,8 +276,8 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                     <ConfigProvider locale={viVN}>
                       <DatePicker
                         id="startDate"
-                        value={startDate ? dayjs(startDate) : null}
-                        onChange={(date) => setStartDate(date ? date.toDate() : undefined)}
+                        value={startDate}
+                        onChange={setStartDate}
                         format="DD/MM/YYYY"
                         placeholder="Chọn ngày bắt đầu"
                         className="w-full"
@@ -292,8 +292,8 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                     <ConfigProvider locale={viVN}>
                       <DatePicker
                         id="deadline"
-                        value={deadline ? dayjs(deadline) : null}
-                        onChange={(date) => setDeadline(date ? date.toDate() : undefined)}
+                        value={deadline}
+                        onChange={setDeadline}
                         format="DD/MM/YYYY"
                         placeholder="Chọn hạn xử lý"
                         className="w-full"
@@ -305,27 +305,27 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                 <div className="grid grid-cols-2 gap-2">
                   <div className="grid gap-2">
                     <Label htmlFor="priority">Phân loại</Label>
-                    <Select value={priority} onValueChange={setPriority}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Chọn phân loại" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Phân loại</SelectLabel>
-                          {categories?.map((c: Category) => (
-                            <SelectItem key={c.id} value={c.id.toString()}>
-                              {c.display_name}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
+                    <AntdSelect
+                      id="priority"
+                      style={{ width: "100%" }}
+                      placeholder="Chọn phân loại"
+                      value={priority}
+                      onChange={setPriority}
+                      options={categories?.map((c: Category) => ({ label: c.display_name, value: c.id.toString() }))}
+                      allowClear
+                      getPopupContainer={triggerNode => triggerNode.parentNode}
+                      showSearch
+                      filterOption={(input, option: any) => {
+                        const opt = option as { label: string; value: string };
+                        if (!opt || !opt.label) return false;
+                        return opt.label.toLowerCase().includes(input.toLowerCase());
+                      }}
+                    />
                     {errorMsg?.category && <span className="text-red-500 text-xs">{errorMsg.category.join(" ")}</span>}
                   </div>
-                  <div className="grid gap-2">
+                  <div className="flex flex-col gap-2">
                     <Label htmlFor="department">Phòng ban</Label>
                     <AntdSelect
-                      className="w-full truncate"
                       id="department"
                       style={{ width: "100%" }}
                       placeholder="Chọn phòng ban"
@@ -348,21 +348,28 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                 <div className="grid grid-cols-2 gap-2">
                   <div className="grid gap-2">
                     <Label htmlFor="weight">Trọng số</Label>
-                    <Select value={weight} onValueChange={setWeight}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Chọn trọng số" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Trọng số</SelectLabel>
-                          <SelectItem value="1">1</SelectItem>
-                          <SelectItem value="2">2</SelectItem>
-                          <SelectItem value="3">3</SelectItem>
-                          <SelectItem value="4">4</SelectItem>
-                          <SelectItem value="5">5</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
+                    <AntdSelect
+                      id="weight"
+                      style={{ width: "100%" }}
+                      placeholder="Chọn trọng số"
+                      value={weight}
+                      onChange={setWeight}
+                      options={[
+                        { label: "1", value: "1" },
+                        { label: "2", value: "2" },
+                        { label: "3", value: "3" },
+                        { label: "4", value: "4" },
+                        { label: "5", value: "5" },
+                      ]}
+                      allowClear
+                      getPopupContainer={triggerNode => triggerNode.parentNode}
+                      showSearch
+                      filterOption={(input, option: any) => {
+                        const opt = option as { label: string; value: string };
+                        if (!opt || !opt.label) return false;
+                        return opt.label.toLowerCase().includes(input.toLowerCase());
+                      }}
+                    />
                     {errorMsg?.count && <span className="text-red-500 text-xs">{errorMsg.count.join(" ")}</span>}
                   </div>
                 </div>
