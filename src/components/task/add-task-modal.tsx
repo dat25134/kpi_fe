@@ -23,14 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { format } from "date-fns"
-import { Input } from "../ui/input"
 import { Select as AntdSelect } from "antd"
 import { Category } from "@/types/category"
 import { useAllUsers } from "@/hooks/useEmployees"
 import { toast } from "sonner"
 import { getErrorMessage, getValidationErrors } from "@/services/errorHandler"
-import { Timeline } from "antd"
 import TaskProgressPanel from "./TaskProgressPanel"
 import { ProgressItem } from "@/types/task"
 import { useProgress } from "@/hooks/useProgress"
@@ -60,7 +57,6 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
   const [priority, setPriority] = useState("")
   const [weight, setWeight] = useState("4")
   const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>([])
-  const [comboboxOpen, setComboboxOpen] = useState(false)
   const [assigner, setAssigner] = useState<number | undefined>(undefined)
   const [mainHandler, setMainHandler] = useState<number | undefined>(undefined)
   const [mainHandlerError, setMainHandlerError] = useState("")
@@ -249,7 +245,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
   }));
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`w-full max-w-full sm:max-w-${editingTask ? "7xl" : "xl"} max-h-[90vh] overflow-y-auto`}>
+      <DialogContent className={`${editingTask ? "sm:max-w-7xl" : "sm:max-w-xl"} max-h-[90vh] overflow-y-auto`}>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{editingTask ? "Chỉnh sửa công việc" : "Thêm mới công việc"}</DialogTitle>
