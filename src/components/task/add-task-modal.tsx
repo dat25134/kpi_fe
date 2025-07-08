@@ -40,6 +40,7 @@ import viVN from "antd/es/locale/vi_VN"
 import dayjs from "dayjs"
 import "dayjs/locale/vi"
 import { UploadOutlined } from '@ant-design/icons';
+import { deleteTaskFile } from "@/services/task"
 dayjs.locale("vi")
 
 type AddTaskModalProps = {
@@ -73,6 +74,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
   const { updateProgress } = useProgress()
   const [files, setFiles] = useState<File[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [deletingFileId, setDeletingFileId] = useState<number | null>(null)
 
   // Dữ liệu mẫu cho người phối hợp
   const collaborators = allUsers?.map((employee: any) => ({
@@ -123,6 +125,28 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
       }
       return newFiles;
     });
+  };
+
+  const handleDeleteAttachedFile = async (fileId: number) => {
+    if (!editingTask?.id) return;
+    
+    try {
+      setDeletingFileId(fileId);
+      await deleteTaskFile(editingTask.id, fileId);
+      
+      // Cập nhật lại danh sách file trong editingTask
+      if (editingTask.files) {
+        editingTask.files = editingTask.files.filter((file: any) => file.id !== fileId);
+      }
+      
+      toast.success("Xóa file thành công!");
+      refreshTasks(); // Refresh lại danh sách task
+    } catch (error: any) {
+      const msg = getErrorMessage(error);
+      toast.error(msg || "Có lỗi xảy ra khi xóa file");
+    } finally {
+      setDeletingFileId(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -197,6 +221,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
     setStatus("pending")
     setProgressHistory([])
     setFiles([])
+    setDeletingFileId(null)
   }
 
   const collaboratorOptions = collaborators.map((c: any) => ({
@@ -454,6 +479,14 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                             </svg>
                             <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate max-w-[200px]">{file.name}</a>
                             <span className="text-gray-400 text-xs">({(file.size/1024).toFixed(1)} KB)</span>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteAttachedFile(file.id)}
+                              disabled={deletingFileId === file.id}
+                              className="ml-auto text-red-500 hover:text-red-700 hover:underline text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {deletingFileId === file.id ? "Đang xóa..." : "Xóa"}
+                            </button>
                           </li>
                         ))}
                       </ul>

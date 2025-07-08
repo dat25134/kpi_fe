@@ -31,3 +31,8 @@ export async function updateTask(id: number, taskData: Partial<Task>) {
   const response = await apiClient.post(API_ENDPOINTS.TASKS.UPDATE(id), taskData, getConfig());
   return response.data.data;
 }
+
+export async function deleteTaskFile(taskId: number, fileId: number) {
+  const response = await apiClient.delete(API_ENDPOINTS.TASKS.DELETE_FILE(taskId, fileId), getConfig());
+  return response.data;
+}
