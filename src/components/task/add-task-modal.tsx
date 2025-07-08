@@ -249,7 +249,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
   }));
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`w-full max-w-full sm:max-w-[${editingTask ? "1200px" : "600px"}] max-h-[90vh] overflow-y-auto`}>
+      <DialogContent className={`w-full max-w-full sm:max-w-${editingTask ? "7xl" : "xl"} max-h-[90vh] overflow-y-auto`}>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{editingTask ? "Chỉnh sửa công việc" : "Thêm mới công việc"}</DialogTitle>
