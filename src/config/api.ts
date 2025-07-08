@@ -55,6 +55,7 @@ export const API_ENDPOINTS = {
     DELETE: (id: number) => `${API_URL}/tasks/${id}`,
     DETAIL: (id: number) => `${API_URL}/tasks/${id}`,
     PROGRESS: (id: number) => `${API_URL}/tasks/${id}/progress`,
+    DELETE_FILE: (taskId: number, fileId: number) => `${API_URL}/tasks/${taskId}/files/${fileId}`,
   },
 
   ACTIVITY_LOG: {
