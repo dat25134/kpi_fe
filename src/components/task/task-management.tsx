@@ -49,7 +49,7 @@ export default function TaskManagement() {
     startDate,
     endDate,
     category,
-    status: activeTab === "completed" ? "completed" : "",
+    status: activeTab === "completed" ? "completed" : "ongoing",
     itemsPerPage,
     departmentId,
   };
@@ -64,6 +64,7 @@ export default function TaskManagement() {
   } = useTasks(params)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [selectedTaskIds, setSelectedTaskIds] = useState<number[]>([])
+  const [parentTask, setParentTask] = useState<{ id: number, name: string } | null>(null)
   
   const handleSearch = () => {
     setStartDate(inputStartDate)
@@ -132,6 +133,12 @@ export default function TaskManagement() {
     const selectedTasks = tasks.filter((task: any) => selectedTaskIds.includes(task.id))
     // TODO: Xử lý xuất file Word với selectedTasks
     alert(`Sẽ export ${selectedTasks.length} công việc sang Word!`)
+  }
+
+  const handleAddSubTask = (task: Task) => {
+    setParentTask({ id: task.id, name: task.content }) // hoặc task.title nếu có
+    setEditingTask(null)
+    setIsAddModalOpen(true)
   }
 
   return (
@@ -314,6 +321,7 @@ export default function TaskManagement() {
                     selectedTaskIds={selectedTaskIds}
                     onSelectTaskIds={setSelectedTaskIds}
                     onRowClick={(task) => { setEditingTask(task); setIsAddModalOpen(true); }}
+                    onAddSubTask={handleAddSubTask}
                   />
                 )}
               </div>
@@ -352,7 +360,10 @@ export default function TaskManagement() {
                     <LoadingSpinner />
                   </div>
                 ) : (
-                  <TableTask tasks={tasks?.filter((task: Task) => task.status === "completed")} />
+                  <TableTask 
+                    tasks={tasks?.filter((task: Task) => task.status === "completed")}
+                    onRowClick={(task) => { setEditingTask(task); setIsAddModalOpen(true); }}
+                  />
                 )}
               </div>
             </TabsContent>
@@ -364,13 +375,18 @@ export default function TaskManagement() {
         open={isAddModalOpen}
         onOpenChange={(open) => {
           setIsAddModalOpen(open)
-          if (!open) setEditingTask(null)
+          if (!open) {
+            setEditingTask(null)
+            setParentTask(null)
+          }
         }}
         onAddTask={handleAddTask}
         onEditTask={handleEditTask}
         editingTask={editingTask}
         categories={categories}
         refreshTasks={refreshTasks}
+        parentTask={parentTask}
+        isCompletedTask={!!(editingTask && editingTask.status === 'completed' && activeTab === 'completed')}
       />
     </div>
   )
