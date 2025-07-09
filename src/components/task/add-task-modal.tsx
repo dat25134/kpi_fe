@@ -51,7 +51,7 @@ type AddTaskModalProps = {
   refreshTasks: () => void
 }
 
-export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask, editingTask, categories, refreshTasks }: AddTaskModalProps) {
+export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask, editingTask, categories, refreshTasks, parentTask }: AddTaskModalProps & { parentTask?: { id: number, name: string } | null }) {
   const [content, setContent] = useState("")
   const [deadline, setDeadline] = useState<Dayjs | null>(dayjs(new Date()))
   const [priority, setPriority] = useState(null)
@@ -107,8 +107,11 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
       setProgressHistory(editingTask?.progressHistory || []);
       setChangeReason("");
       setErrorMsg(null);
+    } else if (open && parentTask && !editingTask) {
+      // Trường hợp tạo subtask: reset form, giữ parentTask
+      resetForm();
     }
-  }, [editingTask, open]);
+  }, [editingTask, open, parentTask]);
 
   const handleCloseModal = () => {
     onOpenChange(false)
@@ -174,6 +177,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
       description: editingTask ? editingTask.description : "",
       progressHistory,
       changeReason: editingTask ? changeReason : undefined, // Chỉ gửi khi update
+      parent_id: (!editingTask && parentTask) ? parentTask.id : undefined, // chỉ gửi khi tạo subtask
     };
 
     const formData = new FormData();
@@ -248,9 +252,20 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
       <DialogContent className={`${editingTask ? "sm:max-w-7xl" : "sm:max-w-xl"} max-h-[90vh] overflow-y-auto`}>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>{editingTask ? "Chỉnh sửa công việc" : "Thêm mới công việc"}</DialogTitle>
-            <DialogDescription>Nhập thông tin chi tiết công việc cần {editingTask ? "cập nhật" : "thêm mới"} vào hệ thống.</DialogDescription>
+            <DialogTitle>
+              {editingTask ? "Chỉnh sửa công việc" : parentTask ? "Tạo công việc con" : "Thêm mới công việc"}
+            </DialogTitle>
+            <DialogDescription>
+              {editingTask ? "Nhập thông tin chi tiết công việc cần cập nhật vào hệ thống." : parentTask ? "Tạo công việc con cho task cha bên dưới." : "Nhập thông tin chi tiết công việc cần thêm mới vào hệ thống."}
+            </DialogDescription>
           </DialogHeader>
+          {/* Hiển thị tên task cha nếu là subtask */}
+          {parentTask && !editingTask && (
+            <div className="mb-2 text-sm text-blue-600">
+              <span>Task cha: </span>
+              <span className="font-semibold">{parentTask.name}</span>
+            </div>
+          )}
           {errorMsg?.general && (
             <div className="text-red-600 text-sm mb-2">{errorMsg.general.join(" ")}</div>
           )}

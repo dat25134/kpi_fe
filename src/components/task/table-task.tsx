@@ -17,7 +17,7 @@ function getAllVisibleTaskAndSubtaskIds(tasks: Task[], expandedTaskIds: number[]
   return ids;
 }
 
-export default function TableTask({ tasks, onRowClick, pagination, selectedTaskIds = [], onSelectTaskIds }: { tasks: Task[], onRowClick?: (task: Task) => void, pagination?: any, selectedTaskIds?: number[], onSelectTaskIds?: (ids: number[]) => void }) {
+export default function TableTask({ tasks, onRowClick, pagination, selectedTaskIds = [], onSelectTaskIds, onAddSubTask }: { tasks: Task[], onRowClick?: (task: Task) => void, pagination?: any, selectedTaskIds?: number[], onSelectTaskIds?: (ids: number[]) => void, onAddSubTask?: (task: Task) => void }) {
   const [expandedTaskIds, setExpandedTaskIds] = useState<number[]>([]);
   const toggleExpand = (taskId: number) => {
     setExpandedTaskIds(ids =>
@@ -173,8 +173,8 @@ export default function TableTask({ tasks, onRowClick, pagination, selectedTaskI
                             )}
                             <button
                               type="button"
-                              className="border border-blue-200 text-blue-600 px-2 py-0.5 rounded flex items-center gap-1 hover:bg-red-50 ml-1"
-                              onClick={e => { e.stopPropagation(); /* TODO: handle add subtask */ }}
+                              className="border border-blue-200 text-blue-600 px-2 py-0.5 rounded flex items-center gap-1 hover:bg-red-50 ml-1 cursor-pointer"
+                              onClick={e => { e.stopPropagation(); onAddSubTask && onAddSubTask(task); }}
                               title="Thêm subtask"
                             >
                               <Plus size={14} />
