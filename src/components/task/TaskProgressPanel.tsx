@@ -10,7 +10,7 @@ import { ProgressItem } from "@/types/task"
 import { getErrorMessage, getValidationErrors } from "@/services/errorHandler"
 import { toast } from "sonner"
 
-export default function TaskProgressPanel({ progressHistory, status, setStatus, onAddProgress, setErrorMsg, errorMsg }: TaskProgressPanelProps) {
+export default function TaskProgressPanel({ progressHistory, status, setStatus, onAddProgress, setErrorMsg, errorMsg, isCompletedTask }: TaskProgressPanelProps) {
   const [progressInput, setProgressInput] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -51,7 +51,7 @@ export default function TaskProgressPanel({ progressHistory, status, setStatus, 
             }))}
           />
         </div>
-        <div className="mt-4 flex flex-col gap-2">
+        {!isCompletedTask && <div className="mt-4 flex flex-col gap-2">
           <Textarea
             placeholder="Nhập nội dung tiến độ mới"
             value={progressInput}
@@ -64,11 +64,11 @@ export default function TaskProgressPanel({ progressHistory, status, setStatus, 
             Cập nhật tiến độ
           </Button>
           {errorMsg?.contentProgress && <span className="text-red-500 text-xs">{errorMsg.contentProgress.join(" ")}</span>}
-        </div>
+        </div>}
       </div>
       <div>
         <Label htmlFor="status">Trạng thái công việc</Label>
-        <Select value={status} onValueChange={setStatus}>
+        <Select value={status} onValueChange={setStatus} disabled={isCompletedTask}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Chọn trạng thái" />
           </SelectTrigger>

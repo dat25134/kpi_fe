@@ -386,6 +386,7 @@ export default function TaskManagement() {
         categories={categories}
         refreshTasks={refreshTasks}
         parentTask={parentTask}
+        isCompletedTask={!!(editingTask && editingTask.status === 'completed' && activeTab === 'completed')}
       />
     </div>
   )

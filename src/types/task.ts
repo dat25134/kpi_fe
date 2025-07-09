@@ -54,4 +54,5 @@ export interface TaskProgressPanelProps {
     refreshTasks: () => void
     setErrorMsg: (errorMsg: Record<string, string[]>) => void
     errorMsg: Record<string, string[]>
+    isCompletedTask: boolean
 }

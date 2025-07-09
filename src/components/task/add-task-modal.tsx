@@ -49,9 +49,10 @@ type AddTaskModalProps = {
   editingTask?: any
   categories: Category[]
   refreshTasks: () => void
+  isCompletedTask?: boolean
 }
 
-export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask, editingTask, categories, refreshTasks, parentTask }: AddTaskModalProps & { parentTask?: { id: number, name: string } | null }) {
+export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask, editingTask, categories, refreshTasks, parentTask, isCompletedTask }: AddTaskModalProps & { parentTask?: { id: number, name: string } | null }) {
   const [content, setContent] = useState("")
   const [deadline, setDeadline] = useState<Dayjs | null>(dayjs(new Date()))
   const [priority, setPriority] = useState(null)
@@ -73,6 +74,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [deletingFileId, setDeletingFileId] = useState<number | null>(null)
   const [changeReason, setChangeReason] = useState("")
+  const [qualityWeight, setQualityWeight] = useState(null)
 
   // Dữ liệu mẫu cho người phối hợp
   const collaborators = allUsers?.map((employee: any) => ({
@@ -107,6 +109,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
       setProgressHistory(editingTask?.progressHistory || []);
       setChangeReason("");
       setErrorMsg(null);
+      setQualityWeight(editingTask.qualityWeight?.toString() || null)
     } else if (open && parentTask && !editingTask) {
       // Trường hợp tạo subtask: reset form, giữ parentTask
       resetForm();
@@ -178,6 +181,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
       progressHistory,
       changeReason: editingTask ? changeReason : undefined, // Chỉ gửi khi update
       parent_id: (!editingTask && parentTask) ? parentTask.id : undefined, // chỉ gửi khi tạo subtask
+      qualityWeight: qualityWeight ? Number.parseInt(qualityWeight) : undefined,
     };
 
     const formData = new FormData();
@@ -234,6 +238,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
     setFiles([])
     setDeletingFileId(null)
     setChangeReason("")
+    setQualityWeight(null)
   }
 
   const collaboratorOptions = collaborators.map((c: any) => ({
@@ -282,6 +287,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                     onChange={(e) => setContent(e.target.value)}
                     className="min-h-[60px] resize-none"
                     required
+                    disabled={isCompletedTask}
                   />
                   {errorMsg?.content && <span className="text-red-500 text-xs">{errorMsg.content.join(" ")}</span>}
                 </div>
@@ -297,6 +303,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                         placeholder="Chọn ngày bắt đầu"
                         className="w-full"
                         required
+                        disabled={isCompletedTask}
                       />
                     </ConfigProvider>
                     {startDateError && <span className="text-red-500 text-xs">{startDateError}</span>}
@@ -312,12 +319,13 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                         format="DD/MM/YYYY"
                         placeholder="Chọn hạn xử lý"
                         className="w-full"
+                        disabled={isCompletedTask}
                       />
                     </ConfigProvider>
                     {errorMsg?.deadline && <span className="text-red-500 text-xs">{errorMsg.deadline.join(" ")}</span>}
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 items-start">
                   <div className="grid gap-2">
                     <Label htmlFor="priority">Phân loại</Label>
                     <AntdSelect
@@ -335,6 +343,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                         if (!opt || !opt.label) return false;
                         return opt.label.toLowerCase().includes(input.toLowerCase());
                       }}
+                      disabled={isCompletedTask}
                     />
                     {errorMsg?.category && <span className="text-red-500 text-xs">{errorMsg.category.join(" ")}</span>}
                   </div>
@@ -356,11 +365,12 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                         return opt.label.toLowerCase().includes(input.toLowerCase());
                       }}
                       loading={loadingDepartments}
+                      disabled={isCompletedTask}
                     />
                     {errorMsg?.department && <span className="text-red-500 text-xs">{errorMsg.department.join(" ")}</span>}
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 items-start">
                   <div className="grid gap-2">
                     <Label htmlFor="weight">Trọng số</Label>
                     <AntdSelect
@@ -384,12 +394,38 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                         if (!opt || !opt.label) return false;
                         return opt.label.toLowerCase().includes(input.toLowerCase());
                       }}
+                      disabled={isCompletedTask}
                     />
                     {errorMsg?.count && <span className="text-red-500 text-xs">{errorMsg.count.join(" ")}</span>}
                   </div>
+                  {isCompletedTask && <div className="grid gap-2">
+                    <Label htmlFor="qualityWeight">Trọng số chất lượng</Label>
+                    <AntdSelect
+                      id="qualityWeight"
+                      style={{ width: "100%" }}
+                      placeholder="Chọn trọng số chất lượng"
+                      value={qualityWeight}
+                      onChange={setQualityWeight}
+                      options={[
+                        { label: "1", value: "1" },
+                        { label: "2", value: "2" },
+                        { label: "3", value: "3" },
+                        { label: "4", value: "4" },
+                      ]}
+                      allowClear
+                      getPopupContainer={triggerNode => triggerNode.parentNode}
+                      showSearch
+                      filterOption={(input, option: any) => {
+                        const opt = option as { label: string; value: string };
+                        if (!opt || !opt.label) return false;
+                        return opt.label.toLowerCase().includes(input.toLowerCase());
+                      }}
+                    />
+                    {errorMsg?.qualityWeight && <span className="text-red-500 text-xs">{errorMsg.qualityWeight.join(" ")}</span>}
+                  </div>}
                 </div>
                 <div className="grid gap-2 py-2">
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2 items-start">
                     <div className="grid gap-2">
                       <Label htmlFor="assigner">Người giao:</Label>
                       <AntdSelect
@@ -407,6 +443,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                           if (!opt || !opt.label) return false;
                           return opt.label.toLowerCase().includes(input.toLowerCase());
                         }}
+                        disabled={isCompletedTask}
                       />
                       {errorMsg?.assigner && <span className="text-red-500 text-xs">{errorMsg.assigner.join(" ")}</span>}
                     </div>
@@ -427,6 +464,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                           if (!opt || !opt.label) return false;
                           return opt.label.toLowerCase().includes(input.toLowerCase());
                         }}
+                        disabled={isCompletedTask}
                       />
                       {mainHandlerError && <span className="text-red-500 text-xs">{mainHandlerError}</span>}
                       {errorMsg?.mainHandler && <span className="text-red-500 text-xs">{errorMsg.mainHandler.join(" ")}</span>}
@@ -449,6 +487,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                         if (!opt || !opt.label) return false;
                         return opt.label.toLowerCase().includes(input.toLowerCase());
                       }}
+                      disabled={isCompletedTask}
                     />
                     {errorMsg?.assignees && <span className="text-red-500 text-xs">{errorMsg.assignees.join(" ")}</span>}
                   </div>
@@ -475,11 +514,13 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                         }}
                         className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full"
                         style={{ height: 40 }}
+                        disabled={isCompletedTask}
                       />
                       <button
                         type="button"
                         className="flex items-center gap-2 border rounded px-3 py-2 bg-white hover:bg-gray-50 w-full text-left"
                         tabIndex={-1}
+                        disabled={isCompletedTask}
                       >
                         <UploadOutlined className="text-blue-500" />
                         <span className="font-medium">Chọn file</span>
@@ -543,6 +584,7 @@ export default function AddTaskModal({ open, onOpenChange, onAddTask, onEditTask
                 refreshTasks={refreshTasks}
                 setErrorMsg={setErrorMsg}
                 errorMsg={errorMsg || {}}
+                isCompletedTask={isCompletedTask || false}
               />
             )}
           </div>
