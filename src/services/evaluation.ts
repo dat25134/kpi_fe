@@ -1,6 +1,7 @@
-import { Evaluation, EvaluationResponse, EvaluationDetail } from '@/types/evaluation'
+import { Evaluation, EvaluationResponse, EvaluationDetail, EvaluationCriteriaCategoryResponse, CategoryCriteriaFilter, CategoryCriteriaResponse } from '@/types/evaluation'
 import apiClient from './apiClient'
 import { API_ENDPOINTS } from '@/config/api'
+import useSWR from 'swr'
 
 export const evaluationService = {
   // Lấy danh sách phiếu đánh giá
@@ -37,5 +38,19 @@ export const evaluationService = {
   // Xóa phiếu đánh giá
   deleteEvaluation: async (id: number): Promise<void> => {
     await apiClient.delete(API_ENDPOINTS.EVALUATIONS.DELETE(id))
-  }
+  },
 } 
+
+export async function fetchCategoryWithCriteria(filters: CategoryCriteriaFilter = {}): Promise<CategoryCriteriaResponse> {
+  const params = new URLSearchParams();
+  
+  if (filters.search) {
+    params.append('search', filters.search);
+  }
+  if (filters.role_id) {
+    params.append('role_id', filters.role_id);
+  }
+
+  const response = await apiClient.get(`${API_ENDPOINTS.EVALUATION_CRITERIA.LIST}?${params.toString()}`);
+  return response.data;
+}
