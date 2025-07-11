@@ -67,48 +67,36 @@ export default function MainHeader() {
           </Link>
 
           {user?.role === "admin" && (
-            <Link href="/departments">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
               <Button
-                variant={pathname === "/departments" ? "secondary" : "ghost"}
+                  variant={['/departments','/employees','/roles','/criteria'].includes(pathname) ? 'secondary' : 'ghost'}
                 className={cn(
-                  "h-9 px-3 text-xs md:text-sm",
-                  pathname === "/departments"
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                    : "text-white hover:bg-blue-800",
-                )}
-              >
-                <Building2 className="h-4 w-4 mr-2" />
-                <span className="hidden xl:inline">Quản lý phòng ban</span>
-              </Button>
-            </Link>
-          )}
-          {user?.role === "admin" && (
-            <Link href="/employees">
-              <Button
-                variant={pathname === "/employees" ? "secondary" : "ghost"}
-                className={cn(
-                  "h-9 px-3 text-xs md:text-sm",
-                  pathname === "/employees" ? "bg-blue-600 text-white hover:bg-blue-700" : "text-white hover:bg-blue-800",
-                )}
-              >
-                <Users className="h-4 w-4 mr-2" />
-                <span className="hidden xl:inline">Quản lý nhân viên</span>
-              </Button>
-            </Link>
-          )}
-          {user?.role === "admin" && (
-            <Link href="/roles">
-              <Button
-                variant={pathname === "/roles" ? "secondary" : "ghost"}
-                className={cn(
-                  "h-9 px-3 text-xs md:text-sm",
-                  pathname === "/roles" ? "bg-blue-600 text-white hover:bg-blue-700" : "text-white hover:bg-blue-800",
+                    'text-white',
+                    ['/departments','/employees','/roles','/criteria'].includes(pathname)
+                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'text-white hover:bg-blue-800',
                 )}
               >
                 <Shield className="h-4 w-4 mr-2" />
-                <span className="hidden xl:inline">Quản lý vai trò</span>
+                  <span className="hidden xl:inline">Quản trị</span>
               </Button>
-            </Link>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem asChild>
+                  <Link href="/departments">Quản lý phòng ban</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/employees">Quản lý nhân viên</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/roles">Quản lý vai trò</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/criteria">Quản lý tiêu chí</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
 
           <Link href="/evaluation">

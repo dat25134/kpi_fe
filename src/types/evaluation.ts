@@ -283,3 +283,48 @@ export interface EvaluationModalsProps {
   currentUser: any
   onConfirmCreateEvaluation: (month: number, year: number) => void
 }
+
+// =============================
+// API: GET /api/evaluation-criteria?role_id=3
+// =============================
+
+export interface EvaluationCriteriaItem {
+  id: number;
+  name: string;
+  description: string | null;
+  max_score: string;
+  weight: string;
+  order: number;
+  is_active: boolean;
+}
+
+export interface EvaluationCriteriaCategory {
+  id: number;
+  name: string;
+  description: string | null;
+  role_id: string;
+  role_name: string;
+  evaluation_criteria: EvaluationCriteriaItem[];
+}
+
+export interface EvaluationCriteriaCategoryResponse {
+  data: EvaluationCriteriaCategory[];
+}
+
+export interface CategoryCriteriaFilter {
+  role_id?: string;
+  search?: string;
+}
+
+export interface CategoryCriteriaResponse {
+  data: EvaluationCriteriaCategory[];
+}
+
+export interface CreateCriteriaPayload {
+  role_id: number;
+  category_criteria_id: number;
+  name: string;
+  description: string;
+  max_score: number;
+  is_active: boolean;
+}
