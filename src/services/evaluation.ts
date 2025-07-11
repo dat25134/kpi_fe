@@ -59,3 +59,9 @@ export async function createCategoryCriteria(payload: { name: string }) {
   const response = await apiClient.post(API_ENDPOINTS.EVALUATION_CRITERIA.CREATE, payload);
   return response.data.data;
 }
+
+
+export async function updateCategoryCriteria(id: number, payload: { name: string }) {
+  const response = await apiClient.put(API_ENDPOINTS.EVALUATION_CRITERIA.UPDATE_CATEGORY(id), payload);
+  return response.data.data;
+}

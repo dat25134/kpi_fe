@@ -73,6 +73,7 @@ export const API_ENDPOINTS = {
   EVALUATION_CRITERIA: {
     LIST: `${API_URL}/evaluation-criteria`,
     CREATE: `${API_URL}/evaluation-criteria/category`, // Thêm endpoint tạo danh mục tiêu chí
+    UPDATE_CATEGORY: (id: number) => `${API_URL}/evaluation-criteria/category/${id}`,
   },
 
   // Thêm các nhóm API khác ở đây

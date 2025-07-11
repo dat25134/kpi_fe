@@ -16,6 +16,12 @@ import { useCategoryWithCriteria } from "@/hooks/useCriteria";
 import { useRolesSelection } from "@/hooks/useRole";
 import { toast } from "sonner";
 import AddCategoryModal from "@/components/evaluation/add-category-modal";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 const CriteriaManagement: React.FC = () => {
   const { data: roleData, isLoading: roleLoading, error: roleError } = useRolesSelection();
@@ -23,6 +29,7 @@ const CriteriaManagement: React.FC = () => {
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [showAddCategory, setShowAddCategory] = useState(false);
+  const [editCategory, setEditCategory] = useState<{ id: number; name: string } | null>(null);
   // Lấy dữ liệu từ hook
   const { data, isLoading, isError } = useCategoryWithCriteria({ role_id: roleId, search });
 
@@ -139,9 +146,21 @@ const CriteriaManagement: React.FC = () => {
                   <Button className="ml-auto bg-blue-600 text-white" size="sm">
                     <Plus className="w-4 h-4 mr-1" /> Tạo tiêu chí
                   </Button>
-                  <Button variant="ghost" size="icon" className="ml-2">
-                    <Settings className="w-4 h-4" />
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="ml-2">
+                        <Settings className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => setEditCategory({ id: cat.id, name: cat.name })}>
+                        <Edit className="w-4 h-4 mr-2" /> Chỉnh sửa
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {/* TODO: handle delete */}} className="text-red-600">
+                        <Trash2 className="w-4 h-4 mr-2" /> Xóa
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
                 <div className="space-y-2">
                   {cat.evaluation_criteria.map((c) => (
@@ -192,9 +211,19 @@ const CriteriaManagement: React.FC = () => {
         onOpenChange={setShowAddCategory}
         roleId={roleId}
         search={search}
-        onSuccess={() => {
-          setShowAddCategory(false);
-        }}
+        isEdit={false}
+        onSuccess={() => setShowAddCategory(false)}
+      />
+      <AddCategoryModal
+        key={editCategory?.id || 'edit'}
+        open={!!editCategory}
+        onOpenChange={(open) => { if (!open) setEditCategory(null); }}
+        roleId={roleId}
+        search={search}
+        isEdit={true}
+        category_id={editCategory?.id}
+        category_name={editCategory?.name}
+        onSuccess={() => setEditCategory(null)}
       />
     </div>
   );

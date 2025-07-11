@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
-import { fetchCategoryWithCriteria, createCategoryCriteria } from "@/services/evaluation";
+import { fetchCategoryWithCriteria, createCategoryCriteria, updateCategoryCriteria } from "@/services/evaluation";
 import { CategoryCriteriaFilter } from "@/types/evaluation";
 
 export function useCategoryWithCriteria(filters: CategoryCriteriaFilter = {}) {
@@ -20,5 +20,12 @@ export function useCreateCategory() {
   return useSWRMutation(
     "create-category",
     (_key, { arg }: { arg: { name: string } }) => createCategoryCriteria(arg)
+  );
+}
+
+export function useUpdateCategoryCriteria() {
+  return useSWRMutation(
+    "update-category-criteria",
+    (_key, { arg }: { arg: { id: number; name: string } }) => updateCategoryCriteria(arg.id, { name: arg.name })
   );
 } 

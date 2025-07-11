@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useCreateCategory } from "@/hooks/useCriteria";
+import { useCreateCategory, useUpdateCategoryCriteria } from "@/hooks/useCriteria";
 import { toast } from "sonner";
 import { mutate } from "swr";
 import { getErrorMessage, getValidationErrors } from "@/services/errorHandler";
@@ -13,12 +13,16 @@ interface AddCategoryModalProps {
   onSuccess?: () => void;
   roleId: string;
   search: string;
+  isEdit?: boolean;
+  category_id?: number;
+  category_name?: string;
 }
 
-const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ open, onOpenChange, onSuccess, roleId, search }) => {
-  const [name, setName] = useState("");
+const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ open, onOpenChange, onSuccess, roleId, search, isEdit, category_id, category_name }) => {
+  const [name, setName] = useState(category_name || "");
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const { trigger, isMutating } = useCreateCategory();
+  const { trigger: updateTrigger, isMutating: isUpdating } = useUpdateCategoryCriteria();
 
   const resetForm = () => {
     setName("");
@@ -38,8 +42,13 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ open, onOpenChange,
       return;
     }
     try {
-      await trigger({ name });
-      toast.success("Tạo danh mục thành công!");
+      if (isEdit && category_id) {
+        await updateTrigger({ id: category_id, name });
+        toast.success("Cập nhật danh mục thành công!");
+      } else {
+        await trigger({ name });
+        toast.success("Tạo danh mục thành công!");
+      }
       mutate(["category-with-criteria", { role_id: roleId, search }]);
       resetForm();
       onOpenChange(false);
@@ -55,9 +64,12 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ open, onOpenChange,
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[400px]">
         <form onSubmit={handleSubmit} noValidate>
-          <DialogHeader>
-            <DialogTitle>Tạo danh mục tiêu chí</DialogTitle>
+          <DialogHeader className="pb-2">
+            <DialogTitle>{isEdit ? "Cập nhật danh mục" : "Tạo danh mục"}</DialogTitle>
           </DialogHeader>
+          <div className="mb-2 p-2 bg-yellow-50 border border-yellow-300 text-yellow-800 text-xs rounded">
+            <b>Lưu ý:</b> Danh mục này sẽ áp dụng cho tất cả vai trò
+          </div>
           <div className="grid gap-4 py-2">
             <div className="grid gap-2">
               <label htmlFor="name" className="text-sm font-medium">Tên danh mục <span className="text-red-500">*</span></label>
@@ -75,7 +87,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ open, onOpenChange,
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={handleClose}>Huỷ</Button>
             <Button type="submit" disabled={isMutating} className="bg-blue-600 text-white">
-              {isMutating ? "Đang lưu..." : "Tạo danh mục"}
+              {isMutating ? "Đang lưu..." : (isEdit ? "Cập nhật" : "Tạo danh mục")}
             </Button>
           </DialogFooter>
         </form>
