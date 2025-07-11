@@ -15,12 +15,14 @@ import { EvaluationCriteriaCategory } from "@/types/evaluation";
 import { useCategoryWithCriteria } from "@/hooks/useCriteria";
 import { useRolesSelection } from "@/hooks/useRole";
 import { toast } from "sonner";
+import AddCategoryModal from "@/components/evaluation/add-category-modal";
 
 const CriteriaManagement: React.FC = () => {
   const { data: roleData, isLoading: roleLoading, error: roleError } = useRolesSelection();
   const [roleId, setRoleId] = useState<string>("");
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [showAddCategory, setShowAddCategory] = useState(false);
   // Lấy dữ liệu từ hook
   const { data, isLoading, isError } = useCategoryWithCriteria({ role_id: roleId, search });
 
@@ -108,6 +110,7 @@ const CriteriaManagement: React.FC = () => {
             <Button
               className="mt-2 bg-green-100 text-green-700 hover:bg-green-200 border border-green-400"
               size="sm"
+              onClick={() => setShowAddCategory(true)}
             >
               <Plus className="w-4 h-4 mr-1" /> Tạo danh mục
             </Button>
@@ -184,6 +187,15 @@ const CriteriaManagement: React.FC = () => {
           )}
         </div>
       </div>
+      <AddCategoryModal
+        open={showAddCategory}
+        onOpenChange={setShowAddCategory}
+        roleId={roleId}
+        search={search}
+        onSuccess={() => {
+          setShowAddCategory(false);
+        }}
+      />
     </div>
   );
 };

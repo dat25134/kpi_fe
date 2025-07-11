@@ -39,7 +39,7 @@ export const evaluationService = {
   deleteEvaluation: async (id: number): Promise<void> => {
     await apiClient.delete(API_ENDPOINTS.EVALUATIONS.DELETE(id))
   },
-} 
+}
 
 export async function fetchCategoryWithCriteria(filters: CategoryCriteriaFilter = {}): Promise<CategoryCriteriaResponse> {
   const params = new URLSearchParams();
@@ -53,4 +53,9 @@ export async function fetchCategoryWithCriteria(filters: CategoryCriteriaFilter 
 
   const response = await apiClient.get(`${API_ENDPOINTS.EVALUATION_CRITERIA.LIST}?${params.toString()}`);
   return response.data;
+}
+
+export async function createCategoryCriteria(payload: { name: string }) {
+  const response = await apiClient.post(API_ENDPOINTS.EVALUATION_CRITERIA.CREATE, payload);
+  return response.data.data;
 }

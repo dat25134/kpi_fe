@@ -1,5 +1,6 @@
 import useSWR from "swr";
-import { fetchCategoryWithCriteria } from "@/services/evaluation";
+import useSWRMutation from "swr/mutation";
+import { fetchCategoryWithCriteria, createCategoryCriteria } from "@/services/evaluation";
 import { CategoryCriteriaFilter } from "@/types/evaluation";
 
 export function useCategoryWithCriteria(filters: CategoryCriteriaFilter = {}) {
@@ -13,4 +14,11 @@ export function useCategoryWithCriteria(filters: CategoryCriteriaFilter = {}) {
     isLoading: shouldFetch ? isLoading : false,
     isError: shouldFetch ? error : false,
   };
+}
+
+export function useCreateCategory() {
+  return useSWRMutation(
+    "create-category",
+    (_key, { arg }: { arg: { name: string } }) => createCategoryCriteria(arg)
+  );
 } 
