@@ -171,32 +171,36 @@ const CriteriaManagement: React.FC = () => {
           ) : (
             categoryList.map((cat: EvaluationCriteriaCategory) => (
               <div key={cat.id} className="bg-white rounded shadow-sm p-4 border border-gray-200">
-                <div className="flex items-center mb-2">
-                  <span className="font-semibold text-base mr-2">{cat.name}</span>
-                  <span className="text-xs text-gray-500">
-                    ({cat.evaluation_criteria.length} tiêu chí)
-                  </span>
-                  <span className="ml-4 text-xs text-blue-600">
-                    Tối đa: {cat.evaluation_criteria.reduce((s, c) => s + parseFloat(c.max_score), 0)} điểm
-                  </span>
-                  <Button className="ml-auto bg-blue-600 text-white" size="sm" onClick={() => setShowCreateCriteria({ categoryId: cat.id })}>
-                    <Plus className="w-4 h-4 mr-1" /> Tạo tiêu chí
-                  </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="ml-2">
-                        <Settings className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => setEditCategory({ id: cat.id, name: cat.name })}>
-                        <Edit className="w-4 h-4 mr-2" /> Chỉnh sửa
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleDeleteClick({ id: cat.id, name: cat.name })} className="text-red-600">
-                        <Trash2 className="w-4 h-4 mr-2" /> Xóa
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                <div className="flex flex md:flex-row md:items-center md:mb-2 gap-2 md:gap-0">
+                  <div className="flex-1 flex flex-col md:flex-row md:items-center">
+                    <span className="font-semibold text-base mr-2">{cat.name}</span>
+                    <span className="text-xs text-gray-500 md:ml-2">
+                      ({cat.evaluation_criteria.length} tiêu chí)
+                    </span>
+                    <span className="text-xs text-blue-600 md:ml-4">
+                      Tối đa: {cat.evaluation_criteria.reduce((s, c) => s + parseFloat(c.max_score), 0)} điểm
+                    </span>
+                  </div>
+                  <div className="flex gap-2 mt-2 md:mt-0 md:ml-auto">
+                    <Button className="bg-blue-600 text-white" size="sm" onClick={() => setShowCreateCriteria({ categoryId: cat.id })}>
+                      <Plus className="w-4 h-4 mr-1" /> <span className="hidden sm:inline">Tạo tiêu chí</span>
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <Settings className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setEditCategory({ id: cat.id, name: cat.name })}>
+                          <Edit className="w-4 h-4 mr-2" /> Chỉnh sửa
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDeleteClick({ id: cat.id, name: cat.name })} className="text-red-600">
+                          <Trash2 className="w-4 h-4 mr-2" /> Xóa
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   {cat.evaluation_criteria.map((c) => (
