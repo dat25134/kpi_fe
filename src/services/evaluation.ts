@@ -1,4 +1,4 @@
-import { Evaluation, EvaluationResponse, EvaluationDetail, EvaluationCriteriaCategoryResponse, CategoryCriteriaFilter, CategoryCriteriaResponse } from '@/types/evaluation'
+import { Evaluation, EvaluationResponse, EvaluationDetail, EvaluationCriteriaCategoryResponse, CategoryCriteriaFilter, CategoryCriteriaResponse, CreateCriteriaPayload } from '@/types/evaluation'
 import apiClient from './apiClient'
 import { API_ENDPOINTS } from '@/config/api'
 import useSWR from 'swr'
@@ -64,4 +64,24 @@ export async function createCategoryCriteria(payload: { name: string }) {
 export async function updateCategoryCriteria(id: number, payload: { name: string }) {
   const response = await apiClient.put(API_ENDPOINTS.EVALUATION_CRITERIA.UPDATE_CATEGORY(id), payload);
   return response.data.data;
+}
+
+export async function deleteCategoryCriteria(id: number) {
+  const response = await apiClient.delete(API_ENDPOINTS.EVALUATION_CRITERIA.DELETE_CATEGORY(id));
+  return response.data;
+}
+
+export async function createCriteria(payload: CreateCriteriaPayload) {
+  const response = await apiClient.post(API_ENDPOINTS.EVALUATION_CRITERIA.CREATE_CRITERIA, payload);
+  return response.data.data;
+}
+
+export async function updateCriteria(id: number, payload: Partial<CreateCriteriaPayload>) {
+  const response = await apiClient.put(API_ENDPOINTS.EVALUATION_CRITERIA.UPDATE_CRITERIA(id), payload);
+  return response.data.data;
+}
+
+export async function deleteCriteria(id: number) {
+  const response = await apiClient.delete(API_ENDPOINTS.EVALUATION_CRITERIA.DELETE_CRITERIA(id));
+  return response.data;
 }

@@ -319,3 +319,12 @@ export interface CategoryCriteriaFilter {
 export interface CategoryCriteriaResponse {
   data: EvaluationCriteriaCategory[];
 }
+
+export interface CreateCriteriaPayload {
+  role_id: number;
+  category_criteria_id: number;
+  name: string;
+  description: string;
+  max_score: number;
+  is_active: boolean;
+}

@@ -49,7 +49,6 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ open, onOpenChange,
         await trigger({ name });
         toast.success("Tạo danh mục thành công!");
       }
-      mutate(["category-with-criteria", { role_id: roleId, search }]);
       resetForm();
       onOpenChange(false);
       onSuccess && onSuccess();

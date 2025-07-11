@@ -1,6 +1,7 @@
 import { API_CONFIG, API_ENDPOINTS } from "@/config/api";
 import { getAuthToken } from "./auth";
 import apiClient from "./apiClient";
+import { CreateCriteriaPayload } from "@/types/evaluation";
 
 const getConfig = () => {
   const token = getAuthToken();

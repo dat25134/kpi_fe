@@ -11,8 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Edit, Plus, Settings, Trash2 } from "lucide-react";
+import { fetchCategoryWithCriteria } from "@/services/evaluation";
 import { EvaluationCriteriaCategory } from "@/types/evaluation";
-import { useCategoryWithCriteria } from "@/hooks/useCriteria";
 import { useRolesSelection } from "@/hooks/useRole";
 import { toast } from "sonner";
 import AddCategoryModal from "@/components/evaluation/add-category-modal";
@@ -22,6 +22,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import DeleteCategoryModal from "@/components/evaluation/delete-category-modal";
+import CreateCriteriaModal from "@/components/evaluation/create-criteria-modal";
+import EditCriteriaModal from "@/components/evaluation/edit-criteria-modal";
+import ConfirmDeleteModal from "@/components/shared/confirm-delete-modal";
+import { useDeleteCriteria } from "@/hooks/useCriteria";
 
 const CriteriaManagement: React.FC = () => {
   const { data: roleData, isLoading: roleLoading, error: roleError } = useRolesSelection();
@@ -30,8 +35,34 @@ const CriteriaManagement: React.FC = () => {
   const [search, setSearch] = useState("");
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [editCategory, setEditCategory] = useState<{ id: number; name: string } | null>(null);
-  // Lấy dữ liệu từ hook
-  const { data, isLoading, isError } = useCategoryWithCriteria({ role_id: roleId, search });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteCategory, setDeleteCategory] = useState<{ id: number; name: string } | null>(null);
+  const [showCreateCriteria, setShowCreateCriteria] = useState<{ categoryId: number } | null>(null);
+  const [categoryList, setCategoryList] = useState<EvaluationCriteriaCategory[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [editCriteria, setEditCriteria] = useState<any | null>(null);
+  const [deleteCriteria, setDeleteCriteria] = useState<any | null>(null);
+  const [showDeleteCriteriaModal, setShowDeleteCriteriaModal] = useState(false);
+  const { trigger: deleteCriteriaTrigger, isMutating: isDeletingCriteria } = useDeleteCriteria();
+
+  const fetchCategoryList = async () => {
+    setIsLoading(true);
+    setIsError(false);
+    try {
+      const res = await fetchCategoryWithCriteria({ role_id: roleId, search });
+      setCategoryList(res.data || []);
+    } catch (e) {
+      setIsError(true);
+      setCategoryList([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (roleId) fetchCategoryList();
+  }, [roleId, search]);
 
   React.useEffect(() => {
     if (isError) {
@@ -40,11 +71,11 @@ const CriteriaManagement: React.FC = () => {
   }, [isError]);
 
   // Tổng số tiêu chí và tổng điểm tối đa
-  const totalCriteria = data.reduce(
+  const totalCriteria = categoryList.reduce(
     (sum: number, cat: EvaluationCriteriaCategory) => sum + cat.evaluation_criteria.length,
     0
   );
-  const totalMaxScore = data.reduce(
+  const totalMaxScore = categoryList.reduce(
     (sum: number, cat: EvaluationCriteriaCategory) =>
       sum + cat.evaluation_criteria.reduce((s, c) => s + parseFloat(c.max_score), 0),
     0
@@ -59,6 +90,11 @@ const CriteriaManagement: React.FC = () => {
     setRoleId(value);
     setSearchInput("");
     setSearch("");
+  };
+
+  const handleDeleteClick = (cat: { id: number; name: string }) => {
+    setDeleteCategory(cat);
+    setShowDeleteModal(true);
   };
 
   return (
@@ -128,12 +164,12 @@ const CriteriaManagement: React.FC = () => {
             <div className="text-center text-gray-400 py-8">Vui lòng chọn vai trò</div>
           ) : isLoading ? (
             <div className="text-center text-gray-400 py-8">Đang tải dữ liệu...</div>
-          ) : isError || data.length === 0 ? (
+          ) : isError || categoryList.length === 0 ? (
             <div className="text-center text-gray-400 py-8">
               Không có danh mục tiêu chí phù hợp.
             </div>
           ) : (
-            data.map((cat: EvaluationCriteriaCategory) => (
+            categoryList.map((cat: EvaluationCriteriaCategory) => (
               <div key={cat.id} className="bg-white rounded shadow-sm p-4 border border-gray-200">
                 <div className="flex items-center mb-2">
                   <span className="font-semibold text-base mr-2">{cat.name}</span>
@@ -143,7 +179,7 @@ const CriteriaManagement: React.FC = () => {
                   <span className="ml-4 text-xs text-blue-600">
                     Tối đa: {cat.evaluation_criteria.reduce((s, c) => s + parseFloat(c.max_score), 0)} điểm
                   </span>
-                  <Button className="ml-auto bg-blue-600 text-white" size="sm">
+                  <Button className="ml-auto bg-blue-600 text-white" size="sm" onClick={() => setShowCreateCriteria({ categoryId: cat.id })}>
                     <Plus className="w-4 h-4 mr-1" /> Tạo tiêu chí
                   </Button>
                   <DropdownMenu>
@@ -156,7 +192,7 @@ const CriteriaManagement: React.FC = () => {
                       <DropdownMenuItem onClick={() => setEditCategory({ id: cat.id, name: cat.name })}>
                         <Edit className="w-4 h-4 mr-2" /> Chỉnh sửa
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => {/* TODO: handle delete */}} className="text-red-600">
+                      <DropdownMenuItem onClick={() => handleDeleteClick({ id: cat.id, name: cat.name })} className="text-red-600">
                         <Trash2 className="w-4 h-4 mr-2" /> Xóa
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -183,6 +219,7 @@ const CriteriaManagement: React.FC = () => {
                         variant="ghost"
                         size="icon"
                         className="text-blue-600"
+                        onClick={() => setEditCriteria({ ...c, categoryId: cat.id, roleId })}
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -190,6 +227,7 @@ const CriteriaManagement: React.FC = () => {
                         variant="ghost"
                         size="icon"
                         className="text-red-600"
+                        onClick={() => { setDeleteCriteria({ ...c, categoryId: cat.id }); setShowDeleteCriteriaModal(true); }}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -212,7 +250,10 @@ const CriteriaManagement: React.FC = () => {
         roleId={roleId}
         search={search}
         isEdit={false}
-        onSuccess={() => setShowAddCategory(false)}
+        onSuccess={() => {
+          setShowAddCategory(false);
+          fetchCategoryList();
+        }}
       />
       <AddCategoryModal
         key={editCategory?.id || 'edit'}
@@ -223,7 +264,58 @@ const CriteriaManagement: React.FC = () => {
         isEdit={true}
         category_id={editCategory?.id}
         category_name={editCategory?.name}
-        onSuccess={() => setEditCategory(null)}
+        onSuccess={() => {
+          setEditCategory(null);
+          fetchCategoryList();
+        }}
+      />
+      <DeleteCategoryModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        categoryId={deleteCategory?.id}
+        categoryName={deleteCategory?.name}
+        roleId={roleId}
+        search={search}
+        onSuccess={() => {
+          setShowDeleteModal(false);
+          fetchCategoryList();
+        }}
+      />
+      <CreateCriteriaModal
+        open={!!showCreateCriteria}
+        onOpenChange={(open) => { if (!open) setShowCreateCriteria(null); }}
+        categoryId={showCreateCriteria?.categoryId || 0}
+        roleId={Number(roleId)}
+        search={search}
+        onSuccess={() => {
+          setShowCreateCriteria(null);
+          fetchCategoryList();
+        }}
+      />
+      <EditCriteriaModal
+        open={!!editCriteria}
+        onOpenChange={(open) => { if (!open) setEditCriteria(null); }}
+        criteria={editCriteria}
+        onSuccess={() => { setEditCriteria(null); fetchCategoryList(); }}
+      />
+      <ConfirmDeleteModal
+        open={showDeleteCriteriaModal}
+        onOpenChange={setShowDeleteCriteriaModal}
+        title="Xác nhận xoá tiêu chí"
+        description={`Bạn có chắc chắn muốn xoá tiêu chí "${deleteCriteria?.name}"?`}
+        onConfirm={async () => {
+          if (deleteCriteria?.id) {
+            try {
+              await deleteCriteriaTrigger({ id: deleteCriteria.id });
+              toast.success("Xoá tiêu chí thành công!");
+              setShowDeleteCriteriaModal(false);
+              setDeleteCriteria(null);
+              fetchCategoryList();
+            } catch (e: any) {
+              toast.error(e?.message || "Xoá thất bại");
+            }
+          }
+        }}
       />
     </div>
   );
