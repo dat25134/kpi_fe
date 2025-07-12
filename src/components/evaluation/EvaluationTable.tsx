@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { FileText, Trash2 } from "lucide-react";
-import { cn, getRoleLabel, getStatusBadgeVariant, getStatusLabel, getStatusType } from "@/lib/utils";
+import { cn, getStatusBadgeVariant, getStatusLabel, getStatusType } from "@/lib/utils";
 import React from "react";
 
 interface EvaluationTableProps {
@@ -95,7 +95,7 @@ export default function EvaluationTable({ evaluations, loading, error, onView, o
               </TableCell>
               <TableCell>
                 <Badge variant="outline" className="text-xs">
-                  {getRoleLabel(item.user.role)}
+                  {item.user.roleName}
                 </Badge>
               </TableCell>
               <TableCell>{`${item.month}/${item.year}`}</TableCell>

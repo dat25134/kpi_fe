@@ -121,6 +121,7 @@ export interface EvaluationUser {
   name: string
   department: string
   role: string
+  roleName: string
 }
 
 export interface Evaluation {

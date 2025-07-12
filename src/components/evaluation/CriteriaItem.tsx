@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { cn, getScoreColor } from "@/lib/utils"
 import type { EvaluationCriteriaDetail } from "@/types/evaluation"
+import CriteriaScoreBlock from "./CriteriaScoreBlock"
 
 function getScoreBadge(score: string | null, maxScore: string) {
   if (!score) return null
@@ -33,19 +34,21 @@ function getScoreBadge(score: string | null, maxScore: string) {
 interface CriteriaItemProps {
   item: EvaluationCriteriaDetail
   index: number
-  isReadOnly?: boolean
   onScoreChange?: (id: number, field: string, value: string) => void
   onCommentChange?: (id: number, field: string, value: string) => void
   showSeparator?: boolean
+  mode: 'self' | 'level1' | 'level2'
+  isReadOnly?: boolean
 }
 
 export default function CriteriaItem({
   item,
   index,
-  isReadOnly = true,
   onScoreChange,
   onCommentChange,
-  showSeparator = true
+  showSeparator = true,
+  mode,
+  isReadOnly
 }: CriteriaItemProps) {
   return (
     <div className="space-y-4">
@@ -63,123 +66,44 @@ export default function CriteriaItem({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Self Evaluation */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-blue-600">
-            Tự đánh giá
-          </Label>
-          <div className="flex items-center gap-2">
-            <Input
-              type="number"
-              min="0"
-              max={parseFloat(item.criteria.max_score)}
-              step="0.01"
-              value={item.self_score || ""}
-              onChange={(e) => onScoreChange?.(item.id, "self_score", e.target.value)}
-              readOnly={isReadOnly}
-              className={cn(
-                "w-20",
-                getScoreColor(item.self_score, item.criteria.max_score)
-              )}
-            />
-            <span className="text-sm text-gray-500">
-              / {item.criteria.max_score}
-            </span>
-          </div>
-          <Textarea
-            placeholder="Nhận xét tự đánh giá..."
-            value={item.self_comment || ""}
-            onChange={(e) => onCommentChange?.(item.id, "self_comment", e.target.value)}
-            readOnly={isReadOnly}
-            className="min-h-[80px] text-sm"
-          />
-        </div>
-
-        {/* Level 1 Evaluation */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-green-600">
-            Đánh giá cấp trên
-          </Label>
-          <div className="flex items-center gap-2">
-            <Input
-              type="number"
-              min="0"
-              max={parseFloat(item.criteria.max_score)}
-              step="0.01"
-              value={item.level1_score || ""}
-              onChange={(e) => onScoreChange?.(item.id, "level1_score", e.target.value)}
-              readOnly={isReadOnly}
-              className={cn(
-                "w-20",
-                getScoreColor(item.level1_score, item.criteria.max_score)
-              )}
-            />
-            <span className="text-sm text-gray-500">
-              / {item.criteria.max_score}
-            </span>
-          </div>
-          <Textarea
-            placeholder="Nhận xét cấp trên..."
-            value={item.level1_comment || ""}
-            onChange={(e) => onCommentChange?.(item.id, "level1_comment", e.target.value)}
-            readOnly={isReadOnly}
-            className="min-h-[80px] text-sm"
-          />
-        </div>
-      </div>
-
-      {/* Level 2 Evaluation (if exists) */}
-      {(item.level2_score || item.level2_comment) && (
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-purple-600">
-            Đánh giá cấp 2
-          </Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                min="0"
-                max={parseFloat(item.criteria.max_score)}
-                step="0.01"
-                value={item.level2_score || ""}
-                onChange={(e) => onScoreChange?.(item.id, "level2_score", e.target.value)}
-                readOnly={isReadOnly}
-                className={cn(
-                  "w-20",
-                  getScoreColor(item.level2_score, item.criteria.max_score)
-                )}
-              />
-              <span className="text-sm text-gray-500">
-                / {item.criteria.max_score}
-              </span>
-            </div>
-            <Textarea
-              placeholder="Nhận xét cấp 2..."
-              value={item.level2_comment || ""}
-              onChange={(e) => onCommentChange?.(item.id, "level2_comment", e.target.value)}
-              readOnly={isReadOnly}
-              className="min-h-[80px] text-sm"
-            />
-          </div>
-        </div>
+      {mode === 'self' && (
+        <CriteriaScoreBlock
+          label="Tự đánh giá"
+          score={item.self_score}
+          comment={item.self_comment}
+          maxScore={item.criteria.max_score}
+          placeholder="Nhận xét tự đánh giá..."
+          readOnly={isReadOnly}
+          onScoreChange={value => onScoreChange?.(item.id, "self_score", value)}
+          onCommentChange={value => onCommentChange?.(item.id, "self_comment", value)}
+        />
       )}
 
-      {/* Final Score */}
-      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-        <span className="font-medium text-sm">Điểm cuối cùng:</span>
-        <div className="flex items-center gap-2">
-          <span className={cn(
-            "font-bold text-lg",
-            getScoreColor(item.final_score, item.criteria.max_score)
-          )}>
-            {item.final_score || "0"}
-          </span>
-          <span className="text-sm text-gray-500">
-            / {item.criteria.max_score}
-          </span>
-        </div>
-      </div>
+      {mode === 'level1' && (
+        <CriteriaScoreBlock
+          label="Đánh giá cấp 1"
+          score={item.level1_score}
+          comment={item.level1_comment}
+          maxScore={item.criteria.max_score}
+          placeholder="Nhận xét cấp 1..."
+          readOnly={isReadOnly}
+          onScoreChange={value => onScoreChange?.(item.id, "level1_score", value)}
+          onCommentChange={value => onCommentChange?.(item.id, "level1_comment", value)}
+        />
+      )}
+
+      {mode === 'level2' && (
+        <CriteriaScoreBlock
+          label="Đánh giá cấp 2"
+          score={item.level2_score}
+          comment={item.level2_comment}
+          maxScore={item.criteria.max_score}
+          placeholder="Nhận xét cấp 2..."
+          readOnly={isReadOnly}
+          onScoreChange={value => onScoreChange?.(item.id, "level2_score", value)}
+          onCommentChange={value => onCommentChange?.(item.id, "level2_comment", value)}
+        />
+      )}
 
       {showSeparator && <Separator />}
     </div>

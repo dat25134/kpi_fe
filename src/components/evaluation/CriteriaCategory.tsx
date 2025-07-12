@@ -7,27 +7,38 @@ import CriteriaItem from "./CriteriaItem"
 interface CriteriaCategoryProps {
   category: string
   criteria: EvaluationCriteriaDetail[]
-  isReadOnly?: boolean
   onScoreChange?: (id: number, field: string, value: string) => void
   onCommentChange?: (id: number, field: string, value: string) => void
+  mode: 'self' | 'level1' | 'level2'
 }
 
 export default function CriteriaCategory({
   category,
-  criteria,
-  isReadOnly = true,
+  criteria, 
   onScoreChange,
-  onCommentChange
+  onCommentChange,
+  mode
 }: CriteriaCategoryProps) {
+
   return (
-    <Card>
+    <Card className="mb-4">
       <CardHeader>
         <CardTitle className="text-lg">
-          Tên Nhóm tiêu chí
+          {category}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        Hiển thị list tiêu chí đánh giá theo tên nhóm tiêu chí
+        {criteria.map((item, index) => (
+          <CriteriaItem
+            key={item.id}
+            item={item}
+            index={index}
+            onScoreChange={onScoreChange}
+            onCommentChange={onCommentChange}
+            showSeparator={index < criteria.length - 1}
+            mode={mode}
+          />
+        ))}
       </CardContent>
     </Card>
   )

@@ -86,25 +86,6 @@ export function getStatusType(status: string) {
   }
 }
 
-export function getRoleLabel(role: string) {
-  switch (role) {
-    case "nhanvien":
-      return "Nhân viên"
-    case "chuyenvien":
-      return "Chuyên viên"
-    case "phophong":
-      return "Phó phòng"
-    case "truongphong":
-      return "Trưởng phòng"
-    case "chutich":
-      return "Chủ tịch"
-    case "phochutich":
-      return "Phó chủ tịch"
-    default:
-      return "Không xác định"
-  }
-}
-
 export function getStatusBadgeVariant(statusType: string) {
   switch (statusType) {
     case "waiting":
@@ -172,10 +153,7 @@ export function getQualityRatingBadgeVariant(rating: string): string {
 }
 
 export function calculateTotalScore(details: any[]): number {
-  if (!details) return 0
-  return details.reduce((total, item) => {
-    return total + (parseFloat(item.final_score || "0"))
-  }, 0)
+  return 100;
 }
 
 export function calculateKPIScore(workDescriptions: any[]): number {

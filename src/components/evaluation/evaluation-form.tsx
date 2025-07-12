@@ -85,7 +85,7 @@ export default function EvaluationForm() {
     tabs.push({ value: "personal", label: "Cá nhân" })
     
     // Role-based tabs
-    if (currentUserRole === "chutich" || currentUserRole === "phochutich") {
+    if (currentUserRole === "chutich" || currentUserRole === "phochutich" || currentUserRole === "admin") {
       // Chủ tịch/Phó chủ tịch can see all tabs
       tabs.push(
         { value: "employee", label: "Nhân viên" },

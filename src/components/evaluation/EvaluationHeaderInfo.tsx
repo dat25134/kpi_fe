@@ -3,7 +3,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { getRoleLabel } from "@/lib/utils"
 import type { EvaluationHeaderInfoProps } from "@/types/evaluation"
 
 export default function EvaluationHeaderInfo({ user, month, year }: EvaluationHeaderInfoProps) {
@@ -20,11 +19,11 @@ export default function EvaluationHeaderInfo({ user, month, year }: EvaluationHe
           </div>
           <div>
             <Label className="text-sm font-medium">Đơn vị công tác</Label>
-            <Input value={user?.department} readOnly className="mt-1" />
+            <Input value={user?.department ?? "Chưa có phòng ban"} readOnly className="mt-1" />
           </div>
           <div>
             <Label className="text-sm font-medium">Chức vụ</Label>
-            <Input value={getRoleLabel(user?.role)} readOnly className="mt-1" />
+            <Input value={user?.roleName} readOnly className="mt-1" />
           </div>
           <div>
             <Label className="text-sm font-medium">Tháng đánh giá</Label>

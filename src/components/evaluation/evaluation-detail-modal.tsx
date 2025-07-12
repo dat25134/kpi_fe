@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { TabsContent } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -11,6 +11,7 @@ import EvaluationTabsContainer from "./EvaluationTabsContainer"
 import WorkDescriptionTable from "./WorkDescriptionTable"
 import EvaluationSummary from "./EvaluationSummary"
 import { calculateTotalScore } from "@/lib/utils"
+import { type EvaluationCriteriaDetail } from "@/types/evaluation"
 
 interface EvaluationDetailModalProps {
   open: boolean
@@ -25,6 +26,20 @@ export default function EvaluationDetailModal({
 }: EvaluationDetailModalProps) {
   const { data, isLoading, error } = useEvaluationDetail(evaluationId, open)
   const [activeTab, setActiveTab] = useState("criteria")
+  const [details, setDetails] = useState<EvaluationCriteriaDetail[]>([])
+
+  useEffect(() => {
+    if (data?.details) {
+      setDetails(data.details)
+    }
+  }, [data?.details])
+
+  const handleScoreChange = (id: number, field: string, value: string) => {
+    setDetails(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item))
+  }
+  const handleCommentChange = (id: number, field: string, value: string) => {
+    setDetails(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item))
+  }
 
   if (!open) return null;
   if (isLoading) return (
@@ -35,7 +50,7 @@ export default function EvaluationDetailModal({
   );
   if (!data) return null;
 
-  const totalScore = calculateTotalScore(data?.details)
+  const totalScore = calculateTotalScore(details)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -49,52 +64,51 @@ export default function EvaluationDetailModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Header Info */}
-          <EvaluationHeaderInfo 
-            user={data.user}
-            month={data.month}
-            year={data.year}
-          />
+        {/* Header Info */}
+        <EvaluationHeaderInfo 
+          user={data.user}
+          month={data.month}
+          year={data.year}
+        />
 
-          {/* Evaluation Tabs */}
-          <EvaluationTabsContainer 
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          >
-            <TabsContent value="criteria" className="space-y-4">
-              <EvaluationCriteriaList 
-                details={data?.details} 
-                isReadOnly={true}
-              />
-            </TabsContent>
+        {/* Evaluation Tabs */}
+        <EvaluationTabsContainer 
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        >
+          <TabsContent value="criteria" className="space-y-4">
+            <EvaluationCriteriaList 
+              details={details}
+              onScoreChange={handleScoreChange}
+              onCommentChange={handleCommentChange}
+            />
+          </TabsContent>
 
-            <TabsContent value="workDescription" className="space-y-4">
-              <WorkDescriptionTable 
-                workDescriptions={data?.work_descriptions}
-              />
-            </TabsContent>
+          <TabsContent value="workDescription" className="space-y-4">
+            <WorkDescriptionTable 
+              workDescriptions={data?.work_descriptions}
+            />
+          </TabsContent>
 
-            <TabsContent value="summary" className="space-y-4">
-              <EvaluationSummary 
-                details={data?.details}
-                totalScore={totalScore}
-              />
-            </TabsContent>
-          </EvaluationTabsContainer>
+          <TabsContent value="summary" className="space-y-4">
+            <EvaluationSummary 
+              details={details}
+              totalScore={totalScore}
+            />
+          </TabsContent>
+        </EvaluationTabsContainer>
 
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Đóng
-            </Button>
-            <Button variant="outline">
-              Lưu nháp
-            </Button>
-            <Button>
-              Gửi đánh giá
-            </Button>
-          </div>
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Đóng
+          </Button>
+          <Button variant="outline">
+            Lưu nháp
+          </Button>
+          <Button>
+            Gửi đánh giá
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
