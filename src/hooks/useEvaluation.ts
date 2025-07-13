@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { evaluationService } from '@/services/evaluation'
-import { Evaluation, EvaluationResponse } from '@/types/evaluation'
+import { Evaluation, EvaluationResponse, SaveEvaluationRequest, SaveEvaluationResponse } from '@/types/evaluation'
 
 export interface UseEvaluationParams {
   page?: number
@@ -14,6 +14,12 @@ export interface UseEvaluationParams {
   name?: string
 }
 
+const defaultParams: UseEvaluationParams = {
+  page: 1,
+  limit: 10,
+  type: 'personal',
+}
+
 export const useEvaluation = (params: UseEvaluationParams = {}) => {
   const [evaluations, setEvaluations] = useState<Evaluation[]>([])
   const [loading, setLoading] = useState(false)
@@ -21,9 +27,10 @@ export const useEvaluation = (params: UseEvaluationParams = {}) => {
   const [pagination, setPagination] = useState<EvaluationResponse['pagination'] | null>(null)
 
   const fetchEvaluations = async (fetchParams: UseEvaluationParams = {}) => {
+    const mergedParams = { ...defaultParams, ...fetchParams }
     setLoading(true)
     setError(null)
-    const response = await evaluationService.getEvaluations(fetchParams)
+    const response = await evaluationService.getEvaluations(mergedParams)
     setEvaluations(response.data)
     setPagination(response.pagination)
     setLoading(false)
@@ -55,6 +62,20 @@ export const useEvaluation = (params: UseEvaluationParams = {}) => {
     return updatedEvaluation
   }
 
+  const saveEvaluation = async (id: number, data: SaveEvaluationRequest): Promise<SaveEvaluationResponse> => {
+    setLoading(true)
+    try {
+      const response = await evaluationService.saveEvaluation(id, data)
+      // Refresh evaluations list after save
+      await refetch()
+      setLoading(false)
+      return response
+    } catch (error) {
+      setLoading(false)
+      throw error
+    }
+  }
+
   const deleteEvaluation = async (id: number) => {
     setLoading(true)
     await evaluationService.deleteEvaluation(id)
@@ -70,6 +91,7 @@ export const useEvaluation = (params: UseEvaluationParams = {}) => {
     refetch,
     createEvaluation,
     updateEvaluation,
+    saveEvaluation,
     deleteEvaluation
   }
 } 

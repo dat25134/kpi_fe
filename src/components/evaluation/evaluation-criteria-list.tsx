@@ -8,12 +8,14 @@ interface EvaluationCriteriaListProps {
   details: EvaluationCriteriaDetail[]
   onScoreChange?: (id: number, field: string, value: string) => void
   onCommentChange?: (id: number, field: string, value: string) => void
+  isReadOnly?: boolean
 }
 
 export default function EvaluationCriteriaList({
   details,
   onScoreChange,
-  onCommentChange
+  onCommentChange,
+  isReadOnly = false
 }: EvaluationCriteriaListProps) {
   // Group criteria by category
   const groupedCriteria = details?.reduce((acc, item) => {
@@ -47,6 +49,7 @@ export default function EvaluationCriteriaList({
             onScoreChange={onScoreChange}
             onCommentChange={onCommentChange}
             mode="self"
+            isReadOnly={isReadOnly}
           />
         ))}
       </TabsContent>
@@ -59,6 +62,7 @@ export default function EvaluationCriteriaList({
             onScoreChange={onScoreChange}
             onCommentChange={onCommentChange}
             mode="level1"
+            isReadOnly={isReadOnly}
           />
         ))}
       </TabsContent>
@@ -71,6 +75,7 @@ export default function EvaluationCriteriaList({
             onScoreChange={onScoreChange}
             onCommentChange={onCommentChange}
             mode="level2"
+            isReadOnly={isReadOnly}
           />
         ))}
       </TabsContent>

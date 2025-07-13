@@ -48,7 +48,7 @@ export default function CriteriaItem({
   onCommentChange,
   showSeparator = true,
   mode,
-  isReadOnly
+  isReadOnly = false
 }: CriteriaItemProps) {
   return (
     <div className="space-y-4">

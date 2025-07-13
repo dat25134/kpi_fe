@@ -195,3 +195,110 @@ export function calculateFinalPoints(weightedQualityPoints: number, complexityWe
   return weightedQualityPoints * complexityWeight
 }
 
+// Utility functions cho evaluation
+export const getEvaluationStatusLabel = (status: string): string => {
+  const statusMap: Record<string, string> = {
+    draft: 'Nháp',
+    submitted: 'Đã gửi',
+    level1_approved: 'Đã đánh giá cấp 1',
+    level2_approved: 'Đã đánh giá cấp 2',
+    completed: 'Hoàn thành'
+  }
+  return statusMap[status] || status
+}
+
+export const getEvaluationStatusColor = (status: string): string => {
+  const colorMap: Record<string, string> = {
+    draft: 'bg-gray-100 text-gray-800',
+    submitted: 'bg-blue-100 text-blue-800',
+    level1_approved: 'bg-yellow-100 text-yellow-800',
+    level2_approved: 'bg-green-100 text-green-800',
+    completed: 'bg-purple-100 text-purple-800'
+  }
+  return colorMap[status] || 'bg-gray-100 text-gray-800'
+}
+
+export const canEditEvaluation = (currentStatus: string, userRole: string, targetStatus: string): boolean => {
+  // Quy tắc chuyển đổi status
+  const statusFlow = {
+    draft: ['draft', 'submitted'],
+    submitted: ['submitted', 'level1_approved'],
+    level1_approved: ['level1_approved', 'level2_approved'],
+    level2_approved: ['level2_approved', 'completed'],
+    completed: ['completed']
+  }
+
+  const allowedTransitions = statusFlow[currentStatus as keyof typeof statusFlow] || []
+  return allowedTransitions.includes(targetStatus)
+}
+
+export const canEditByRole = (status: string, userRole: string): boolean => {
+  // Nhân viên chỉ có thể edit khi status là draft
+  if (userRole === 'nhanvien' || userRole === 'chuyenvien') {
+    return status === 'draft'
+  }
+  
+  // Trưởng phòng có thể đánh giá cấp 1
+  if (userRole === 'truongphong') {
+    return status === 'submitted' || status === 'level1_approved'
+  }
+  
+  // Phó phòng có thể đánh giá cấp 1
+  if (userRole === 'phophong') {
+    return status === 'submitted' || status === 'level1_approved'
+  }
+  
+  // Admin/Chủ tịch/Phó chủ tịch có thể đánh giá tất cả
+  if (userRole === 'admin' || userRole === 'chutich' || userRole === 'phochutich') {
+    return true
+  }
+  
+  return false
+}
+
+export const formatEvaluationDataForSave = (
+  details: any[],
+  status: string,
+  workDescriptions?: any[]
+) => {
+  const requestData: any = {
+    status
+  }
+
+  // Chỉ gửi evaluation_details khi cần thiết
+  if (status === 'draft' || status === 'level1_approved' || status === 'level2_approved') {
+    requestData.evaluation_details = details.map(detail => {
+      const item: any = {
+        criteria_id: detail.criteria.id
+      }
+
+      if (status === 'draft') {
+        if (detail.self_score) item.self_score = parseFloat(detail.self_score)
+        if (detail.self_comment) item.self_comment = detail.self_comment
+      } else if (status === 'level1_approved') {
+        if (detail.level1_score) item.level1_score = parseFloat(detail.level1_score)
+        if (detail.level1_comment) item.level1_comment = detail.level1_comment
+      } else if (status === 'level2_approved') {
+        if (detail.level2_score) item.level2_score = parseFloat(detail.level2_score)
+        if (detail.level2_comment) item.level2_comment = detail.level2_comment
+      }
+
+      return item
+    }).filter(item => {
+      // Chỉ gửi những item có dữ liệu
+      return Object.keys(item).length > 1 // Có ít nhất 1 field ngoài criteria_id
+    })
+  }
+
+  // Tạm thời bỏ qua work_descriptions theo yêu cầu
+  // if (workDescriptions && workDescriptions.length > 0) {
+  //   requestData.work_descriptions = workDescriptions.map(wd => ({
+  //     id: wd.id,
+  //     result_level: wd.result_level,
+  //     quality_weight: wd.quality_weight
+  //   }))
+  // }
+
+  return requestData
+}
+

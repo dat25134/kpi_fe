@@ -10,6 +10,7 @@ interface CriteriaCategoryProps {
   onScoreChange?: (id: number, field: string, value: string) => void
   onCommentChange?: (id: number, field: string, value: string) => void
   mode: 'self' | 'level1' | 'level2'
+  isReadOnly?: boolean
 }
 
 export default function CriteriaCategory({
@@ -17,7 +18,8 @@ export default function CriteriaCategory({
   criteria, 
   onScoreChange,
   onCommentChange,
-  mode
+  mode,
+  isReadOnly = false
 }: CriteriaCategoryProps) {
 
   return (
@@ -37,6 +39,7 @@ export default function CriteriaCategory({
             onCommentChange={onCommentChange}
             showSeparator={index < criteria.length - 1}
             mode={mode}
+            isReadOnly={isReadOnly}
           />
         ))}
       </CardContent>

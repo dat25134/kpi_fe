@@ -1,4 +1,4 @@
-import { Evaluation, EvaluationResponse, EvaluationDetail, EvaluationCriteriaCategoryResponse, CategoryCriteriaFilter, CategoryCriteriaResponse, CreateCriteriaPayload } from '@/types/evaluation'
+import { Evaluation, EvaluationResponse, EvaluationDetail, EvaluationCriteriaCategoryResponse, CategoryCriteriaFilter, CategoryCriteriaResponse, CreateCriteriaPayload, SaveEvaluationRequest, SaveEvaluationResponse } from '@/types/evaluation'
 import apiClient from './apiClient'
 import { API_ENDPOINTS } from '@/config/api'
 import useSWR from 'swr'
@@ -32,6 +32,12 @@ export const evaluationService = {
   // Cập nhật phiếu đánh giá
   updateEvaluation: async (id: number, data: Partial<Evaluation>): Promise<Evaluation> => {
     const response = await apiClient.put(API_ENDPOINTS.EVALUATIONS.UPDATE(id), data)
+    return response.data
+  },
+
+  // Lưu đánh giá theo giai đoạn
+  saveEvaluation: async (id: number, data: SaveEvaluationRequest): Promise<SaveEvaluationResponse> => {
+    const response = await apiClient.post(API_ENDPOINTS.EVALUATIONS.SAVE(id), data)
     return response.data
   },
 
