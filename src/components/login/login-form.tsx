@@ -11,12 +11,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import { login, setAuthToken } from "@/services/auth"
 import { toast } from "sonner"
+import { getErrorMessage, getValidationErrors } from "@/services/errorHandler"
 
 export default function LoginForm() {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
+  const [errors, setErrors] = useState<Record<string, string[]>>({})
   const [isLoading, setIsLoading] = useState(false)
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -24,12 +25,14 @@ export default function LoginForm() {
 
     if (isLoading) return
 
-    setError("")
+    setErrors({})
     setIsLoading(true)
 
     try {
       if (!email || !password) {
-        setError("Vui lòng nhập email và mật khẩu")
+        setErrors({
+          email: ["Vui lòng nhập email và mật khẩu"]
+        })
         setIsLoading(false)
         return
       }
@@ -39,7 +42,7 @@ export default function LoginForm() {
       router.push("/dashboard")
     } catch (error: any) {
       toast.error("Đăng nhập thất bại")
-      setError(error?.message || "Đăng nhập thất bại. Vui lòng thử lại.")
+      setErrors(getValidationErrors(error) || {})
       setIsLoading(false)
     }
   }
@@ -57,10 +60,10 @@ export default function LoginForm() {
           <CardDescription>Nhập thông tin đăng nhập để truy cập hệ thống</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {error && (
+          {errors.email && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{errors.email}</AlertDescription>
             </Alert>
           )}
           <form onSubmit={handleLogin}>

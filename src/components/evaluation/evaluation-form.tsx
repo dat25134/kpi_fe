@@ -41,10 +41,10 @@ export default function EvaluationForm() {
   const getTabTypeParam = (tab: string) => {
     switch (tab) {
       case "personal": return "personal";
-      case "employee": return "nhanvien";
-      case "specialist": return "chuyenvien";
-      case "department": return "phophong";
-      case "manager": return "truongphong";
+      case "nhanvien": return "nhanvien";
+      case "chuyenvien": return "chuyenvien";
+      case "phophong": return "phophong";
+      case "truongphong": return "truongphong";
       default: return "personal";
     }
   };
@@ -62,7 +62,7 @@ export default function EvaluationForm() {
   } = useEvaluation({
     page: currentPage,
     limit: 10,
-    type: getTabTypeParam(activeTab),
+    type: getTabTypeParam(activeTab) ?? "personal",
     status: filterStatus !== "all" ? filterStatus : undefined,
     final_grade: filterRating !== "all" ? filterRating : undefined,
     month: filterPeriod !== "all" ? parseInt(filterPeriod.split('/')[0]) : undefined,
@@ -85,19 +85,19 @@ export default function EvaluationForm() {
     tabs.push({ value: "personal", label: "Cá nhân" })
     
     // Role-based tabs
-    if (currentUserRole === "chutich" || currentUserRole === "phochutich") {
+    if (currentUserRole === "chutich" || currentUserRole === "phochutich" || currentUserRole === "admin") {
       // Chủ tịch/Phó chủ tịch can see all tabs
       tabs.push(
-        { value: "employee", label: "Nhân viên" },
-        { value: "specialist", label: "Chuyên viên" },
-        { value: "department", label: "Phó phòng" },
-        { value: "manager", label: "Trưởng phòng" }
+        { value: "nhanvien", label: "Nhân viên" },
+        { value: "chuyenvien", label: "Chuyên viên" },
+        { value: "phophong", label: "Phó phòng" },
+        { value: "truongphong", label: "Trưởng phòng" }
       )
     } else if (currentUserRole === "truongphong" || currentUserRole === "phophong") {
       // Trưởng phòng/Phó phòng can see employee and specialist tabs
       tabs.push(
-        { value: "employee", label: "Nhân viên" },
-        { value: "specialist", label: "Chuyên viên" }
+        { value: "nhanvien", label: "Nhân viên" },
+        { value: "chuyenvien", label: "Chuyên viên" }
       )
     }
     

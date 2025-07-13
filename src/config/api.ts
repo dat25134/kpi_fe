@@ -68,6 +68,7 @@ export const API_ENDPOINTS = {
     UPDATE: (id: number) => `${API_URL}/evaluations/${id}`,
     DELETE: (id: number) => `${API_URL}/evaluations/${id}`,
     DETAIL: (id: number) => `${API_URL}/evaluations/${id}`,
+    SAVE: (id: number) => `${API_URL}/evaluations/${id}/save`,
   },
 
   EVALUATION_CRITERIA: {

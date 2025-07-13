@@ -121,6 +121,7 @@ export interface EvaluationUser {
   name: string
   department: string
   role: string
+  roleName: string
 }
 
 export interface Evaluation {
@@ -172,13 +173,12 @@ export interface EvaluationDetail {
   total_score: string
   details: EvaluationCriteriaDetail[]
   work_descriptions: WorkDescriptionItem[]
+  department: string
 }
 
 // New interfaces for component refactoring
 export interface EvaluationHeaderInfoProps {
-  user: EvaluationUser
-  month: number
-  year: number
+  data : EvaluationDetail
 }
 
 export interface EvaluationTabsContainerProps {
@@ -327,4 +327,34 @@ export interface CreateCriteriaPayload {
   description: string;
   max_score: number;
   is_active: boolean;
+}
+
+// Interface cho API Save Evaluation
+export interface SaveEvaluationRequest {
+  status: 'draft' | 'submitted' | 'level1_approved' | 'level2_approved' | 'completed';
+  evaluation_details?: Array<{
+    criteria_id: number;
+    self_score?: number;
+    self_comment?: string;
+    level1_score?: number;
+    level1_comment?: string;
+    level2_score?: number;
+    level2_comment?: string;
+  }>;
+  work_descriptions?: Array<{
+    id: number;
+    result_level?: number;
+    quality_weight?: number;
+  }>;
+}
+
+export interface SaveEvaluationResponse {
+  message: string;
+  data: EvaluationDetail;
+}
+
+// Interface cho validation errors
+export interface SaveEvaluationError {
+  message: string;
+  errors?: Record<string, string[]>;
 }

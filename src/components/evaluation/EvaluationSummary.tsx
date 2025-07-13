@@ -8,6 +8,20 @@ import type { EvaluationSummaryProps } from "@/types/evaluation"
 
 export default function EvaluationSummary({ details, totalScore }: EvaluationSummaryProps) {
   const qualityRating = getQualityRating(totalScore)
+
+  if (!details || details.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Tổng hợp kết quả đánh giá</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center text-gray-500 py-8">Chưa có tiêu chí đánh giá trong đợt này</div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card>
       <CardHeader>
