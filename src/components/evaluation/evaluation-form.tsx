@@ -142,6 +142,7 @@ export default function EvaluationForm() {
         setShowCreateEvaluationModal={handleCloseCreateModal}
         currentUser={currentUser}
         onConfirmCreateEvaluation={handleConfirmCreateEvaluation}
+        onSuccess={handleRefresh}
       />
     </div>
   )
