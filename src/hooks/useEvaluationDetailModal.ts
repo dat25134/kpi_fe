@@ -6,7 +6,7 @@ import { EvaluationCriteriaDetail, EvaluationDetailModalState, EvaluationDetailM
 import { formatEvaluationDataForSave, getActionButtonsConfig } from '@/lib/utils'
 import { toast } from 'sonner'
 
-export const useEvaluationDetailModal = (evaluationId?: number | string, open?: boolean) => {
+export const useEvaluationDetailModal = (evaluationId?: number | string, open?: boolean, onSuccess?: () => void) => {
   const { data, isLoading, error, refetch } = useEvaluationDetail(evaluationId, open)
   const { saveEvaluation } = useEvaluation()
   const { user } = useUser()
@@ -97,13 +97,14 @@ export const useEvaluationDetailModal = (evaluationId?: number | string, open?: 
       await saveEvaluation(Number(evaluationId), requestData)
       toast.success("Đã gửi đánh giá thành công!")
       await refetch()
+      if (onSuccess) onSuccess()
     } catch (error: any) {
       setFieldErrors(error?.response?.data?.errors || {})
       toast.error(error?.response?.data?.message || "Không thể gửi đánh giá. Vui lòng thử lại!")
     } finally {
       setState(prev => ({ ...prev, saving: false }))
     }
-  }, [data, evaluationId, state.details, saveEvaluation, refetch])
+  }, [data, evaluationId, state.details, saveEvaluation, refetch, onSuccess])
 
   const handleSubmit = useCallback(() => {
     showConfirm(
@@ -122,13 +123,14 @@ export const useEvaluationDetailModal = (evaluationId?: number | string, open?: 
       await saveEvaluation(Number(evaluationId), requestData)
       toast.success("Đã đánh giá cấp 1 thành công!")
       await refetch()
+      if (onSuccess) onSuccess()
     } catch (error: any) {
       setFieldErrors(error?.response?.data?.errors || {})
       toast.error(error?.response?.data?.message || "Không thể đánh giá cấp 1. Vui lòng thử lại!")
     } finally {
       setState(prev => ({ ...prev, saving: false }))
     }
-  }, [data, evaluationId, state.details, saveEvaluation, refetch])
+  }, [data, evaluationId, state.details, saveEvaluation, refetch, onSuccess])
 
   const handleLevel1Approve = useCallback(() => {
     showConfirm(
@@ -147,13 +149,14 @@ export const useEvaluationDetailModal = (evaluationId?: number | string, open?: 
       await saveEvaluation(Number(evaluationId), requestData)
       toast.success("Đã đánh giá cấp 2 thành công!")
       await refetch()
+      if (onSuccess) onSuccess()
     } catch (error: any) {
       setFieldErrors(error?.response?.data?.errors || {})
       toast.error(error?.response?.data?.message || "Không thể đánh giá cấp 2. Vui lòng thử lại!")
     } finally {
       setState(prev => ({ ...prev, saving: false }))
     }
-  }, [data, evaluationId, state.details, saveEvaluation, refetch])
+  }, [data, evaluationId, state.details, saveEvaluation, refetch, onSuccess])
 
   const handleLevel2Approve = useCallback(() => {
     showConfirm(
@@ -172,13 +175,14 @@ export const useEvaluationDetailModal = (evaluationId?: number | string, open?: 
       await saveEvaluation(Number(evaluationId), requestData)
       toast.success("Đã hoàn thành đánh giá!")
       await refetch()
+      if (onSuccess) onSuccess()
     } catch (error: any) {
       setFieldErrors(error?.response?.data?.errors || {})
       toast.error(error?.response?.data?.message || "Không thể hoàn thành đánh giá. Vui lòng thử lại!")
     } finally {
       setState(prev => ({ ...prev, saving: false }))
     }
-  }, [data, evaluationId, state.details, saveEvaluation, refetch])
+  }, [data, evaluationId, state.details, saveEvaluation, refetch, onSuccess])
 
   // Tab change handler
   const handleTabChange = useCallback((tab: string) => {

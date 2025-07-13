@@ -17,12 +17,14 @@ interface EvaluationDetailModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   evaluationId?: number | string
+  onSuccess?: () => void
 }
 
 export default function EvaluationDetailModal({ 
   open, 
   onOpenChange, 
-  evaluationId
+  evaluationId,
+  onSuccess
 }: EvaluationDetailModalProps) {
   const {
     // State
@@ -48,7 +50,7 @@ export default function EvaluationDetailModal({
     handleComplete,
     handleTabChange,
     fieldErrors
-  } = useEvaluationDetailModal(evaluationId, open)
+  } = useEvaluationDetailModal(evaluationId, open, onSuccess)
 
   if (!open) return null;
   if (isLoading) return (

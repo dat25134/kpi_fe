@@ -12,8 +12,9 @@ export default function EvaluationModals({
   showCreateEvaluationModal,
   setShowCreateEvaluationModal,
   currentUser,
-  onConfirmCreateEvaluation
-}: Omit<EvaluationModalsProps, 'showWorkDescriptionForm' | 'setShowWorkDescriptionForm'>) {
+  onConfirmCreateEvaluation,
+  onSuccess
+}: Omit<EvaluationModalsProps, 'showWorkDescriptionForm' | 'setShowWorkDescriptionForm'> & { onSuccess?: () => void }) {
   return (
     <>
       {/* Evaluation Detail Modal */}
@@ -21,6 +22,7 @@ export default function EvaluationModals({
         open={showEvaluationDetail}
         onOpenChange={setShowEvaluationDetail}
         evaluationId={selectedEvaluation || undefined}
+        onSuccess={onSuccess}
       />
 
       {/* Create Evaluation Modal */}
