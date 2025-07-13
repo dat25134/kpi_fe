@@ -64,7 +64,6 @@ export default function EvaluationCriteriaList({ details, onScoreChange, onComme
             onCommentChange={onCommentChange}
             mode="self"
             isReadOnly={isReadOnly}
-            details={details}
           />
         ))}
       </TabsContent>
@@ -85,7 +84,6 @@ export default function EvaluationCriteriaList({ details, onScoreChange, onComme
             onCommentChange={onCommentChange}
             mode="level1"
             isReadOnly={isReadOnly}
-            details={details}
           />
         ))}
       </TabsContent>
@@ -106,7 +104,6 @@ export default function EvaluationCriteriaList({ details, onScoreChange, onComme
             onCommentChange={onCommentChange}
             mode="level2"
             isReadOnly={isReadOnly}
-            details={details}
           />
         ))}
       </TabsContent>
