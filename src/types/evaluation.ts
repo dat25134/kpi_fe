@@ -358,3 +358,185 @@ export interface SaveEvaluationError {
   message: string;
   errors?: Record<string, string[]>;
 }
+
+// New interfaces for refactoring
+export interface EvaluationFilterState {
+  filterNameInput: string;
+  filterStatusInput: string;
+  filterRatingInput: string;
+  filterPeriodInput: Date | null;
+  filterName: string;
+  filterStatus: string;
+  filterRating: string;
+  filterPeriod: string;
+}
+
+export interface EvaluationFilterBarProps {
+  filterNameInput: string;
+  setFilterNameInput: (value: string) => void;
+  filterStatusInput: string;
+  setFilterStatusInput: (value: string) => void;
+  filterRatingInput: string;
+  setFilterRatingInput: (value: string) => void;
+  filterPeriodInput: Date | null;
+  setFilterPeriodInput: (value: Date | null) => void;
+  onApply: () => void;
+  onClear: () => void;
+}
+
+export interface EvaluationTableProps {
+  evaluations: Evaluation[];
+  loading: boolean;
+  error: string | null;
+  onView: (id: string) => void;
+  onDelete: (id: number) => void;
+}
+
+export interface QualityRatingBadgeProps {
+  rating: string;
+  showLabel?: boolean;
+  showShortLabel?: boolean;
+}
+
+export interface EvaluationFormState {
+  activeTab: string;
+  currentPage: number;
+  selectedEvaluation: string | null;
+  showEvaluationDetail: boolean;
+  showCreateEvaluationModal: boolean;
+}
+
+export interface EvaluationFormHandlers {
+  handleViewEvaluation: (evaluationId: string) => void;
+  handleCreateEvaluation: () => void;
+  handleConfirmCreateEvaluation: (month: number, year: number) => Promise<void>;
+  handleDeleteEvaluation: (evaluationId: number) => Promise<void>;
+  handleApplyFilter: () => void;
+  handleClearFilter: () => void;
+  handleRefresh: () => Promise<void>;
+  handlePageChange: (page: number) => void;
+}
+
+export interface CriteriaManagementState {
+  roleId: string;
+  searchInput: string;
+  search: string;
+  showAddCategory: boolean;
+  editCategory: { id: number; name: string } | null;
+  showDeleteModal: boolean;
+  deleteCategory: { id: number; name: string } | null;
+  showCreateCriteria: { categoryId: number } | null;
+  categoryList: EvaluationCriteriaCategory[];
+  isLoading: boolean;
+  isError: boolean;
+  editCriteria: any | null;
+  deleteCriteria: any | null;
+  showDeleteCriteriaModal: boolean;
+}
+
+export interface CriteriaManagementHandlers {
+  handleSearch: () => void;
+  handleRoleChange: (value: string) => void;
+  handleDeleteClick: (cat: { id: number; name: string }) => void;
+  fetchCategoryList: () => Promise<void>;
+}
+
+export interface EvaluationDetailModalState {
+  activeTab: string;
+  details: EvaluationCriteriaDetail[];
+  saving: boolean;
+}
+
+export interface EvaluationDetailModalHandlers {
+  handleScoreChange: (id: number, field: string, value: string) => void;
+  handleCommentChange: (id: number, field: string, value: string) => void;
+  handleSaveDraft: () => Promise<void>;
+  handleSubmit: () => Promise<void>;
+  handleLevel1Approve: () => Promise<void>;
+  handleLevel2Approve: () => Promise<void>;
+  handleComplete: () => Promise<void>;
+  getActionButtons: () => React.ReactNode[];
+}
+
+export interface WorkItemFormState {
+  item: Partial<WorkDescriptionItem>;
+  isEditing: boolean;
+}
+
+export interface WorkItemFormHandlers {
+  onSave: (item: WorkDescriptionItem) => void;
+  onCancel: () => void;
+  onFieldChange: (field: keyof WorkDescriptionItem, value: any) => void;
+}
+
+export interface EvaluationCriteriaListProps {
+  details: EvaluationCriteriaDetail[];
+  onScoreChange: (id: number, field: string, value: string) => void;
+  onCommentChange: (id: number, field: string, value: string) => void;
+  isReadOnly?: boolean;
+}
+
+export interface EvaluationCriteriaItemProps {
+  item: EvaluationCriteriaDetail;
+  isReadOnly?: boolean;
+  onScoreChange: (id: number, field: string, value: string) => void;
+  onCommentChange: (id: number, field: string, value: string) => void;
+}
+
+export interface EvaluationCriteriaCategoryProps {
+  category: string;
+  criteria: EvaluationCriteriaDetail[];
+  isReadOnly?: boolean;
+  onScoreChange: (id: number, field: string, value: string) => void;
+  onCommentChange: (id: number, field: string, value: string) => void;
+}
+
+export interface EvaluationModalProps {
+  showEvaluationDetail: boolean;
+  setShowEvaluationDetail: (show: boolean) => void;
+  selectedEvaluation: string | null;
+  showCreateEvaluationModal: boolean;
+  setShowCreateEvaluationModal: (show: boolean) => void;
+  currentUser: any;
+  onConfirmCreateEvaluation: (month: number, year: number) => void;
+}
+
+export interface CreateEvaluationModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: (month: number, year: number) => void;
+}
+
+export interface EvaluationTabConfig {
+  value: string;
+  label: string;
+}
+
+export interface EvaluationTabProps {
+  tab: EvaluationTabConfig;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+  children: React.ReactNode;
+}
+
+export interface EvaluationStats {
+  totalCriteria: number;
+  totalMaxScore: number;
+}
+
+export interface EvaluationCriteriaItemDisplayProps {
+  criteria: EvaluationCriteriaItem;
+  categoryId: number;
+  roleId: string;
+  onEdit: (criteria: any) => void;
+  onDelete: (criteria: any) => void;
+}
+
+export interface EvaluationCriteriaCategoryDisplayProps {
+  category: EvaluationCriteriaCategory;
+  onEditCategory: (category: { id: number; name: string }) => void;
+  onDeleteCategory: (category: { id: number; name: string }) => void;
+  onCreateCriteria: (categoryId: number) => void;
+  onEditCriteria: (criteria: any) => void;
+  onDeleteCriteria: (criteria: any) => void;
+}

@@ -15,13 +15,12 @@ interface CriteriaCategoryProps {
 
 export default function CriteriaCategory({
   category,
-  criteria, 
+  criteria,
   onScoreChange,
   onCommentChange,
   mode,
-  isReadOnly = false
+  isReadOnly
 }: CriteriaCategoryProps) {
-
   return (
     <Card className="mb-4">
       <CardHeader>
@@ -37,12 +36,11 @@ export default function CriteriaCategory({
             index={index}
             onScoreChange={onScoreChange}
             onCommentChange={onCommentChange}
-            showSeparator={index < criteria.length - 1}
             mode={mode}
             isReadOnly={isReadOnly}
           />
         ))}
       </CardContent>
     </Card>
-  )
+  );
 } 

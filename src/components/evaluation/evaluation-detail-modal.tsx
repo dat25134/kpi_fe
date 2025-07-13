@@ -1,20 +1,17 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { TabsContent } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { useEvaluationDetail } from "@/hooks/useEvaluationDetail"
-import { useEvaluation } from "@/hooks/useEvaluation"
-import { useUser } from "@/hooks/useUser"
-import EvaluationCriteriaList from "./evaluation-criteria-list"
-import EvaluationHeaderInfo from "./EvaluationHeaderInfo"
-import EvaluationTabsContainer from "./EvaluationTabsContainer"
-import WorkDescriptionTable from "./WorkDescriptionTable"
-import EvaluationSummary from "./EvaluationSummary"
-import { calculateTotalScore, canEditByRole, canEditEvaluation, formatEvaluationDataForSave, getEvaluationStatusLabel } from "@/lib/utils"
-import { type EvaluationCriteriaDetail } from "@/types/evaluation"
-import { toast } from "sonner"
+import { useEvaluationDetailModal } from "@/hooks/useEvaluationDetailModal"
+import EvaluationCriteriaList from "@/components/evaluation/evaluation-criteria-list"
+import EvaluationHeaderInfo from "@/components/evaluation/EvaluationHeaderInfo"
+import EvaluationTabsContainer from "@/components/evaluation/EvaluationTabsContainer"
+import WorkDescriptionTable from "@/components/evaluation/WorkDescriptionTable"
+import EvaluationSummary from "@/components/evaluation/EvaluationSummary"
+import { calculateTotalScore, getEvaluationStatusLabel } from "@/lib/utils"
+import ActionButtons from "@/components/evaluation/ActionButtons"
+import ConfirmModal from "@/components/shared/confirm-delete-modal"
 
 interface EvaluationDetailModalProps {
   open: boolean
@@ -27,186 +24,31 @@ export default function EvaluationDetailModal({
   onOpenChange, 
   evaluationId
 }: EvaluationDetailModalProps) {
-  const { data, isLoading, error, refetch } = useEvaluationDetail(evaluationId, open)
-  const { saveEvaluation } = useEvaluation()
-  const { user } = useUser()
-  
-  const [activeTab, setActiveTab] = useState("criteria")
-  const [details, setDetails] = useState<EvaluationCriteriaDetail[]>([])
-  const [saving, setSaving] = useState(false)
-
-  useEffect(() => {
-    if (data?.details) {
-      setDetails(data.details)
-    }
-  }, [data?.details])
-
-  const handleScoreChange = (id: number, field: string, value: string) => {
-    setDetails(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item))
-  }
-  
-  const handleCommentChange = (id: number, field: string, value: string) => {
-    setDetails(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item))
-  }
-
-  const handleSaveDraft = async () => {
-    if (!data || !evaluationId) return
+  const {
+    // State
+    state,
+    data,
+    isLoading,
+    error,
+    user,
+    canEdit,
+    actionButtonsConfig,
+    showConfirmModal,
+    confirmMessage,
+    setShowConfirmModal,
+    handleConfirm,
     
-    try {
-      setSaving(true)
-      const requestData = formatEvaluationDataForSave(details, 'draft')
-      await saveEvaluation(Number(evaluationId), requestData)
-      toast.success("Đã lưu nháp thành công!")
-      await refetch()
-    } catch (error: any) {
-      console.error("Lỗi khi lưu nháp:", error)
-      toast.error(error?.response?.data?.message || "Không thể lưu nháp. Vui lòng thử lại!")
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleSubmit = async () => {
-    if (!data || !evaluationId) return
-    
-    try {
-      setSaving(true)
-      const requestData = formatEvaluationDataForSave(details, 'submitted')
-      await saveEvaluation(Number(evaluationId), requestData)
-      toast.success("Đã gửi đánh giá thành công!")
-      await refetch()
-    } catch (error: any) {
-      console.error("Lỗi khi gửi đánh giá:", error)
-      toast.error(error?.response?.data?.message || "Không thể gửi đánh giá. Vui lòng thử lại!")
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleLevel1Approve = async () => {
-    if (!data || !evaluationId) return
-    
-    try {
-      setSaving(true)
-      const requestData = formatEvaluationDataForSave(details, 'level1_approved')
-      await saveEvaluation(Number(evaluationId), requestData)
-      toast.success("Đã đánh giá cấp 1 thành công!")
-      await refetch()
-    } catch (error: any) {
-      console.error("Lỗi khi đánh giá cấp 1:", error)
-      toast.error(error?.response?.data?.message || "Không thể đánh giá cấp 1. Vui lòng thử lại!")
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleLevel2Approve = async () => {
-    if (!data || !evaluationId) return
-    
-    try {
-      setSaving(true)
-      const requestData = formatEvaluationDataForSave(details, 'level2_approved')
-      await saveEvaluation(Number(evaluationId), requestData)
-      toast.success("Đã đánh giá cấp 2 thành công!")
-      await refetch()
-    } catch (error: any) {
-      console.error("Lỗi khi đánh giá cấp 2:", error)
-      toast.error(error?.response?.data?.message || "Không thể đánh giá cấp 2. Vui lòng thử lại!")
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleComplete = async () => {
-    if (!data || !evaluationId) return
-    
-    try {
-      setSaving(true)
-      const requestData = formatEvaluationDataForSave(details, 'completed')
-      await saveEvaluation(Number(evaluationId), requestData)
-      toast.success("Đã hoàn thành đánh giá!")
-      await refetch()
-    } catch (error: any) {
-      console.error("Lỗi khi hoàn thành đánh giá:", error)
-      toast.error(error?.response?.data?.message || "Không thể hoàn thành đánh giá. Vui lòng thử lại!")
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  // Kiểm tra quyền chỉnh sửa
-  const canEdit = data && user ? canEditByRole(data.status, user.role) : false
-  
-  // Xác định action buttons dựa trên status và role
-  const getActionButtons = () => {
-    if (!data || !user) return []
-
-    const buttons = []
-    const currentStatus = data.status
-    const userRole = user.role
-
-    // Nhân viên/Chuyên viên
-    if (userRole === 'nhanvien' || userRole === 'chuyenvien') {
-      if (currentStatus === 'draft') {
-        buttons.push(
-          <Button key="draft" variant="outline" onClick={handleSaveDraft} disabled={saving}>
-            {saving ? "Đang lưu..." : "Lưu nháp"}
-          </Button>,
-          <Button key="submit" onClick={handleSubmit} disabled={saving}>
-            {saving ? "Đang gửi..." : "Gửi đánh giá"}
-          </Button>
-        )
-      }
-    }
-    
-    // Trưởng phòng/Phó phòng
-    if (userRole === 'truongphong' || userRole === 'phophong') {
-      if (currentStatus === 'submitted') {
-        buttons.push(
-          <Button key="level1" onClick={handleLevel1Approve} disabled={saving}>
-            {saving ? "Đang đánh giá..." : "Đánh giá cấp 1"}
-          </Button>
-        )
-      } else if (currentStatus === 'level1_approved') {
-        buttons.push(
-          <Button key="level1" variant="outline" onClick={handleLevel1Approve} disabled={saving}>
-            {saving ? "Đang cập nhật..." : "Cập nhật đánh giá cấp 1"}
-          </Button>
-        )
-      }
-    }
-    
-    // Admin/Chủ tịch/Phó chủ tịch
-    if (userRole === 'admin' || userRole === 'chutich' || userRole === 'phochutich') {
-      if (currentStatus === 'submitted') {
-        buttons.push(
-          <Button key="level1" onClick={handleLevel1Approve} disabled={saving}>
-            {saving ? "Đang đánh giá..." : "Đánh giá cấp 1"}
-          </Button>
-        )
-      } else if (currentStatus === 'level1_approved') {
-        buttons.push(
-          <Button key="level1" variant="outline" onClick={handleLevel1Approve} disabled={saving}>
-            {saving ? "Đang cập nhật..." : "Cập nhật đánh giá cấp 1"}
-          </Button>,
-          <Button key="level2" onClick={handleLevel2Approve} disabled={saving}>
-            {saving ? "Đang đánh giá..." : "Đánh giá cấp 2"}
-          </Button>
-        )
-      } else if (currentStatus === 'level2_approved') {
-        buttons.push(
-          <Button key="level2" variant="outline" onClick={handleLevel2Approve} disabled={saving}>
-            {saving ? "Đang cập nhật..." : "Cập nhật đánh giá cấp 2"}
-          </Button>,
-          <Button key="complete" onClick={handleComplete} disabled={saving}>
-            {saving ? "Đang hoàn thành..." : "Hoàn thành"}
-          </Button>
-        )
-      }
-    }
-
-    return buttons
-  }
+    // Handlers
+    handleScoreChange,
+    handleCommentChange,
+    handleSaveDraft,
+    handleSubmit,
+    handleLevel1Approve,
+    handleLevel2Approve,
+    handleComplete,
+    handleTabChange,
+    fieldErrors
+  } = useEvaluationDetailModal(evaluationId, open)
 
   if (!open) return null;
   if (isLoading) return (
@@ -217,8 +59,7 @@ export default function EvaluationDetailModal({
   );
   if (!data) return null;
 
-  const totalScore = calculateTotalScore(details)
-  const actionButtons = getActionButtons()
+  const totalScore = calculateTotalScore(state.details)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -241,15 +82,16 @@ export default function EvaluationDetailModal({
 
         {/* Evaluation Tabs */}
         <EvaluationTabsContainer 
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
+          activeTab={state.activeTab}
+          onTabChange={handleTabChange}
         >
           <TabsContent value="criteria" className="space-y-4">
             <EvaluationCriteriaList 
-              details={details}
+              details={state.details}
               onScoreChange={handleScoreChange}
               onCommentChange={handleCommentChange}
               isReadOnly={!canEdit}
+              fieldErrors={fieldErrors}
             />
           </TabsContent>
 
@@ -261,7 +103,7 @@ export default function EvaluationDetailModal({
 
           <TabsContent value="summary" className="space-y-4">
             <EvaluationSummary 
-              details={details}
+              details={state.details}
               totalScore={totalScore}
             />
           </TabsContent>
@@ -276,10 +118,26 @@ export default function EvaluationDetailModal({
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Đóng
             </Button>
-            {actionButtons}
+            <ActionButtons
+              actionButtonsConfig={actionButtonsConfig}
+              saving={state.saving}
+              onSaveDraft={handleSaveDraft}
+              onSubmit={handleSubmit}
+              onLevel1Approve={handleLevel1Approve}
+              onLevel2Approve={handleLevel2Approve}
+              onComplete={handleComplete}
+            />
           </div>
         </div>
       </DialogContent>
+      {/* Confirm Modal */}
+      <ConfirmModal
+        open={showConfirmModal}
+        onOpenChange={setShowConfirmModal}
+        title="Xác nhận gửi đánh giá"
+        description={confirmMessage}
+        onConfirm={handleConfirm}
+      />
     </Dialog>
   )
 } 
