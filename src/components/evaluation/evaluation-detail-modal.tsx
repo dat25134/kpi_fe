@@ -92,6 +92,8 @@ export default function EvaluationDetailModal({
               onCommentChange={handleCommentChange}
               isReadOnly={!canEdit}
               fieldErrors={fieldErrors}
+              currentUserRole={user?.role}
+              evaluationStatus={data?.status}
             />
           </TabsContent>
 
