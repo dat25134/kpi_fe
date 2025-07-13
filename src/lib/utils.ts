@@ -265,14 +265,22 @@ export const formatEvaluationDataForSave = (
     status
   }
 
-  // Chỉ gửi evaluation_details khi cần thiết
-  if (status === 'draft' || status === 'level1_approved' || status === 'level2_approved') {
+  // Gửi evaluation_details cho các trạng thái cần thiết
+  if (
+    status === 'draft' ||
+    status === 'submitted' || // Thêm dòng này để gửi evaluation_details khi submitted
+    status === 'level1_approved' ||
+    status === 'level2_approved'
+  ) {
     requestData.evaluation_details = details.map(detail => {
       const item: any = {
         criteria_id: detail.criteria.id
       }
 
       if (status === 'draft') {
+        if (detail.self_score) item.self_score = parseFloat(detail.self_score)
+        if (detail.self_comment) item.self_comment = detail.self_comment
+      } else if (status === 'submitted') {
         if (detail.self_score) item.self_score = parseFloat(detail.self_score)
         if (detail.self_comment) item.self_comment = detail.self_comment
       } else if (status === 'level1_approved') {
@@ -300,5 +308,163 @@ export const formatEvaluationDataForSave = (
   // }
 
   return requestData
+}
+
+// Evaluation utility functions for refactoring
+export const getTabTypeParam = (tab: string): string => {
+  switch (tab) {
+    case "personal": return "personal";
+    case "nhanvien": return "nhanvien";
+    case "chuyenvien": return "chuyenvien";
+    case "phophong": return "phophong";
+    case "truongphong": return "truongphong";
+    default: return "personal";
+  }
+}
+
+export const getVisibleTabs = (currentUserRole: string) => {
+  const tabs = []
+  
+  // Personal tab - always visible
+  tabs.push({ value: "personal", label: "Cá nhân" })
+  
+  // Role-based tabs
+  if (currentUserRole === "chutich" || currentUserRole === "phochutich" || currentUserRole === "admin") {
+    // Chủ tịch/Phó chủ tịch can see all tabs
+    tabs.push(
+      { value: "nhanvien", label: "Nhân viên" },
+      { value: "chuyenvien", label: "Chuyên viên" },
+      { value: "phophong", label: "Phó phòng" },
+      { value: "truongphong", label: "Trưởng phòng" }
+    )
+  } else if (currentUserRole === "truongphong" || currentUserRole === "phophong") {
+    // Trưởng phòng/Phó phòng can see employee and specialist tabs
+    tabs.push(
+      { value: "nhanvien", label: "Nhân viên" },
+      { value: "chuyenvien", label: "Chuyên viên" }
+    )
+  }
+  
+  return tabs
+}
+
+export const getQualityRatingBadge = (rating: string) => {
+  const variants = {
+    "A": "bg-green-100 text-green-800",
+    "B": "bg-blue-100 text-blue-800", 
+    "C": "bg-yellow-100 text-yellow-800",
+    "D": "bg-red-100 text-red-800"
+  }
+  const labels = {
+    "A": "Hoàn thành xuất sắc nhiệm vụ (A)",
+    "B": "Hoàn thành tốt nhiệm vụ (B)",
+    "C": "Hoàn thành nhiệm vụ (C)",
+    "D": "Không hoàn thành nhiệm vụ (D)"
+  }
+  const shortLabels = {
+    "A": "A",
+    "B": "B",
+    "C": "C",
+    "D": "D"
+  }
+  return {
+    variant: variants[rating as keyof typeof variants],
+    label: labels[rating as keyof typeof labels],
+    shortLabel: shortLabels[rating as keyof typeof shortLabels]
+  }
+}
+
+export const calculateEvaluationStats = (categoryList: any[]) => {
+  const totalCriteria = categoryList.reduce(
+    (sum: number, cat: any) => sum + cat.evaluation_criteria.length,
+    0
+  )
+  const totalMaxScore = categoryList.reduce(
+    (sum: number, cat: any) =>
+      sum + cat.evaluation_criteria.reduce((s: number, c: any) => s + parseFloat(c.max_score), 0),
+    0
+  )
+  return { totalCriteria, totalMaxScore }
+}
+
+export const getActionButtonsConfig = (currentStatus: string, userRole: string) => {
+  const config = {
+    canSaveDraft: false,
+    canSubmit: false,
+    canLevel1Approve: false,
+    canLevel2Approve: false,
+    canComplete: false,
+    canUpdateLevel1: false,
+    canUpdateLevel2: false
+  }
+
+  // Nhân viên/Chuyên viên
+  if (userRole === 'nhanvien' || userRole === 'chuyenvien') {
+    if (currentStatus === 'draft') {
+      config.canSaveDraft = true
+      config.canSubmit = true
+    }
+  }
+  
+  // Trưởng phòng/Phó phòng
+  if (userRole === 'truongphong' || userRole === 'phophong') {
+    if (currentStatus === 'submitted') {
+      config.canLevel1Approve = true
+    } else if (currentStatus === 'level1_approved') {
+      config.canUpdateLevel1 = true
+    }
+  }
+  
+  // Admin/Chủ tịch/Phó chủ tịch
+  if (userRole === 'admin' || userRole === 'chutich' || userRole === 'phochutich') {
+    if (currentStatus === 'submitted') {
+      config.canLevel1Approve = true
+    } else if (currentStatus === 'level1_approved') {
+      config.canUpdateLevel1 = true
+      config.canLevel2Approve = true
+    } else if (currentStatus === 'level2_approved') {
+      config.canUpdateLevel2 = true
+      config.canComplete = true
+    }
+  }
+
+  return config
+}
+
+export const formatPeriodFilter = (filterPeriodInput: Date | null): string => {
+  if (filterPeriodInput) {
+    return `${filterPeriodInput.getMonth() + 1}/${filterPeriodInput.getFullYear()}`
+  }
+  return "all"
+}
+
+export const parsePeriodFilter = (filterPeriod: string): { month?: number; year?: number } => {
+  if (filterPeriod !== "all") {
+    const [month, year] = filterPeriod.split('/')
+    return {
+      month: parseInt(month),
+      year: parseInt(year)
+    }
+  }
+  return {}
+}
+
+export const getEvaluationTableRowKey = (item: any): string => {
+  return `${item.id}-${item.user?.id}-${item.month}-${item.year}`
+}
+
+export const getEvaluationTableRowData = (item: any, index: number) => {
+  return {
+    id: item.id,
+    index: index + 1,
+    name: item.user?.name || '',
+    department: item.user?.department || '',
+    roleName: item.user?.roleName || '',
+    period: `${item.month}/${item.year}`,
+    totalScore: item.total_score || '0',
+    finalGrade: item.final_grade || '',
+    status: item.status || '',
+    avatarInitials: item.user?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || ''
+  }
 }
 
