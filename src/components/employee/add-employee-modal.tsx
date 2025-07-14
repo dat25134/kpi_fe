@@ -93,10 +93,6 @@ export default function AddEmployeeModal({
     setErrors({})
 
     const selectedDepartment = departments.find((dept) => dept.id.toString() === formData.departmentId)
-    if (!selectedDepartment) {
-      setErrors({ departmentId: ["Vui lòng chọn phòng ban."] })
-      return
-    }
 
     const selectedRole = roles.find((role) => role.name === formData.roleName)
     if (!selectedRole) {

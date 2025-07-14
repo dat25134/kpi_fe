@@ -196,11 +196,11 @@ export default function AddDepartmentModal({
                   <SelectGroup>
                     <SelectLabel>Danh sách trưởng phòng</SelectLabel>
                     {loadingManagers ? (
-                      <SelectItem value="" disabled>
+                      <SelectItem value="__loading__" disabled>
                         Đang tải danh sách...
                       </SelectItem>
                     ) : managers.length === 0 ? (
-                      <SelectItem value="" disabled>
+                      <SelectItem value="__empty__" disabled>
                         Không có trưởng phòng nào
                       </SelectItem>
                     ) : (
