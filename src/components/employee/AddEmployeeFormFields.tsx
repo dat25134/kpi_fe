@@ -148,7 +148,6 @@ export default function AddEmployeeFormFields({
             <Select
               value={formData.departmentId}
               onValueChange={(value) => handleInputChange("departmentId", value)}
-              required
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Chọn phòng ban" />
