@@ -24,11 +24,12 @@ import {
   DepartmentPayload,
   updateDepartment,
 } from "@/services/department"
-import { useManagers } from "@/hooks/useEmployees"
+import { useAllUsers, useManagers } from "@/hooks/useEmployees"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { getErrorMessage, getValidationErrors } from "@/services/errorHandler"
+import { Select as AntdSelect } from "antd"
 
 type AddDepartmentModalProps = {
   open: boolean
@@ -52,7 +53,9 @@ export default function AddDepartmentModal({
   const [description, setDescription] = useState("")
   const [managerId, setManagerId] = useState<string | undefined>()
   const [status, setStatus] = useState("active")
+  const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<number[]>([])
   const [errors, setErrors] = useState<Record<string, string[]>>({})
+  const { allUsers, loading: loadingAllUsers, error: errorAllUsers } = useAllUsers()
   
   // Sử dụng SWR hook để fetch danh sách trưởng phòng
   const { data: managers, isLoading: loadingManagers } = useManagers()
@@ -64,6 +67,11 @@ export default function AddDepartmentModal({
       setDescription(editingDepartment.description)
       setManagerId(editingDepartment.manager ? editingDepartment.manager.id.toString() : undefined)
       setStatus(editingDepartment.status)
+      setSelectedEmployeeIds(
+        editingDepartment.employees
+          ? editingDepartment.employees.map((emp: any) => emp.id)
+          : []
+      )
     } else {
       resetForm()
     }
@@ -86,6 +94,7 @@ export default function AddDepartmentModal({
       description,
       manager_id: selectedManager.id,
       status,
+      employee_ids: selectedEmployeeIds,
     }
 
     try {
@@ -115,6 +124,7 @@ export default function AddDepartmentModal({
     setDescription("")
     setManagerId(undefined)
     setStatus("active")
+    setSelectedEmployeeIds([])
     setErrors({})
   }
 
@@ -220,6 +230,7 @@ export default function AddDepartmentModal({
               </Select>
               {errors.manager_id && <p className="text-sm text-red-600">{errors.manager_id[0]}</p>}
             </div>
+            
             <div className="grid gap-2">
               <label htmlFor="status" className="text-sm font-medium leading-6 text-gray-900">
                 Trạng thái
@@ -237,6 +248,28 @@ export default function AddDepartmentModal({
                 </SelectContent>
               </Select>
               {errors.status && <p className="text-sm text-red-600">{errors.status[0]}</p>}
+            </div>
+            <div className="grid gap-2">
+              <label htmlFor="employees" className="text-sm font-medium leading-6 text-gray-900">
+                Nhân viên phòng ban
+              </label>
+              <AntdSelect
+                mode="multiple"
+                allowClear
+                showSearch
+                style={{ width: '100%' }}
+                placeholder="Chọn nhân viên"
+                value={selectedEmployeeIds}
+                onChange={setSelectedEmployeeIds}
+                optionFilterProp="label"
+                loading={loadingAllUsers}
+                getPopupContainer={triggerNode => triggerNode.parentNode}
+                options={allUsers.map((user: any) => ({
+                  value: user.id,
+                  label: user.name,
+                }))}
+              />
+              {errors.employee_ids && <p className="text-sm text-red-600">{errors.employee_ids[0]}</p>}
             </div>
           </div>
           <DialogFooter>

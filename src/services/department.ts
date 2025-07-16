@@ -50,6 +50,7 @@ export type DepartmentPayload = {
   description: string;
   manager_id: number;
   status: string;
+  employee_ids?: number[];
 };
 
 export const createDepartment = async (departmentData: DepartmentPayload) => {
