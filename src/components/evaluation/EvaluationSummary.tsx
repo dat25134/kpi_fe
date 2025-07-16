@@ -22,6 +22,17 @@ export default function EvaluationSummary({ details, totalScore }: EvaluationSum
     )
   }
 
+  // Tính tổng điểm đạt được và tổng điểm tối đa toàn bộ
+  const totalAll = details.reduce(
+    (acc, item) => {
+      const score = item.final_score ?? item.level2_score ?? item.level1_score ?? item.self_score;
+      acc.total += score ? parseFloat(score) : 0;
+      acc.max += parseFloat(item.criteria.max_score);
+      return acc;
+    },
+    { total: 0, max: 0 }
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -32,12 +43,27 @@ export default function EvaluationSummary({ details, totalScore }: EvaluationSum
           <div className="space-y-4">
             <h4 className="font-semibold">Chi tiết điểm theo tiêu chí</h4>
             <div className="space-y-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> Hiển thị list tiêu chí đánh giá</div>
-              <Separator />
-              <div className="flex justify-between text-lg font-bold">
-                <span>Tổng điểm:</span>
-                <span>{totalScore.toFixed(1)}/100</span>
-              </div>
+              {Object.entries(
+                details.reduce((acc, item) => {
+                  const cat = item.criteria.category;
+                  if (!acc[cat]) acc[cat] = { total: 0, max: 0 };
+                  const score = item.final_score ?? item.level2_score ?? item.level1_score ?? item.self_score;
+                  acc[cat].total += score ? parseFloat(score) : 0;
+                  acc[cat].max += parseFloat(item.criteria.max_score);
+                  return acc;
+                }, {} as Record<string, { total: number; max: number }>)
+              ).map(([cat, { total, max }]) => (
+                <div key={cat} className="flex justify-between items-center py-1">
+                  <span className="text-sm truncate">{cat}</span>
+                  <span className="font-semibold">{total}/{max}</span>
+                </div>
+              ))}
+            </div>
+            {/* Tổng cộng */}
+            <Separator />
+            <div className="flex justify-between text-lg font-bold">
+              <span>Tổng điểm:</span>
+              <span className="font-semibold">{totalAll.total}/{totalAll.max}</span>
             </div>
           </div>
 

@@ -196,18 +196,27 @@ export const useEvaluationDetailModal = (evaluationId?: number | string, open?: 
   }, [])
 
   // Computed values
-  const canEdit = data && user ? getActionButtonsConfig(data.status, user.role) : null
-  
-  const actionButtonsConfig = data && user ? getActionButtonsConfig(data.status, user.role) : {
-    canSaveDraft: false,
-    canSubmit: false,
-    canLevel1Approve: false,
-    canLevel2Approve: false,
-    canComplete: false,
-    canUpdateLevel1: false,
-    canUpdateLevel2: false
-  }
+  const actionButtonsConfig = data && user
+    ? getActionButtonsConfig(
+        data.status,
+        user.role,
+        data.creator_role,
+        data.level1_approver_role,
+        data.level2_approver_role
+      )
+    : {
+        canSaveDraft: false,
+        canSubmit: false,
+        canLevel1Approve: false,
+        canLevel2Approve: false,
+        canComplete: false,
+        canUpdateLevel1: false,
+        canUpdateLevel2: false
+      };
 
+  // Quyền chỉnh sửa: chỉ người tạo khi là draft
+  const canEdit = data && user && data.status === 'draft' && user.role === data.creator_role;
+  
   return {
     // State
     state,

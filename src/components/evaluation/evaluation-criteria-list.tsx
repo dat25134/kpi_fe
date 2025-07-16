@@ -9,6 +9,9 @@ interface Props extends EvaluationCriteriaListProps {
   fieldErrors?: Record<string, string[]>;
   currentUserRole?: string;
   evaluationStatus?: string;
+  creatorRole?: string;
+  level1ApproverRole?: string;
+  level2ApproverRole?: string;
 }
 
 export default function EvaluationCriteriaList({ 
@@ -18,7 +21,10 @@ export default function EvaluationCriteriaList({
   isReadOnly, 
   fieldErrors,
   currentUserRole = "nhanvien",
-  evaluationStatus = "draft"
+  evaluationStatus = "draft",
+  creatorRole,
+  level1ApproverRole,
+  level2ApproverRole
 }: Props) {
   // Group criteria by category
   const groupedCriteria = details?.reduce((acc, item) => {
@@ -50,25 +56,42 @@ export default function EvaluationCriteriaList({
     });
   }
 
-  // Xác định tabs hiển thị dựa trên role và status
+  // Xác định quyền nhập cho từng tab
+  const isSelfEditable = currentUserRole === creatorRole && evaluationStatus === 'draft';
+  const isLevel1Editable = currentUserRole === level1ApproverRole && evaluationStatus === 'submitted';
+  const isLevel2Editable = currentUserRole === level2ApproverRole && evaluationStatus === 'level1_approved';
+
+  // Xác định tabs hiển thị dựa trên role, status và dữ liệu đã có
   const getVisibleTabs = () => {
-    // Đối với tự đánh giá (nhanvien, chuyenvien) - chỉ hiển thị tab tự đánh giá
-    if (currentUserRole === 'nhanvien' || currentUserRole === 'chuyenvien') {
-      return ['self'];
+    const tabs = [];
+
+    // Tab tự đánh giá: luôn hiển thị để xem, chỉ cho nhập nếu là người tạo và draft
+    tabs.push('self');
+
+    // Tab đánh giá cấp 1: hiển thị nếu user là level1ApproverRole hoặc đã có dữ liệu level1_score hoặc phiếu đã qua trạng thái cấp 1
+    const hasLevel1 = details.some(item => item.level1_score !== null && item.level1_score !== undefined);
+    if (
+      currentUserRole === level1ApproverRole ||
+      evaluationStatus === 'level1_approved' ||
+      evaluationStatus === 'level2_approved' ||
+      evaluationStatus === 'completed' ||
+      hasLevel1
+    ) {
+      tabs.push('level1');
     }
-    
-    // Đối với đánh giá cấp 1 (truongphong, phophong) - hiển thị tự đánh giá và cấp 1
-    if (currentUserRole === 'truongphong' || currentUserRole === 'phophong') {
-      return ['self', 'level1'];
+
+    // Tab đánh giá cấp 2: hiển thị nếu user là level2ApproverRole hoặc đã có dữ liệu level2_score hoặc phiếu đã qua trạng thái cấp 2
+    const hasLevel2 = details.some(item => item.level2_score !== null && item.level2_score !== undefined);
+    if (
+      currentUserRole === level2ApproverRole ||
+      evaluationStatus === 'level2_approved' ||
+      evaluationStatus === 'completed' ||
+      hasLevel2
+    ) {
+      tabs.push('level2');
     }
-    
-    // Đối với đánh giá cấp 2 (admin, chutich, phochutich) - hiển thị cả 3 tab
-    if (currentUserRole === 'admin' || currentUserRole === 'chutich' || currentUserRole === 'phochutich') {
-      return ['self', 'level1', 'level2'];
-    }
-    
-    // Mặc định chỉ hiển thị tự đánh giá
-    return ['self'];
+
+    return tabs;
   };
 
   const visibleTabs = getVisibleTabs();
@@ -105,7 +128,7 @@ export default function EvaluationCriteriaList({
               onScoreChange={onScoreChange}
               onCommentChange={onCommentChange}
               mode="self"
-              isReadOnly={isReadOnly}
+              isReadOnly={!isSelfEditable}
             />
           ))}
         </TabsContent>
@@ -128,7 +151,7 @@ export default function EvaluationCriteriaList({
               onScoreChange={onScoreChange}
               onCommentChange={onCommentChange}
               mode="level1"
-              isReadOnly={isReadOnly}
+              isReadOnly={!isLevel1Editable}
             />
           ))}
         </TabsContent>
@@ -151,7 +174,7 @@ export default function EvaluationCriteriaList({
               onScoreChange={onScoreChange}
               onCommentChange={onCommentChange}
               mode="level2"
-              isReadOnly={isReadOnly}
+              isReadOnly={!isLevel2Editable}
             />
           ))}
         </TabsContent>

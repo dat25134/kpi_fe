@@ -153,7 +153,11 @@ export function getQualityRatingBadgeVariant(rating: string): string {
 }
 
 export function calculateTotalScore(details: any[]): number {
-  return 100;
+  return details.reduce((sum, item) => {
+    // Ưu tiên final_score, nếu không có thì lấy level2_score, level1_score, self_score
+    const score = item.final_score ?? item.level2_score ?? item.level1_score ?? item.self_score;
+    return sum + (score ? parseFloat(score) : 0);
+  }, 0);
 }
 
 export function calculateKPIScore(workDescriptions: any[]): number {
@@ -337,7 +341,14 @@ export const getVisibleTabs = (currentUserRole: string) => {
       { value: "phophong", label: "Phó phòng" },
       { value: "truongphong", label: "Trưởng phòng" }
     )
-  } else if (currentUserRole === "truongphong" || currentUserRole === "phophong") {
+  } else if (currentUserRole === "truongphong") {
+    // Trưởng phòng/Phó phòng can see employee and specialist tabs
+    tabs.push(
+      { value: "nhanvien", label: "Nhân viên" },
+      { value: "chuyenvien", label: "Chuyên viên" },
+      { value: "phophong", label: "Phó Phòng" }
+    )
+  } else if (currentUserRole === "phophong") {
     // Trưởng phòng/Phó phòng can see employee and specialist tabs
     tabs.push(
       { value: "nhanvien", label: "Nhân viên" },
@@ -387,7 +398,13 @@ export const calculateEvaluationStats = (categoryList: any[]) => {
   return { totalCriteria, totalMaxScore }
 }
 
-export const getActionButtonsConfig = (currentStatus: string, userRole: string) => {
+export const getActionButtonsConfig = (
+  currentStatus: string,
+  userRole: string,
+  creatorRole?: string,
+  level1ApproverRole?: string,
+  level2ApproverRole?: string
+) => {
   const config = {
     canSaveDraft: false,
     canSubmit: false,
@@ -398,34 +415,42 @@ export const getActionButtonsConfig = (currentStatus: string, userRole: string) 
     canUpdateLevel2: false
   }
 
-  // Nhân viên/Chuyên viên
-  if (userRole === 'nhanvien' || userRole === 'chuyenvien') {
+  // Quyền lưu nháp và gửi: chỉ người tạo
+  if (userRole === creatorRole) {
     if (currentStatus === 'draft') {
       config.canSaveDraft = true
       config.canSubmit = true
     }
   }
-  
-  // Trưởng phòng/Phó phòng
-  if (userRole === 'truongphong' || userRole === 'phophong') {
+
+  // Quyền duyệt cấp 1: chỉ role duyệt cấp 1
+  if (userRole === level1ApproverRole) {
     if (currentStatus === 'submitted') {
       config.canLevel1Approve = true
     } else if (currentStatus === 'level1_approved') {
       config.canUpdateLevel1 = true
     }
   }
-  
-  // Admin/Chủ tịch/Phó chủ tịch
-  if (userRole === 'admin' || userRole === 'chutich' || userRole === 'phochutich') {
-    if (currentStatus === 'submitted') {
-      config.canLevel1Approve = true
-    } else if (currentStatus === 'level1_approved') {
-      config.canUpdateLevel1 = true
+
+  // Quyền duyệt cấp 2: chỉ role duyệt cấp 2
+  if (userRole === level2ApproverRole) {
+    if (currentStatus === 'level1_approved') {
       config.canLevel2Approve = true
     } else if (currentStatus === 'level2_approved') {
       config.canUpdateLevel2 = true
       config.canComplete = true
     }
+  }
+
+  // Quyền admin (nếu có)
+  if (userRole === 'admin') {
+    config.canSaveDraft = true
+    config.canSubmit = true
+    config.canLevel1Approve = true
+    config.canUpdateLevel1 = true
+    config.canLevel2Approve = true
+    config.canUpdateLevel2 = true
+    config.canComplete = true
   }
 
   return config

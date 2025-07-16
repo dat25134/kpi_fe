@@ -174,6 +174,9 @@ export interface EvaluationDetail {
   details: EvaluationCriteriaDetail[]
   work_descriptions: WorkDescriptionItem[]
   department: string
+  creator_role: string // Vai trò người tạo phiếu
+  level1_approver_role: string // Vai trò duyệt cấp 1
+  level2_approver_role: string // Vai trò duyệt cấp 2
 }
 
 // New interfaces for component refactoring

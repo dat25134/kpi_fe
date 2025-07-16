@@ -92,10 +92,13 @@ export default function EvaluationDetailModal({
               details={state.details}
               onScoreChange={handleScoreChange}
               onCommentChange={handleCommentChange}
-              isReadOnly={!canEdit}
+              isReadOnly={false} // sẽ xác định ở bên trong từng tab
               fieldErrors={fieldErrors}
               currentUserRole={user?.role}
               evaluationStatus={data?.status}
+              creatorRole={data?.creator_role}
+              level1ApproverRole={data?.level1_approver_role}
+              level2ApproverRole={data?.level2_approver_role}
             />
           </TabsContent>
 
