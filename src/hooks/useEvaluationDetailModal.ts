@@ -5,6 +5,7 @@ import { useUser } from './useUser'
 import { EvaluationCriteriaDetail, EvaluationDetailModalState, EvaluationDetailModalHandlers } from '@/types/evaluation'
 import { formatEvaluationDataForSave, getActionButtonsConfig } from '@/lib/utils'
 import { toast } from 'sonner'
+import { getErrorMessage, getValidationErrors } from '@/services/errorHandler'
 
 export const useEvaluationDetailModal = (evaluationId?: number | string, open?: boolean, onSuccess?: () => void) => {
   const { data, isLoading, error, refetch } = useEvaluationDetail(evaluationId, open)
@@ -80,8 +81,9 @@ export const useEvaluationDetailModal = (evaluationId?: number | string, open?: 
       toast.success("Đã lưu nháp thành công!")
       await refetch()
     } catch (error: any) {
-      setFieldErrors(error?.response?.data?.errors || {})
-      toast.error(error?.response?.data?.message || "Không thể lưu nháp. Vui lòng thử lại!")
+      const msg = getErrorMessage(error)
+      setFieldErrors(getValidationErrors(error) || {})
+      toast.error(msg || "Không thể lưu nháp. Vui lòng thử lại!")
     } finally {
       setState(prev => ({ ...prev, saving: false }))
     }
@@ -99,8 +101,9 @@ export const useEvaluationDetailModal = (evaluationId?: number | string, open?: 
       await refetch()
       if (onSuccess) onSuccess()
     } catch (error: any) {
-      setFieldErrors(error?.response?.data?.errors || {})
-      toast.error(error?.response?.data?.message || "Không thể gửi đánh giá. Vui lòng thử lại!")
+      const msg = getErrorMessage(error)
+      setFieldErrors(getValidationErrors(error) || {})
+      toast.error(msg || "Không thể gửi đánh giá. Vui lòng thử lại!")
     } finally {
       setState(prev => ({ ...prev, saving: false }))
     }
@@ -125,8 +128,9 @@ export const useEvaluationDetailModal = (evaluationId?: number | string, open?: 
       await refetch()
       if (onSuccess) onSuccess()
     } catch (error: any) {
-      setFieldErrors(error?.response?.data?.errors || {})
-      toast.error(error?.response?.data?.message || "Không thể đánh giá cấp 1. Vui lòng thử lại!")
+      const msg = getErrorMessage(error)
+      setFieldErrors(getValidationErrors(error) || {})
+      toast.error(msg || "Không thể đánh giá cấp 1. Vui lòng thử lại!")
     } finally {
       setState(prev => ({ ...prev, saving: false }))
     }
@@ -151,8 +155,9 @@ export const useEvaluationDetailModal = (evaluationId?: number | string, open?: 
       await refetch()
       if (onSuccess) onSuccess()
     } catch (error: any) {
-      setFieldErrors(error?.response?.data?.errors || {})
-      toast.error(error?.response?.data?.message || "Không thể đánh giá cấp 2. Vui lòng thử lại!")
+      const msg = getErrorMessage(error)
+      setFieldErrors(getValidationErrors(error) || {})
+      toast.error(msg || "Không thể đánh giá cấp 2. Vui lòng thử lại!")
     } finally {
       setState(prev => ({ ...prev, saving: false }))
     }
@@ -177,8 +182,9 @@ export const useEvaluationDetailModal = (evaluationId?: number | string, open?: 
       await refetch()
       if (onSuccess) onSuccess()
     } catch (error: any) {
-      setFieldErrors(error?.response?.data?.errors || {})
-      toast.error(error?.response?.data?.message || "Không thể hoàn thành đánh giá. Vui lòng thử lại!")
+      const msg = getErrorMessage(error)
+      setFieldErrors(getValidationErrors(error) || {})
+      toast.error(msg || "Không thể hoàn thành đánh giá. Vui lòng thử lại!")
     } finally {
       setState(prev => ({ ...prev, saving: false }))
     }
