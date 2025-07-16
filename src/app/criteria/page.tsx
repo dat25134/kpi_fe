@@ -1,5 +1,6 @@
 import MainHeader from "@/components/shared/main-header";
 import CriteriaManagement from "@/components/evaluation/criteria-management";
+import WithPermissionGuard from "@/components/shared/with-role-guard"
 
 export const metadata = {
   title: "Quản lý tiêu chí | KPI",
@@ -14,11 +15,13 @@ export const metadata = {
 
 export default function CriteriaPage() {
   return (
-    <div className="flex min-h-[calc(100vh-100px)] flex-col">
-      <MainHeader />
-      <div className="flex-1">
-        <CriteriaManagement />
+    <WithPermissionGuard allowedPermissions={["evaluation_criteria.manage"]}>
+      <div className="flex min-h-[calc(100vh-100px)] flex-col">
+        <MainHeader />
+        <div className="flex-1">
+          <CriteriaManagement />
+        </div>
       </div>
-    </div>
+    </WithPermissionGuard>
   );
 } 

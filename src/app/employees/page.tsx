@@ -1,6 +1,6 @@
 import MainHeader from "@/components/shared/main-header"
 import EmployeeManagement from "@/components/employee/employee-management"
-import WithRoleGuard from "@/components/shared/with-role-guard"
+import WithPermissionGuard from "@/components/shared/with-role-guard"
 
 export const metadata = {
   title: "Nhân viên | KPI",
@@ -15,13 +15,13 @@ export const metadata = {
 
 export default function EmployeesPage() {
   return (
-    <WithRoleGuard allowedRoles={["admin"]}>
+    <WithPermissionGuard allowedPermissions={["hr.view"]}>
       <div className="flex min-h-[calc(100vh-100px)] flex-col">
         <MainHeader />
         <div className="flex-1">
           <EmployeeManagement />
         </div>
       </div>
-    </WithRoleGuard>
+    </WithPermissionGuard>
   )
 }

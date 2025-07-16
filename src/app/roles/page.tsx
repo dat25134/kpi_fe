@@ -1,5 +1,6 @@
 import MainHeader from "@/components/shared/main-header"
 import RolesManagement from "@/components/roles/role-management"
+import WithPermissionGuard from "@/components/shared/with-role-guard"
 
 export const metadata = {
   title: "Quản lý vai trò | KPI",
@@ -14,11 +15,13 @@ export const metadata = {
 
 export default function RolesPage() {
   return (
-    <div className="flex min-h-[calc(100vh-100px)] flex-col">
-      <MainHeader />
-      <div className="flex-1">
-        <RolesManagement />
+    <WithPermissionGuard allowedPermissions={["system.grant_permission"]}>
+      <div className="flex min-h-[calc(100vh-100px)] flex-col">
+        <MainHeader />
+        <div className="flex-1">
+          <RolesManagement />
+        </div>
       </div>
-    </div>
+    </WithPermissionGuard>
   )
 }

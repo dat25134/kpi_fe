@@ -21,12 +21,16 @@ export function getErrorMessage(error: any, fallbackMessage = "Đã có lỗi x�
     const data = error.response.data
     // Nếu là lỗi validate 422, luôn trả về message mặc định
     if (status === 422) return fallbackMessage
-    // Ưu tiên lấy message từ response
-    if (data?.message) return data.message
+
     // Xử lý theo status code nếu muốn custom
     if (status === 401) return "Bạn không có quyền thực hiện thao tác này."
     if (status === 404) return "Không tìm thấy dữ liệu."
     if (status === 500) return "Lỗi máy chủ. Vui lòng thử lại sau."
+    if (status === 403) return "Bạn không có quyền thực hiện thao tác này."
+
+    // Ưu tiên lấy message từ response
+    if (data?.message) return data.message
+    
     return fallbackMessage
   }
   // Nếu là object trả về từ handleApiError

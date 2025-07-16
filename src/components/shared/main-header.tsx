@@ -20,6 +20,10 @@ import { toast } from "sonner"
 import { useState } from "react"
 import MobileSidebar from "./mobile-sidebar"
 
+function hasPermission(user: { permissions?: string[] } | undefined, permission: string): boolean {
+  return user?.permissions?.includes(permission) ?? false;
+}
+
 export default function MainHeader() {
   const pathname = usePathname()
   const router = useRouter()
@@ -66,79 +70,93 @@ export default function MainHeader() {
             </Button>
           </Link>
 
-          {user?.role === "admin" && (
+          {(hasPermission(user, "department.manage") || hasPermission(user, "hr.view") || hasPermission(user, "system.grant_permission") || hasPermission(user, "evaluation_criteria.manage")) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-              <Button
+                <Button
                   variant={['/departments','/employees','/roles','/criteria'].includes(pathname) ? 'secondary' : 'ghost'}
-                className={cn(
+                  className={cn(
                     'text-white',
                     ['/departments','/employees','/roles','/criteria'].includes(pathname)
                       ? 'bg-blue-600 text-white hover:bg-blue-700'
                       : 'text-white hover:bg-blue-800',
-                )}
-              >
-                <Shield className="h-4 w-4 mr-2" />
+                  )}
+                >
+                  <Shield className="h-4 w-4 mr-2" />
                   <span className="hidden xl:inline">Quản trị</span>
-              </Button>
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem asChild>
-                  <Link href="/departments">Quản lý phòng ban</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/employees">Quản lý nhân viên</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/roles">Quản lý vai trò</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/criteria">Quản lý tiêu chí</Link>
-                </DropdownMenuItem>
+                {hasPermission(user, "department.manage") && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/departments">Quản lý phòng ban</Link>
+                  </DropdownMenuItem>
+                )}
+                {hasPermission(user, "hr.view") && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/employees">Quản lý nhân viên</Link>
+                  </DropdownMenuItem>
+                )}
+                {hasPermission(user, "system.grant_permission") && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/roles">Quản lý vai trò</Link>
+                  </DropdownMenuItem>
+                )}
+                {hasPermission(user, "evaluation_criteria.manage") && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/criteria">Quản lý tiêu chí</Link>
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}
 
-          <Link href="/evaluation">
-            <Button
-              variant={pathname === "/evaluation" ? "secondary" : "ghost"}
-              className={cn(
-                "h-9 px-3 text-xs md:text-sm",
-                pathname === "/evaluation"
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "text-white hover:bg-blue-800",
-              )}
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              <span className="hidden xl:inline">Phiếu đánh giá</span>
-            </Button>
-          </Link>
-
-          <Link href="/reports">
-            <Button
-              variant={pathname === "/reports" ? "secondary" : "ghost"}
-              className={cn(
-                "h-9 px-3 text-xs md:text-sm",
-                pathname === "/reports" ? "bg-blue-600 text-white hover:bg-blue-700" : "text-white hover:bg-blue-800",
-              )}
-            >
-              <FileChartColumn className="h-4 w-4 mr-2" />
-              <span className="hidden xl:inline">Báo cáo</span>
+          {hasPermission(user, "evaluation.view") && (
+            <Link href="/evaluation">
+              <Button
+                variant={pathname === "/evaluation" ? "secondary" : "ghost"}
+                className={cn(
+                  "h-9 px-3 text-xs md:text-sm",
+                  pathname === "/evaluation"
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "text-white hover:bg-blue-800",
+                )}
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                <span className="hidden xl:inline">Phiếu đánh giá</span>
               </Button>
-          </Link>
+            </Link>
+          )}
 
-          <Link href="/activity-log">
-            <Button
-              variant={pathname === "/activity-log" ? "secondary" : "ghost"}
-              className={cn(
-                "h-9 px-3 text-xs md:text-sm",
-                pathname === "/activity-log" ? "bg-blue-600 text-white hover:bg-blue-700" : "text-white hover:bg-blue-800",
-              )}
-            >
-              <Activity className="h-4 w-4 mr-2" />
-              <span className="hidden xl:inline">Nhật ký hoạt động</span>
+          {hasPermission(user, "report.view_dashboard") && (
+            <Link href="/reports">
+              <Button
+                variant={pathname === "/reports" ? "secondary" : "ghost"}
+                className={cn(
+                  "h-9 px-3 text-xs md:text-sm",
+                  pathname === "/reports" ? "bg-blue-600 text-white hover:bg-blue-700" : "text-white hover:bg-blue-800",
+                )}
+              >
+                <FileChartColumn className="h-4 w-4 mr-2" />
+                <span className="hidden xl:inline">Báo cáo</span>
               </Button>
-          </Link>
+            </Link>
+          )}
+
+          {hasPermission(user, "system.view_log") && (
+            <Link href="/activity-log">
+              <Button
+                variant={pathname === "/activity-log" ? "secondary" : "ghost"}
+                className={cn(
+                  "h-9 px-3 text-xs md:text-sm",
+                  pathname === "/activity-log" ? "bg-blue-600 text-white hover:bg-blue-700" : "text-white hover:bg-blue-800",
+                )}
+              >
+                <Activity className="h-4 w-4 mr-2" />
+                <span className="hidden xl:inline">Nhật ký hoạt động</span>
+              </Button>
+            </Link>
+          )}
         </nav>
 
         <div className="hidden md:flex ml-auto items-center space-x-4 mt-2 md:mt-0">
