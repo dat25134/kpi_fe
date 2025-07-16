@@ -1,4 +1,5 @@
 import MainHeader from "@/components/shared/main-header"
+import WithPermissionGuard from "@/components/shared/with-role-guard";
 import TaskManagement from "@/components/task/task-management"
 
 export const metadata = {
@@ -14,6 +15,7 @@ export const metadata = {
 
 export default function DashboardPage() {
   return (
+    <WithPermissionGuard allowedPermissions={["project.view_all", "project.view_related"]}>
     <div className="flex min-h-[calc(100vh-100px)] flex-col">
       <MainHeader />
       <div className="flex-1 px-2 md:px-6 py-2 md:py-4 w-full">
@@ -25,5 +27,6 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
+    </WithPermissionGuard>
   )
 }
