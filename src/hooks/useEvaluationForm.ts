@@ -6,6 +6,7 @@ import { getTabTypeParam, getVisibleTabs, formatPeriodFilter, parsePeriodFilter 
 import { toast } from 'sonner'
 import ConfirmDeleteModal from "@/components/shared/confirm-delete-modal"
 import { getErrorMessage } from '@/services/errorHandler'
+import { evaluationService } from '@/services/evaluation'
 
 export const useEvaluationForm = () => {
   // Form state
@@ -194,6 +195,25 @@ export const useEvaluationForm = () => {
     setFilterState(prev => ({ ...prev, filterPeriodInput: value }))
   }, [])
 
+  // Tạo phiếu đánh giá thủ công cho user hiện tại
+  const handleManualCreateEvaluation = useCallback(async (month?: number, year?: number) => {
+    try {
+      const res = await evaluationService.manualCreateEvaluation(month, year)
+      if (res.status && res.evaluation_id) {
+        toast.success(res.message || 'Tạo phiếu đánh giá thành công!')
+        await refetch()
+        return true
+      } else {
+        toast.error(res.message || 'Không có công việc nào cần đánh giá trong tháng này.')
+        return false
+      }
+    } catch (error: any) {
+      const msg = getErrorMessage(error)
+      toast.error(msg || 'Có lỗi xảy ra khi tạo phiếu đánh giá')
+      return false
+    }
+  }, [refetch])
+
   return {
     // State
     formState,
@@ -229,6 +249,7 @@ export const useEvaluationForm = () => {
     refetch,
     showDeleteModal,
     setShowDeleteModal,
-    handleConfirmDelete
+    handleConfirmDelete,
+    handleManualCreateEvaluation
   }
 } 

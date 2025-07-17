@@ -5,10 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import type { CreateEvaluationFormProps } from "@/types/evaluation"
+import { toast } from 'sonner'
+import { useEvaluationForm } from '@/hooks/useEvaluationForm'
 
-export default function CreateEvaluationForm({ onConfirm, onCancel }: CreateEvaluationFormProps) {
+export default function CreateEvaluationForm({ onConfirm, onCancel, onSuccess }: CreateEvaluationFormProps) {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const { handleManualCreateEvaluation } = useEvaluationForm()
 
   const months = [
     { value: 1, label: "Tháng 1" },
@@ -26,6 +29,14 @@ export default function CreateEvaluationForm({ onConfirm, onCancel }: CreateEval
   ]
 
   const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i)
+
+  const handleCreate = async () => {
+    const success = await handleManualCreateEvaluation(selectedMonth, selectedYear)
+    if (success) {
+      onCancel()
+      onSuccess && onSuccess()
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -66,7 +77,7 @@ export default function CreateEvaluationForm({ onConfirm, onCancel }: CreateEval
         <Button variant="outline" onClick={onCancel}>
           Hủy
         </Button>
-        <Button onClick={() => onConfirm(selectedMonth, selectedYear)}>
+        <Button onClick={handleCreate}>
           Tạo phiếu đánh giá
         </Button>
       </div>
