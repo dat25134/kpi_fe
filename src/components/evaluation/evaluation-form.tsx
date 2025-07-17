@@ -12,6 +12,7 @@ import EvaluationActions from "@/components/evaluation/EvaluationActions"
 import EvaluationPagination from "@/components/evaluation/EvaluationPagination"
 import EvaluationModals from "@/components/evaluation/EvaluationModals"
 import EvaluationTabContent from "@/components/evaluation/EvaluationTabContent"
+import ConfirmDeleteModal from "@/components/shared/confirm-delete-modal"
 
 export default function EvaluationForm() {
   const {
@@ -42,7 +43,11 @@ export default function EvaluationForm() {
     setFilterNameInput,
     setFilterStatusInput,
     setFilterRatingInput,
-    setFilterPeriodInput
+    setFilterPeriodInput,
+    // Delete modal
+    showDeleteModal,
+    setShowDeleteModal,
+    handleConfirmDelete
   } = useEvaluationForm()
 
   // Filter props
@@ -143,6 +148,13 @@ export default function EvaluationForm() {
         currentUser={currentUser}
         onConfirmCreateEvaluation={handleConfirmCreateEvaluation}
         onSuccess={handleRefresh}
+      />
+      <ConfirmDeleteModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Xác nhận xóa phiếu đánh giá"
+        description="Bạn có chắc chắn muốn xóa phiếu đánh giá này? Hành động này không thể hoàn tác."
       />
     </div>
   )
