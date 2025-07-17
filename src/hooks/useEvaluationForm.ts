@@ -4,6 +4,8 @@ import { useUser } from './useUser'
 import { EvaluationFilterState, EvaluationFormState, EvaluationFormHandlers } from '@/types/evaluation'
 import { getTabTypeParam, getVisibleTabs, formatPeriodFilter, parsePeriodFilter } from '@/lib/utils'
 import { toast } from 'sonner'
+import ConfirmDeleteModal from "@/components/shared/confirm-delete-modal"
+import { getErrorMessage } from '@/services/errorHandler'
 
 export const useEvaluationForm = () => {
   // Form state
@@ -96,15 +98,28 @@ export const useEvaluationForm = () => {
     }
   }, [createEvaluation, refetch])
 
-  const handleDeleteEvaluation = useCallback(async (evaluationId: number) => {
-    if (confirm("Bạn có chắc chắn muốn xóa phiếu đánh giá này?")) {
-      try {
-        await deleteEvaluation(evaluationId)
-      } catch (error) {
-        console.error("Error deleting evaluation:", error)
-      }
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
+
+  const handleDeleteEvaluation = useCallback((evaluationId: number) => {
+    setPendingDeleteId(evaluationId)
+    setShowDeleteModal(true)
+  }, [])
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!pendingDeleteId) return
+    try {
+      await deleteEvaluation(pendingDeleteId)
+      toast.success("Xóa phiếu đánh giá thành công!")
+    } catch (error) {
+      const msg = getErrorMessage(error)
+      toast.error(msg || "Xóa phiếu đánh giá thất bại!")
+    } finally {
+      await refetch()
+      setShowDeleteModal(false)
+      setPendingDeleteId(null)
     }
-  }, [deleteEvaluation])
+  }, [pendingDeleteId, deleteEvaluation, refetch])
 
   const handleApplyFilter = useCallback(() => {
     setFormState(prev => ({ ...prev, currentPage: 1 }))
@@ -211,6 +226,9 @@ export const useEvaluationForm = () => {
     setFilterPeriodInput,
     
     // Actions
-    refetch
+    refetch,
+    showDeleteModal,
+    setShowDeleteModal,
+    handleConfirmDelete
   }
 } 
