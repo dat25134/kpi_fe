@@ -493,3 +493,21 @@ export const getEvaluationTableRowData = (item: any, index: number) => {
   }
 }
 
+// Xếp loại KPI theo chuẩn KPI 4 điểm
+export function getKPIRatingForKPI(score: number): string {
+  if (score < 2.2) return "not_achieved"
+  if (score < 2.7) return "limited"
+  if (score < 3.4) return "achieved"
+  return "outstanding"
+}
+
+export function getKPIRatingLabelForKPI(rating: string): string {
+  switch (rating) {
+    case "not_achieved": return "Không đạt"
+    case "limited": return "Đạt, còn hạn chế"
+    case "achieved": return "Đạt"
+    case "outstanding": return "Đạt vượt mức"
+    default: return "Không xác định"
+  }
+}
+
