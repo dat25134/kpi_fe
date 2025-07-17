@@ -192,6 +192,8 @@ export interface EvaluationTabsContainerProps {
 
 export interface WorkDescriptionTableProps {
   workDescriptions: WorkDescriptionItem[]
+  isEditable?: boolean
+  onSave?: (items: Array<{id: number, quality_weight: number, result_level: number}>) => void
 }
 
 export interface EvaluationSummaryProps {

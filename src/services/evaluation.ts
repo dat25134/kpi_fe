@@ -45,6 +45,14 @@ export const evaluationService = {
   deleteEvaluation: async (id: number): Promise<void> => {
     await apiClient.delete(API_ENDPOINTS.EVALUATIONS.DELETE(id))
   },
+
+  // Cập nhật work_descriptions cho phiếu đánh giá
+  updateWorkDescriptions: async (id: number, workDescriptions: Array<{id: number, quality_weight: number, result_level: number}>) => {
+    const response = await apiClient.put(API_ENDPOINTS.EVALUATIONS.UPDATE_WORK_DESCRIPTIONS(id), {
+      work_descriptions: workDescriptions
+    });
+    return response.data;
+  },
 }
 
 export async function fetchCategoryWithCriteria(filters: CategoryCriteriaFilter = {}): Promise<CategoryCriteriaResponse> {

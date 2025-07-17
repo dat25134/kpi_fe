@@ -49,7 +49,8 @@ export default function EvaluationDetailModal({
     handleLevel2Approve,
     handleComplete,
     handleTabChange,
-    fieldErrors
+    fieldErrors,
+    handleUpdateWorkDescriptions
   } = useEvaluationDetailModal(evaluationId, open, onSuccess)
 
   if (!open) return null;
@@ -62,6 +63,8 @@ export default function EvaluationDetailModal({
   if (!data) return null;
 
   const totalScore = calculateTotalScore(state.details)
+  const isLevel1Approver = user && data && user.role === data.level1_approver_role
+  const canEditWorkDescriptions = isLevel1Approver && actionButtonsConfig.canLevel1Approve
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -105,6 +108,8 @@ export default function EvaluationDetailModal({
           <TabsContent value="workDescription" className="space-y-4">
             <WorkDescriptionTable 
               workDescriptions={data?.work_descriptions}
+              isEditable={!!canEditWorkDescriptions}
+              onSave={handleUpdateWorkDescriptions}
             />
           </TabsContent>
 

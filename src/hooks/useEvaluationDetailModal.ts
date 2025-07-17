@@ -6,6 +6,7 @@ import { EvaluationCriteriaDetail, EvaluationDetailModalState, EvaluationDetailM
 import { formatEvaluationDataForSave, getActionButtonsConfig } from '@/lib/utils'
 import { toast } from 'sonner'
 import { getErrorMessage, getValidationErrors } from '@/services/errorHandler'
+import { evaluationService } from '@/services/evaluation'
 
 export const useEvaluationDetailModal = (evaluationId?: number | string, open?: boolean, onSuccess?: () => void) => {
   const { data, isLoading, error, refetch } = useEvaluationDetail(evaluationId, open)
@@ -195,6 +196,23 @@ export const useEvaluationDetailModal = (evaluationId?: number | string, open?: 
     setState(prev => ({ ...prev, activeTab: tab }))
   }, [])
 
+  // Cập nhật work_descriptions
+  const handleUpdateWorkDescriptions = useCallback(async (workDescriptions: Array<{id: number, quality_weight: number, result_level: number}>) => {
+    if (!data || !evaluationId) return;
+    try {
+      setState(prev => ({ ...prev, saving: true }));
+      const res = await evaluationService.updateWorkDescriptions(Number(evaluationId), workDescriptions);
+      toast.success(res?.message || "Cập nhật Bảng mô tả công việc thành công!");
+      await refetch();
+      if (onSuccess) onSuccess();
+    } catch (error: any) {
+      toast.error(error?.message || "Có lỗi xảy ra khi cập nhật Bảng mô tả công việc");
+      throw error;
+    } finally {
+      setState(prev => ({ ...prev, saving: false }));
+    }
+  }, [data, evaluationId, refetch, onSuccess]);
+
   // Computed values
   const actionButtonsConfig = data && user
     ? getActionButtonsConfig(
@@ -241,6 +259,7 @@ export const useEvaluationDetailModal = (evaluationId?: number | string, open?: 
     handleLevel2Approve,
     handleComplete,
     handleTabChange,
+    handleUpdateWorkDescriptions,
     
     // Actions
     refetch
