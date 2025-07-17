@@ -277,6 +277,7 @@ export interface ScoreBadgeProps {
 export interface CreateEvaluationFormProps {
   onConfirm: (month: number, year: number) => void
   onCancel: () => void
+  onSuccess?: () => void
 }
 
 export interface EvaluationModalsProps {

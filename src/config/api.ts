@@ -70,6 +70,7 @@ export const API_ENDPOINTS = {
     DETAIL: (id: number) => `${API_URL}/evaluations/${id}`,
     SAVE: (id: number) => `${API_URL}/evaluations/${id}/save`,
     UPDATE_WORK_DESCRIPTIONS: (id: number) => `${API_URL}/evaluations/${id}/work-descriptions`,
+    MANUAL_CREATE_EVALUATION: `${API_URL}/evaluations/manual-create-evaluation`,
   },
 
   EVALUATION_CRITERIA: {

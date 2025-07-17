@@ -38,6 +38,7 @@ export default function EvaluationModals({
           <CreateEvaluationForm 
             onConfirm={onConfirmCreateEvaluation}
             onCancel={() => setShowCreateEvaluationModal(false)}
+            onSuccess={onSuccess}
           />
         </DialogContent>
       </Dialog>

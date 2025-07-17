@@ -53,6 +53,15 @@ export const evaluationService = {
     });
     return response.data;
   },
+
+  // Tạo phiếu đánh giá thủ công cho user hiện tại, có thể truyền tháng/năm
+  manualCreateEvaluation: async (month?: number, year?: number) => {
+    const body: any = {}
+    if (month) body.month = month
+    if (year) body.year = year
+    const response = await apiClient.post(API_ENDPOINTS.EVALUATIONS.MANUAL_CREATE_EVALUATION, body)
+    return response.data
+  },
 }
 
 export async function fetchCategoryWithCriteria(filters: CategoryCriteriaFilter = {}): Promise<CategoryCriteriaResponse> {

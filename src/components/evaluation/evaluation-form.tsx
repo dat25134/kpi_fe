@@ -13,6 +13,8 @@ import EvaluationPagination from "@/components/evaluation/EvaluationPagination"
 import EvaluationModals from "@/components/evaluation/EvaluationModals"
 import EvaluationTabContent from "@/components/evaluation/EvaluationTabContent"
 import ConfirmDeleteModal from "@/components/shared/confirm-delete-modal"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 export default function EvaluationForm() {
   const {
@@ -50,6 +52,8 @@ export default function EvaluationForm() {
     handleConfirmDelete
   } = useEvaluationForm()
 
+  const router = useRouter();
+
   // Filter props
   const filterProps = {
     filterNameInput: filterState.filterNameInput,
@@ -76,9 +80,9 @@ export default function EvaluationForm() {
   return (
     <div className="container mx-auto p-4">
       <div className="flex items-center mb-4">
-        <Button variant="ghost" size="sm" className="mr-2">
+        <a href="#" className="mr-2" onClick={e => { e.preventDefault(); window.history.back(); }}>
           <ArrowLeft className="h-4 w-4 mr-1" />
-        </Button>
+        </a>
         <h2 className="text-lg font-medium">Đơn vị hiện tại</h2>
       </div>
 
