@@ -43,6 +43,7 @@ import PositionStats from "./PositionStats"
 import TaskProgressChart from "./TaskProgressChart"
 import KPITrendsChart from "./KPITrendsChart"
 import TopPerformers from "./TopPerformers"
+import AlertsNotifications from "./AlertsNotifications"
 
 // Dữ liệu mẫu cho dashboard
 const dashboardData = {
@@ -167,53 +168,8 @@ export default function Reports() {
         {/* Top performers */}
         <TopPerformers departmentId={departmentFilter} />
 
-        {/* Cảnh báo và thông báo */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <AlertTriangle className="h-5 w-5 mr-2 text-orange-500" />
-              Cảnh báo và thông báo
-            </CardTitle>
-            <CardDescription>Các vấn đề cần chú ý</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3 p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
-                <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
-                <div>
-                  <div className="font-medium text-red-900">Công việc quá hạn</div>
-                  <div className="text-sm text-red-700">
-                    {overview.overdueTasks} công việc đã quá hạn cần xử lý ngay
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3 p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
-                <Clock className="h-5 w-5 text-yellow-500 mt-0.5" />
-                <div>
-                  <div className="font-medium text-yellow-900">Sắp đến hạn</div>
-                  <div className="text-sm text-yellow-700">8 công việc sẽ đến hạn trong tuần này</div>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                <Users className="h-5 w-5 text-blue-500 mt-0.5" />
-                <div>
-                  <div className="font-medium text-blue-900">Nhân sự mới</div>
-                  <div className="text-sm text-blue-700">2 nhân viên mới cần được phân công công việc</div>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3 p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
-                <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
-                <div>
-                  <div className="font-medium text-green-900">Mục tiêu đạt được</div>
-                  <div className="text-sm text-green-700">Phòng QTNT đã hoàn thành 120% mục tiêu tháng</div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Block cảnh báo và thông báo */}
+        <AlertsNotifications departmentId={departmentFilter} />
       </div>
 
       {/* Thống kê bổ sung */}

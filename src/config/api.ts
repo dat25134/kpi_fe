@@ -91,6 +91,7 @@ export const API_ENDPOINTS = {
     TASK_PROGRESS: `${API_URL}/report/task-progress`,
     KPI_TRENDS: `${API_URL}/report/kpi-trends`,
     TOP_PERFORMERS: `${API_URL}/report/top-performers`,
+    ALERTS_NOTIFICATIONS: `${API_URL}/report/alerts-notifications`,
   },
 
   // Thêm các nhóm API khác ở đây

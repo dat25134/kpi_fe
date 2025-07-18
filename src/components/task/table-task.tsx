@@ -146,12 +146,22 @@ export default function TableTask({ tasks, onRowClick, pagination, selectedTaskI
                         <div
                           className="break-words whitespace-normal flex-1"
                         >
-                          <div 
-                          className="font-medium cursor-pointer hover:underline" 
-                          onClick={e => {
-                            e.stopPropagation();
-                            onRowClick && onRowClick(task);
-                          }}>
+                          <div
+                            className="font-medium cursor-pointer hover:underline"
+                            style={{
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'normal'
+                            }}
+                            title={task.content}
+                            onClick={e => {
+                              e.stopPropagation();
+                              onRowClick && onRowClick(task);
+                            }}
+                          >
                             {task.content}
                           </div>
                           <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">

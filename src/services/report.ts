@@ -14,4 +14,11 @@ export async function getTopPerformers({ departmentId }: { departmentId?: string
   if (departmentId) params.departmentId = departmentId;
   const res = await apiClient.get(API_ENDPOINTS.REPORTS.KPI_TRENDS.replace("kpi-trends", "top-performers"), { params });
   return res.data;
+}
+
+export async function getAlertsNotifications({ departmentId }: { departmentId?: string }) {
+  const params: any = {};
+  if (departmentId) params.departmentId = departmentId;
+  const res = await apiClient.get(API_ENDPOINTS.REPORTS.ALERTS_NOTIFICATIONS, { params });
+  return res.data;
 } 
