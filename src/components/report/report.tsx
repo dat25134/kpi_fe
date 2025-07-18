@@ -41,6 +41,7 @@ import { useDepartmentsListSelect } from "@/hooks/useDepartments"
 import DepartmentStats from "./DepartmentStats"
 import PositionStats from "./PositionStats"
 import TaskProgressChart from "./TaskProgressChart"
+import KPITrendsChart from "./KPITrendsChart"
 
 // Dữ liệu mẫu cho dashboard
 const dashboardData = {
@@ -156,28 +157,8 @@ export default function Reports() {
         {/* Biểu đồ tiến độ công việc */}
         <TaskProgressChart timeFilter={timeFilter} departmentId={departmentFilter} />
 
-        {/* Xu hướng KPI */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <TrendingUp className="h-5 w-5 mr-2" />
-              Xu hướng KPI
-            </CardTitle>
-            <CardDescription>Hiệu suất đạt được so với mục tiêu</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={kpiTrends}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Area type="monotone" dataKey="target" stackId="1" stroke="#94A3B8" fill="#94A3B8" name="Mục tiêu" />
-                <Area type="monotone" dataKey="achieved" stackId="2" stroke="#10B981" fill="#10B981" name="Đạt được" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        {/* Block xu hướng KPI */}
+        <KPITrendsChart departmentId={departmentFilter} />
       </div>
 
       {/* Top performers và cảnh báo */}
