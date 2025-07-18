@@ -84,6 +84,13 @@ export const API_ENDPOINTS = {
     DELETE_CRITERIA: (id: number) => `${API_URL}/evaluation-criteria/criteria/${id}`,
   },
 
+  REPORTS: {
+    OVERVIEW: `${API_URL}/report/overview`,
+    DEPARTMENT_STATS: `${API_URL}/report/department-stats`,
+    POSITION_STATS: `${API_URL}/report/position-stats`,
+    TASK_PROGRESS: `${API_URL}/report/task-progress`,
+  },
+
   // Thêm các nhóm API khác ở đây
 } as const;
 

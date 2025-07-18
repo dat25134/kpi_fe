@@ -36,6 +36,11 @@ import {
   AreaChart,
   Pie,
 } from "recharts"
+import OverviewStats from "./OverviewStats"
+import { useDepartmentsListSelect } from "@/hooks/useDepartments"
+import DepartmentStats from "./DepartmentStats"
+import PositionStats from "./PositionStats"
+import TaskProgressChart from "./TaskProgressChart"
 
 // Dữ liệu mẫu cho dashboard
 const dashboardData = {
@@ -88,6 +93,7 @@ const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"]
 export default function Reports() {
   const [timeFilter, setTimeFilter] = useState("month")
   const [departmentFilter, setDepartmentFilter] = useState("all")
+  const { data: departmentsList, isLoading: loadingDepartments } = useDepartmentsListSelect();
 
   const { overview, departmentStats, positionStats, taskProgress, topPerformers, kpiTrends } = dashboardData
 
@@ -121,187 +127,34 @@ export default function Reports() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả phòng ban</SelectItem>
-              <SelectItem value="QTNT">QTNT</SelectItem>
-              <SelectItem value="TCKT">TCKT</SelectItem>
-              <SelectItem value="NS">NS</SelectItem>
-              <SelectItem value="KD">KD</SelectItem>
+              {loadingDepartments ? (
+                <SelectItem value="loading" disabled>Đang tải...</SelectItem>
+              ) : (
+                departmentsList?.map((dept: any) => (
+                  <SelectItem key={dept.id} value={dept.id.toString()}>{dept.name}</SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
         </div>
       </div>
 
       {/* Thống kê tổng quan */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tổng nhân viên</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{overview.totalEmployees}</div>
-            <div className="flex items-center text-xs text-muted-foreground mt-1">
-              <UserCheck className="h-3 w-3 mr-1 text-green-600" />
-              {overview.activeEmployees} hoạt động
-              <UserX className="h-3 w-3 ml-2 mr-1 text-red-600" />
-              {overview.inactiveEmployees} tạm nghỉ
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lương trung bình</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{(overview.averageSalary / 1000000).toFixed(1)}M</div>
-            <p className="text-xs text-muted-foreground">VNĐ/tháng</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tổng công việc</CardTitle>
-            <ClipboardList className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{overview.totalTasks}</div>
-            <div className="flex items-center text-xs text-muted-foreground mt-1">
-              <CheckCircle className="h-3 w-3 mr-1 text-green-600" />
-              {overview.completedTasks} hoàn thành
-              <Clock className="h-3 w-3 ml-2 mr-1 text-blue-600" />
-              {overview.ongoingTasks} đang làm
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tỷ lệ hoàn thành</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{completionRate}%</div>
-            <Progress value={completionRate} className="mt-2" />
-            <p className="text-xs text-muted-foreground mt-1">{overview.overdueTasks} công việc quá hạn</p>
-          </CardContent>
-        </Card>
-      </div>
+      <OverviewStats timeFilter={timeFilter} departmentId={departmentFilter} />
 
       {/* Thống kê chi tiết */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Thống kê theo phòng ban */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Building2 className="h-5 w-5 mr-2" />
-              Thống kê theo phòng ban
-            </CardTitle>
-            <CardDescription>Hiệu suất và nhân sự theo từng phòng ban</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {departmentStats.map((dept, index) => (
-                <div key={dept.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                      <span className="text-sm font-medium text-blue-900">{dept.name}</span>
-                    </div>
-                    <div>
-                      <div className="font-medium">{dept.name}</div>
-                      <div className="text-sm text-gray-500">{dept.employees} nhân viên</div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <Badge variant="outline" className="text-green-700 bg-green-50">
-                        {dept.completed} hoàn thành
-                      </Badge>
-                      <Badge variant="outline" className="text-blue-700 bg-blue-50">
-                        {dept.ongoing} đang làm
-                      </Badge>
-                      {dept.overdue > 0 && (
-                        <Badge variant="outline" className="text-red-700 bg-red-50">
-                          {dept.overdue} quá hạn
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="text-xs text-gray-500">TB: {(dept.avgSalary / 1000000).toFixed(1)}M VNĐ</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <DepartmentStats timeFilter={timeFilter} />
 
         {/* Thống kê theo chức vụ */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Crown className="h-5 w-5 mr-2" />
-              Thống kê theo chức vụ
-            </CardTitle>
-            <CardDescription>Phân bố nhân sự và quyền hạn theo chức vụ</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {positionStats
-                .filter((pos) => pos.count > 0)
-                .map((pos, index) => (
-                  <div key={pos.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <Crown
-                        className={`h-5 w-5 ${
-                          index === 0
-                            ? "text-yellow-500"
-                            : index === 1
-                              ? "text-gray-400"
-                              : index === 2
-                                ? "text-orange-500"
-                                : "text-gray-300"
-                        }`}
-                      />
-                      <div>
-                        <div className="font-medium">{pos.name}</div>
-                        <div className="text-sm text-gray-500">{pos.count} người</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-medium">{(pos.avgSalary / 1000000).toFixed(1)}M VNĐ</div>
-                      <div className="text-xs text-gray-500">{pos.permissions} quyền hạn</div>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </CardContent>
-        </Card>
+        <PositionStats timeFilter={timeFilter} />
       </div>
 
       {/* Biểu đồ và thống kê nâng cao */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Biểu đồ tiến độ công việc */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <BarChart3 className="h-5 w-5 mr-2" />
-              Tiến độ công việc theo tháng
-            </CardTitle>
-            <CardDescription>Thống kê hoàn thành công việc 3 tháng gần nhất</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={taskProgress}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="completed" fill="#10B981" name="Hoàn thành" />
-                <Bar dataKey="ongoing" fill="#3B82F6" name="Đang làm" />
-                <Bar dataKey="overdue" fill="#EF4444" name="Quá hạn" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        <TaskProgressChart timeFilter={timeFilter} departmentId={departmentFilter} />
 
         {/* Xu hướng KPI */}
         <Card>
