@@ -21,4 +21,11 @@ export async function getAlertsNotifications({ departmentId }: { departmentId?: 
   if (departmentId) params.departmentId = departmentId;
   const res = await apiClient.get(API_ENDPOINTS.REPORTS.ALERTS_NOTIFICATIONS, { params });
   return res.data;
+}
+
+export async function getDepartmentDistribution({ departmentId }: { departmentId?: string }) {
+  const params: any = {};
+  if (departmentId) params.departmentId = departmentId;
+  const res = await apiClient.get(API_ENDPOINTS.REPORTS.DEPARTMENT_DISTRIBUTION, { params });
+  return res.data;
 } 

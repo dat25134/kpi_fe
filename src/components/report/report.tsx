@@ -44,6 +44,7 @@ import TaskProgressChart from "./TaskProgressChart"
 import KPITrendsChart from "./KPITrendsChart"
 import TopPerformers from "./TopPerformers"
 import AlertsNotifications from "./AlertsNotifications"
+import DepartmentDistribution from "./DepartmentDistribution"
 
 // Dữ liệu mẫu cho dashboard
 const dashboardData = {
@@ -174,31 +175,8 @@ export default function Reports() {
 
       {/* Thống kê bổ sung */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Phân bố theo phòng ban</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <RechartsPieChart>
-                <Pie
-                  data={departmentStats}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={60}
-                  fill="#8884d8"
-                  dataKey="employees"
-                  label={({ name, value }) => `${name}: ${value}`}
-                >
-                  {departmentStats.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </RechartsPieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        {/* Block phân bố theo phòng ban */}
+        <DepartmentDistribution departmentId={departmentFilter} />
 
         <Card>
           <CardHeader>
