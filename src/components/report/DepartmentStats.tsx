@@ -21,6 +21,8 @@ export default function DepartmentStats({ timeFilter }: { timeFilter: string }) 
           </div>
         ) : error ? (
           <div className="text-red-500">{error}</div>
+        ) : !data || data.length === 0 ? (
+          <div className="text-center text-gray-500 py-8"> Không có dữ liệu </div>
         ) : (
           <div className="space-y-4">
             {data.map((dept: any) => (

@@ -12,6 +12,8 @@ export interface DepartmentDistributionProps {
 export default function DepartmentDistribution({ departmentId }: DepartmentDistributionProps) {
   const { data, isLoading, error } = useDepartmentDistribution({ departmentId });
 
+  const isEmpty = !data || !Array.isArray(data) || data.length === 0;
+
   return (
     <Card>
       <CardHeader>
@@ -24,6 +26,8 @@ export default function DepartmentDistribution({ departmentId }: DepartmentDistr
           </div>
         ) : error ? (
           <div className="text-red-500 text-center py-8">Không thể tải dữ liệu phân bố phòng ban</div>
+        ) : isEmpty ? (
+          <div className="text-center text-gray-500 py-8">Không có dữ liệu</div>
         ) : (
           <ResponsiveContainer width="100%" height={200}>
             <RechartsPieChart>
