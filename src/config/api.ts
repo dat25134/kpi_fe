@@ -93,6 +93,8 @@ export const API_ENDPOINTS = {
     TOP_PERFORMERS: `${API_URL}/report/top-performers`,
     ALERTS_NOTIFICATIONS: `${API_URL}/report/alerts-notifications`,
     DEPARTMENT_DISTRIBUTION: `${API_URL}/report/department-distribution`,
+    MONTHLY_PERFORMANCE: `${API_URL}/report/monthly-performance`,
+    RECENT_ACTIVITIES: `${API_URL}/report/recent-activities`,
   },
 
   // Thêm các nhóm API khác ở đây

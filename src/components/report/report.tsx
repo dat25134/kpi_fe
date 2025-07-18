@@ -45,6 +45,8 @@ import KPITrendsChart from "./KPITrendsChart"
 import TopPerformers from "./TopPerformers"
 import AlertsNotifications from "./AlertsNotifications"
 import DepartmentDistribution from "./DepartmentDistribution"
+import MonthlyPerformance from "./MonthlyPerformance"
+import RecentActivities from "./RecentActivities"
 
 // Dữ liệu mẫu cho dashboard
 const dashboardData = {
@@ -178,56 +180,11 @@ export default function Reports() {
         {/* Block phân bố theo phòng ban */}
         <DepartmentDistribution departmentId={departmentFilter} />
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Hiệu suất tháng</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Hoàn thành đúng hạn</span>
-              <span className="font-medium">{onTimeRate}%</span>
-            </div>
-            <Progress value={onTimeRate} />
+        {/* Block hiệu suất tháng */}
+        <MonthlyPerformance departmentId={departmentFilter} month={timeFilter} />
 
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Chất lượng công việc</span>
-              <span className="font-medium">87%</span>
-            </div>
-            <Progress value={87} />
-
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Mức độ hài lòng</span>
-              <span className="font-medium">92%</span>
-            </div>
-            <Progress value={92} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Hoạt động gần đây</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2 text-sm">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>Phạm Ngọc Vinh hoàn thành "Cập nhật hệ thống"</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span>Thêm 2 nhân viên mới vào phòng TCKT</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm">
-                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                <span>Công việc "Báo cáo tháng 3" sắp đến hạn</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <span>Cập nhật quyền hạn cho chức vụ Chuyên viên</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Block hoạt động gần đây */}
+        <RecentActivities departmentId={departmentFilter} timeFilter={timeFilter} />
       </div>
     </div>
   )

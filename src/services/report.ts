@@ -28,4 +28,20 @@ export async function getDepartmentDistribution({ departmentId }: { departmentId
   if (departmentId) params.departmentId = departmentId;
   const res = await apiClient.get(API_ENDPOINTS.REPORTS.DEPARTMENT_DISTRIBUTION, { params });
   return res.data;
+}
+
+export async function getMonthlyPerformance({ departmentId, month }: { departmentId?: string; month?: string }) {
+  const params: any = {};
+  if (departmentId) params.departmentId = departmentId;
+  if (month) params.month = month;
+  const res = await apiClient.get(API_ENDPOINTS.REPORTS.MONTHLY_PERFORMANCE, { params });
+  return res.data;
+}
+
+export async function getRecentActivities({ departmentId, timeFilter }: { departmentId?: string; timeFilter?: string }) {
+  const params: any = {};
+  if (departmentId) params.departmentId = departmentId;
+  if (timeFilter) params.timeFilter = timeFilter;
+  const res = await apiClient.get(API_ENDPOINTS.REPORTS.RECENT_ACTIVITIES, { params });
+  return res.data;
 } 
