@@ -36,3 +36,8 @@ export async function deleteTaskFile(taskId: number, fileId: number) {
   const response = await apiClient.delete(API_ENDPOINTS.TASKS.DELETE_FILE(taskId, fileId), getConfig());
   return response.data;
 }
+
+export async function getCurrentUserWorkDescriptions() {
+  const response = await apiClient.get(API_ENDPOINTS.TASKS.KPI_SCORE, getConfig());
+  return response.data;
+}

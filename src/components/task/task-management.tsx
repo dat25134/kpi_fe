@@ -24,6 +24,8 @@ import { DatePicker, ConfigProvider } from "antd"
 import viVN from "antd/es/locale/vi_VN"
 import dayjs from "dayjs"
 import "dayjs/locale/vi"
+import { useCurrentUserWorkDescriptions } from "@/hooks/useCurrentUserWorkDescriptions"
+import { calculateKPIScore, getKPIRatingForKPI, getKPIRatingLabelForKPI } from "@/lib/utils"
 dayjs.locale("vi")
 
 export default function TaskManagement() {
@@ -65,6 +67,11 @@ export default function TaskManagement() {
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [selectedTaskIds, setSelectedTaskIds] = useState<number[]>([])
   const [parentTask, setParentTask] = useState<{ id: number, name: string } | null>(null)
+  const { data: kpiData, loading: kpiLoading, error: kpiError } = useCurrentUserWorkDescriptions();
+  const workDescriptions = kpiData?.work_descriptions || [];
+  const kpiScore = calculateKPIScore(workDescriptions);
+  const kpiRating = getKPIRatingForKPI(kpiScore);
+  const kpiRatingLabel = getKPIRatingLabelForKPI(kpiRating);
   
   const handleSearch = () => {
     setStartDate(inputStartDate)
@@ -150,21 +157,25 @@ export default function TaskManagement() {
               <User className="h-4 w-4 text-blue-500" />
               <span className="text-blue-700">Công việc</span>
             </Button>
-            <Button variant="outline" className="flex items-center gap-2">
+            {/* <Button variant="outline" className="flex items-center gap-2">
               <CircleDot className="h-4 w-4" />
               <span>Egov</span>
-            </Button>
+            </Button> */}
           </div>
           <div className="flex flex-col md:flex-row items-start md:items-center text-sm text-gray-500 gap-y-1 md:gap-y-0 md:gap-x-6">
             <div className="flex items-center gap-x-1">
               <span>KPI hiện tại</span>
               <span>:</span>
-              <span className="font-semibold text-gray-700">2.0 / 4.0</span>
+              <span className="font-semibold text-gray-700">
+                {kpiLoading ? '...' : `${kpiScore.toFixed(2)} / 4.0`}
+              </span>
             </div>
             <div className="flex items-center gap-x-1">
               <span>Tạm xếp loại</span>
               <span>:</span>
-              <span className="font-semibold text-gray-700">Tốt</span>
+              <span className="font-semibold text-gray-700">
+                {kpiLoading ? '...' : kpiRatingLabel}
+              </span>
             </div>
           </div>
         </div>
