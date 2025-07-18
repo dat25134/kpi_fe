@@ -42,6 +42,7 @@ import DepartmentStats from "./DepartmentStats"
 import PositionStats from "./PositionStats"
 import TaskProgressChart from "./TaskProgressChart"
 import KPITrendsChart from "./KPITrendsChart"
+import TopPerformers from "./TopPerformers"
 
 // Dữ liệu mẫu cho dashboard
 const dashboardData = {
@@ -164,43 +165,7 @@ export default function Reports() {
       {/* Top performers và cảnh báo */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top performers */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Award className="h-5 w-5 mr-2" />
-              Nhân viên xuất sắc
-            </CardTitle>
-            <CardDescription>Top 4 nhân viên có hiệu suất cao nhất</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {topPerformers.map((performer, index) => (
-                <div key={performer.name} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="relative">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-blue-100 text-blue-900">{performer.avatar}</AvatarFallback>
-                      </Avatar>
-                      {index === 0 && (
-                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center">
-                          <span className="text-xs text-white">👑</span>
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <div className="font-medium">{performer.name}</div>
-                      <div className="text-sm text-gray-500">{performer.department}</div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-medium">{performer.completed} công việc</div>
-                    <div className="text-sm text-green-600">{performer.score} điểm</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <TopPerformers departmentId={departmentFilter} />
 
         {/* Cảnh báo và thông báo */}
         <Card>

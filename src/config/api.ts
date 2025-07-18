@@ -90,6 +90,7 @@ export const API_ENDPOINTS = {
     POSITION_STATS: `${API_URL}/report/position-stats`,
     TASK_PROGRESS: `${API_URL}/report/task-progress`,
     KPI_TRENDS: `${API_URL}/report/kpi-trends`,
+    TOP_PERFORMERS: `${API_URL}/report/top-performers`,
   },
 
   // Thêm các nhóm API khác ở đây
