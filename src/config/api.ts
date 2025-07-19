@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
     DETAIL: (id: number) => `${API_URL}/employees/${id}`,
     MANAGER: `${API_URL}/employees/manager`,
     ALL: `${API_URL}/employees/all-employees`,
+    IMPORT: `${API_URL}/employees/import`,
   },
 
   ROLES: {

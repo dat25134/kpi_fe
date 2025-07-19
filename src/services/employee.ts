@@ -94,3 +94,12 @@ export async function fetchManagerEmployees(): Promise<Employee[]> {
   const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.MANAGER, getConfig());
   return response.data.data;
 }
+
+export async function importEmployees(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await apiClient.post(API_ENDPOINTS.EMPLOYEES.IMPORT, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+}

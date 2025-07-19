@@ -6,7 +6,8 @@ import {
   updateEmployee, 
   deleteEmployee,
   fetchEmployeeDetail,
-  fetchManagerEmployees
+  fetchManagerEmployees,
+  importEmployees as importEmployeesService
 } from '@/services/employee';
 import type { Employee, EmployeeSummary, EmployeeFilters, EmployeeListResponse } from '@/types/employee';
 import useSWR from 'swr';
@@ -130,6 +131,7 @@ export function useEmployees() {
     clearFilters,
     setLoading,
     updateEmployeePermissions,
+    refetch,
   };
 }
 
@@ -150,4 +152,32 @@ export function useAllUsers() {
     loading: isLoading,
     error,
   };
+} 
+
+export function useImportEmployees() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const importEmployees = useCallback(async (file: File) => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const data = await importEmployeesService(file);
+      if (data.success) {
+        setSuccess(data.message || 'Import thành công');
+      } else {
+        setError(data.message || 'Import thất bại');
+      }
+      return data;
+    } catch (err: any) {
+      setError(err?.message || 'Không thể kết nối đến máy chủ.');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { importEmployees, loading, error, success };
 } 

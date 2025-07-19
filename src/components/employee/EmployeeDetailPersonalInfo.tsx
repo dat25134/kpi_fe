@@ -1,4 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { formatDate } from "@/lib/utils";
 import { Calendar } from "lucide-react";
 import React from "react";
 
@@ -15,17 +16,17 @@ export default function EmployeeDetailPersonalInfo({ employee }: EmployeeDetailP
       <CardContent className="space-y-3">
         <div className="flex justify-between">
           <span className="text-sm text-gray-500">Ngày sinh:</span>
-          <span className="text-sm font-medium">{employee.birthDate}</span>
+          <span className="text-sm font-medium">{formatDate(employee.birthDate, "DD/MM/YYYY")}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-sm text-gray-500">Giới tính:</span>
-          <span className="text-sm font-medium">{employee.gender}</span>
+          <span className="text-sm font-medium">{employee.gender === 'male' ? "Nam" : "Nữ"}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-sm text-gray-500">Ngày vào làm:</span>
           <span className="text-sm font-medium flex items-center gap-1">
             <Calendar className="h-3 w-3" />
-            {employee.joinDate}
+            {formatDate(employee.joinDate, "DD/MM/YYYY")}
           </span>
         </div>
       </CardContent>

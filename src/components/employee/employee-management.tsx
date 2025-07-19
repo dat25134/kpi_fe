@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, UserCheck, UserX, Users, ChevronLeft, ChevronRight } from "lucide-react"
+import { Plus, UserCheck, UserX, Users, ChevronLeft, ChevronRight, Upload } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useEmployees } from "@/hooks/useEmployees"
 import { useDepartments, useDepartmentsListSelect } from "@/hooks/useDepartments"
@@ -22,6 +22,7 @@ const EmployeeTable = dynamic(() => import("./EmployeeTable"), { ssr: false })
 
 const AddEmployeeModal = dynamic(() => import("./add-employee-modal"), { ssr: false })
 const EmployeeDetailModal = dynamic(() => import("./employee-detail-modal"), { ssr: false })
+import EmployeeImportModal from "./employee-import-modal"
 
 export default function EmployeeManagement() {
   const {
@@ -39,7 +40,8 @@ export default function EmployeeManagement() {
     changePage,
     clearFilters,
     setLoading,
-    updateEmployeePermissions
+    updateEmployeePermissions,
+    refetch
   } = useEmployees()
   const { data: departments, isLoading: departmentsLoading } = useDepartmentsListSelect()
   const { data: roles, isLoading: rolesLoading } = useRolesSelection()
@@ -56,6 +58,7 @@ export default function EmployeeManagement() {
   const [employeeToDelete, setEmployeeToDelete] = useState<number | null>(null)
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false)
   const [selectedEmployeeForPermission, setSelectedEmployeeForPermission] = useState<any>(null)
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false)
 
   // Apply filters when search/filter values change
   useEffect(() => {
@@ -187,10 +190,16 @@ export default function EmployeeManagement() {
           <h1 className="text-2xl font-bold text-gray-900">Quản lý Nhân viên</h1>
           <p className="text-gray-600">Quản lý thông tin nhân viên trong tổ chức</p>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="h-4 w-4 mr-2" />
-          Thêm nhân viên
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setIsImportModalOpen(true)} variant="outline" className="flex items-center">
+            <Upload className="h-4 w-4 mr-2" />
+            Import file
+          </Button>
+          <Button onClick={() => setIsAddModalOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="h-4 w-4 mr-2" />
+            Thêm nhân viên
+          </Button>
+        </div>
       </div>
 
       {/* Thống kê tổng quan */}
@@ -397,6 +406,7 @@ export default function EmployeeManagement() {
         onUpdatePermissions={handleUpdateEmployeePermissions}
         employee={selectedEmployeeForPermission}
       />
+      <EmployeeImportModal open={isImportModalOpen} onOpenChange={setIsImportModalOpen} onImported={refetch} />
     </div>
   )
 }
