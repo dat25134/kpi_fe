@@ -27,3 +27,16 @@ export async function fetchAllUsers() {
   const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.ALL, getConfig());
   return response.data.data;
 }
+
+export async function changePassword(payload: {
+  current_password: string;
+  new_password: string;
+  new_password_confirmation: string;
+}) {
+  const response = await apiClient.post(
+    API_ENDPOINTS.USER.CHANGE_PASSWORD,
+    payload,
+    getConfig()
+  );
+  return response.data;
+}

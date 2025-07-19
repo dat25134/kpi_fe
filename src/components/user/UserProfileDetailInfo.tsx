@@ -19,7 +19,7 @@ export default function UserProfileDetailInfo({ userProfile }: UserProfileDetail
         </div>
         <div className="flex justify-between">
           <span className="text-sm text-gray-500">Giới tính:</span>
-          <span className="text-sm font-medium">{userProfile?.gender}</span>
+          <span className="text-sm font-medium">{userProfile?.gender === "male" ? "Nam" : "Nữ"}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-sm text-gray-500">Ngày vào làm:</span>

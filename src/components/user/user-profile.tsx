@@ -64,7 +64,7 @@ export default function UserProfile() {
           <h1 className="text-2xl font-bold text-gray-900">Thông tin cá nhân</h1>
           <p className="text-gray-600">Quản lý thông tin tài khoản và hồ sơ cá nhân</p>
         </div>
-        <div className="flex items-center space-x-2">
+        {/* <div className="flex items-center space-x-2">
           {isEditing ? (
             <>
               <Button variant="outline" onClick={handleCancel}>
@@ -82,7 +82,7 @@ export default function UserProfile() {
               Chỉnh sửa
             </Button>
           )}
-        </div>
+        </div> */}
       </div>
 
       {/* Header với thông tin cơ bản */}

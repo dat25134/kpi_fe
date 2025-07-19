@@ -19,6 +19,7 @@ import { useUser } from "@/hooks/useUser"
 import { toast } from "sonner"
 import { useState } from "react"
 import MobileSidebar from "./mobile-sidebar"
+import ChangePasswordModal from "@/components/user/change-password-modal"
 
 function hasPermission(user: { permissions?: string[] } | undefined, permission: string): boolean {
   return user?.permissions?.includes(permission) ?? false;
@@ -29,6 +30,7 @@ export default function MainHeader() {
   const router = useRouter()
   const { user, isLoading } = useUser();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
   const handleLogout = () => {
     setAuthToken("")
@@ -181,6 +183,9 @@ export default function MainHeader() {
               <DropdownMenuItem onClick={() => router.push("/settings")}>
                 <Link href="/settings">Cài đặt</Link>
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setChangePasswordOpen(true)}>
+                Đổi mật khẩu
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 className="text-red-600 focus:text-red-600"
@@ -189,6 +194,7 @@ export default function MainHeader() {
                 <Link href="/logout">Đăng xuất</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
+            <ChangePasswordModal open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
           </DropdownMenu>
         </div>
 

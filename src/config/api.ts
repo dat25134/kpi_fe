@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
     USER_INFO: `${API_URL}/user/info`,
     PROFILE: `${API_URL}/user/profile`,
     UPDATE_PROFILE: `${API_URL}/user/profile`,
+    CHANGE_PASSWORD: `${API_URL}/user/change-password`,
   },
   EMPLOYEES: {
     LIST: `${API_URL}/employees`,
