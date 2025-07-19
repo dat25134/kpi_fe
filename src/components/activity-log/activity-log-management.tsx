@@ -336,10 +336,10 @@ export function ActivityLogManagement() {
                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
                 Làm mới
               </Button>
-              <Button variant="outline" size="sm">
+              {/* <Button variant="outline" size="sm">
                 <Download className="h-4 w-4 mr-2" />
                 Xuất Excel
-              </Button>
+              </Button> */}
             </div>
           </div>
         </CardHeader>

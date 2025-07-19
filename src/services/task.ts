@@ -41,3 +41,14 @@ export async function getCurrentUserWorkDescriptions() {
   const response = await apiClient.get(API_ENDPOINTS.TASKS.KPI_SCORE, getConfig());
   return response.data;
 }
+
+export async function exportTasksToWord({ ids, startDate, endDate }: { ids: number[], startDate: string, endDate: string }) {
+  const response = await apiClient.post(API_ENDPOINTS.TASKS.EXPORT_WORD, {
+    ids,
+    startDate,
+    endDate,
+  }, {
+    responseType: 'blob', // để nhận file về
+  });
+  return response.data;
+}

@@ -26,6 +26,8 @@ import dayjs from "dayjs"
 import "dayjs/locale/vi"
 import { useCurrentUserWorkDescriptions } from "@/hooks/useCurrentUserWorkDescriptions"
 import { calculateKPIScore, getKPIRatingForKPI, getKPIRatingLabelForKPI } from "@/lib/utils"
+import { exportTasksToWord } from '@/services/task';
+import { useLoading } from '@/context/loading-context';
 dayjs.locale("vi")
 
 export default function TaskManagement() {
@@ -65,13 +67,15 @@ export default function TaskManagement() {
     editTask
   } = useTasks(params)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
-  const [selectedTaskIds, setSelectedTaskIds] = useState<number[]>([])
+  const [selectedOngoingTaskIds, setSelectedOngoingTaskIds] = useState<number[]>([])
+  const [selectedCompletedTaskIds, setSelectedCompletedTaskIds] = useState<number[]>([])
   const [parentTask, setParentTask] = useState<{ id: number, name: string } | null>(null)
   const { data: kpiData, loading: kpiLoading, error: kpiError } = useCurrentUserWorkDescriptions();
   const workDescriptions = kpiData?.work_descriptions || [];
   const kpiScore = calculateKPIScore(workDescriptions);
   const kpiRating = getKPIRatingForKPI(kpiScore);
   const kpiRatingLabel = getKPIRatingLabelForKPI(kpiRating);
+  const { hideLoading } = useLoading();
   
   const handleSearch = () => {
     setStartDate(inputStartDate)
@@ -136,10 +140,49 @@ export default function TaskManagement() {
     },
   ]
 
-  const handleExportWord = () => {
-    const selectedTasks = tasks.filter((task: any) => selectedTaskIds.includes(task.id))
-    // TODO: Xử lý xuất file Word với selectedTasks
-    alert(`Sẽ export ${selectedTasks.length} công việc sang Word!`)
+  const handleExportWord = async () => {
+    const allSelectedIds = [...selectedOngoingTaskIds, ...selectedCompletedTaskIds]
+    const uniqueSelectedIds = Array.from(new Set(allSelectedIds))
+    if (uniqueSelectedIds.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một công việc để export!')
+      return
+    }
+    try {
+      const blob = await exportTasksToWord({
+        ids: uniqueSelectedIds,
+        startDate,
+        endDate,
+      })
+      // Kiểm tra nếu response là JSON lỗi
+      if (blob.type === "application/json") {
+        const reader = new FileReader()
+        reader.onload = function () {
+          try {
+            const json = JSON.parse(reader.result as string)
+            toast.error(json.message || "Xuất file Word thất bại!")
+            hideLoading()
+          } catch {
+            toast.error("Xuất file Word thất bại!")
+            hideLoading()
+          }
+        }
+        reader.readAsText(blob)
+        return
+      }
+      // Nếu là file Word thì tải về
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `tasks_export_${startDate}_${endDate}.docx`)
+      document.body.appendChild(link)
+      link.click()
+      link.parentNode?.removeChild(link)
+      toast.success('Xuất file Word thành công!')
+      hideLoading()
+    } catch (err) {
+      toast.error('Xuất file Word thất bại!')
+      hideLoading()
+    }
   }
 
   const handleAddSubTask = (task: Task) => {
@@ -298,7 +341,7 @@ export default function TaskManagement() {
               <div className="flex justify-between p-2 border-b">
                 <Button
                   className="bg-green-600 hover:bg-green-700"
-                  disabled={selectedTaskIds.length === 0}
+                  disabled={selectedOngoingTaskIds.length === 0 && selectedCompletedTaskIds.length === 0}
                   onClick={handleExportWord}
                 >
                   <Download className="h-4 w-4 mr-1" />
@@ -329,8 +372,8 @@ export default function TaskManagement() {
                   <TableTask
                     pagination={pagination}
                     tasks={tasks}
-                    selectedTaskIds={selectedTaskIds}
-                    onSelectTaskIds={setSelectedTaskIds}
+                    selectedTaskIds={selectedOngoingTaskIds}
+                    onSelectTaskIds={setSelectedOngoingTaskIds}
                     onRowClick={(task) => { setEditingTask(task); setIsAddModalOpen(true); }}
                     onAddSubTask={handleAddSubTask}
                   />
@@ -371,9 +414,13 @@ export default function TaskManagement() {
                     <LoadingSpinner />
                   </div>
                 ) : (
-                  <TableTask 
+                  <TableTask
                     tasks={tasks?.filter((task: Task) => task.status === "completed")}
+                    selectedTaskIds={selectedCompletedTaskIds}
+                    onSelectTaskIds={setSelectedCompletedTaskIds}
                     onRowClick={(task) => { setEditingTask(task); setIsAddModalOpen(true); }}
+                    onAddSubTask={handleAddSubTask}
+                    pagination={pagination}
                   />
                 )}
               </div>

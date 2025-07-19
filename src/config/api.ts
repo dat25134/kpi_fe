@@ -59,6 +59,7 @@ export const API_ENDPOINTS = {
     PROGRESS: (id: number) => `${API_URL}/tasks/${id}/progress`,
     DELETE_FILE: (taskId: number, fileId: number) => `${API_URL}/tasks/${taskId}/files/${fileId}`,
     KPI_SCORE: `${API_URL}/tasks/current-user-work-descriptions`,
+    EXPORT_WORD: `${API_URL}/tasks/export-word`,
   },
 
   ACTIVITY_LOG: {
