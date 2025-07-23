@@ -100,6 +100,12 @@ export const API_ENDPOINTS = {
     RECENT_ACTIVITIES: `${API_URL}/report/recent-activities`,
   },
 
+  NOTIFICATIONS: {
+    LIST: `${API_URL}/notifications`,
+    MARK_READ: (id: string) => `${API_URL}/notifications/${id}/mark-read`,
+    MARK_ALL_READ: `${API_URL}/notifications/mark-all-read`,
+  },
+
   // Thêm các nhóm API khác ở đây
 } as const;
 
