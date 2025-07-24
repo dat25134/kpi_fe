@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import Echo from 'laravel-echo';
 import io from 'socket.io-client';
 import { getAuthToken } from '@/services/auth';
+import { toast } from 'sonner';
 
 export interface NotificationData {
   id: number;
@@ -66,6 +67,15 @@ export function useNotificationsSocket(userId: number) {
     const channel = echo.channel(`kpi_database_user.${userId}`);
     channel.listen('.notification', (notification: any) => {
       fetchInitialNotifications()
+      toast.info(notification.data.title, {
+        description: notification.data.content,
+        action: {
+          label: 'Xem',
+          onClick: () => {
+            window.open(notification.data.url, '_blank');
+          }
+        }
+      })
     });
 
     return () => {
