@@ -17,6 +17,8 @@ type ConfirmDeleteModalProps = {
   onConfirm: () => void
   title: string
   description: string
+  confirmText?: string
+  icon?: React.ReactNode
 }
 
 export default function ConfirmDeleteModal({
@@ -25,13 +27,15 @@ export default function ConfirmDeleteModal({
   onConfirm,
   title,
   description,
+  confirmText = "Xác nhận xóa",
+  icon,
 }: ConfirmDeleteModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-6 w-6 text-destructive" />
+            {icon || <AlertTriangle className="h-6 w-6 text-destructive" />}
             {title}
           </DialogTitle>
           <DialogDescription>{description}</DialogDescription>
@@ -41,7 +45,7 @@ export default function ConfirmDeleteModal({
             Hủy
           </Button>
           <Button variant="destructive" onClick={onConfirm}>
-            Xác nhận xóa
+            {confirmText}
           </Button>
         </DialogFooter>
       </DialogContent>

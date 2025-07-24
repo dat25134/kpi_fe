@@ -103,3 +103,10 @@ export async function importEmployees(file: File) {
   });
   return response.data;
 }
+
+/**
+ * Reset mật khẩu cho nhân viên (gửi email mật khẩu mới)
+ */
+export async function resetEmployeePassword(id: number): Promise<void> {
+  await apiClient.post(API_ENDPOINTS.EMPLOYEES.RESET_PASSWORD(id), {}, getConfig());
+}

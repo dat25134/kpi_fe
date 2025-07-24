@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, UserCheck, UserX, Users, ChevronLeft, ChevronRight, Upload } from "lucide-react"
+import { Plus, UserCheck, UserX, Users, ChevronLeft, ChevronRight, Upload, Mail } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useEmployees } from "@/hooks/useEmployees"
 import { useDepartments, useDepartmentsListSelect } from "@/hooks/useDepartments"
@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRolesSelection } from "@/hooks/useRole"
 import { getErrorMessage } from "@/services/errorHandler"
 import { syncEmployeePermissions } from "@/services/permission"
+import { resetEmployeePassword } from '@/services/employee';
 const PermissionModal = dynamic(() => import("../roles/permission-modal"), { ssr: false })
 const EmployeeTable = dynamic(() => import("./EmployeeTable"), { ssr: false })
 
@@ -59,6 +60,8 @@ export default function EmployeeManagement() {
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false)
   const [selectedEmployeeForPermission, setSelectedEmployeeForPermission] = useState<any>(null)
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
+  const [employeeToResetPassword, setEmployeeToResetPassword] = useState<any>(null);
 
   // Apply filters when search/filter values change
   useEffect(() => {
@@ -171,6 +174,24 @@ export default function EmployeeManagement() {
       setSelectedEmployeeForPermission(null)
     }
   }
+
+  const handleResetPasswordRequest = (employee: any) => {
+    setEmployeeToResetPassword(employee);
+    setIsResetPasswordModalOpen(true);
+  };
+
+  const handleConfirmResetPassword = async () => {
+    if (!employeeToResetPassword) return;
+    try {
+      await resetEmployeePassword(employeeToResetPassword.id);
+      toast.success('Đã gửi email mật khẩu mới cho nhân viên!');
+    } catch (error) {
+      toast.error(getErrorMessage(error) || 'Không thể reset mật khẩu.');
+    } finally {
+      setIsResetPasswordModalOpen(false);
+      setEmployeeToResetPassword(null);
+    }
+  };
 
   // Loading states
   if (summaryLoading) {
@@ -338,6 +359,8 @@ export default function EmployeeManagement() {
                 onEdit={handleEdit}
                 onDelete={handleDeleteRequest}
                 onManagePermissions={handleManagePermissions}
+                // Thêm prop mới để truyền hàm reset password
+                onResetPassword={handleResetPasswordRequest}
               />
 
               {/* Phân trang */}
@@ -407,6 +430,16 @@ export default function EmployeeManagement() {
         employee={selectedEmployeeForPermission}
       />
       <EmployeeImportModal open={isImportModalOpen} onOpenChange={setIsImportModalOpen} onImported={refetch} />
+      {/* Modal xác nhận reset mật khẩu */}
+      <ConfirmDeleteModal
+        open={isResetPasswordModalOpen}
+        onOpenChange={setIsResetPasswordModalOpen}
+        onConfirm={handleConfirmResetPassword}
+        title="Xác nhận reset mật khẩu"
+        description={`Bạn có chắc chắn muốn reset mật khẩu cho nhân viên ${employeeToResetPassword?.name || ''}? Một email sẽ được gửi tới nhân viên với mật khẩu mới.`}
+        confirmText="Reset mật khẩu"
+        icon={<Mail className="text-blue-500" />}
+      />
     </div>
   )
 }
