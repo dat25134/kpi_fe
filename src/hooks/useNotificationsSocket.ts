@@ -1,6 +1,8 @@
 import { fetchNotifications } from '@/services/notifi';
 import { useEffect, useRef, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import Echo from 'laravel-echo';
+import io from 'socket.io-client';
+import { getAuthToken } from '@/services/auth';
 
 export interface NotificationData {
   id: number;
@@ -23,7 +25,7 @@ export interface NotificationData {
 export function useNotificationsSocket(userId: number) {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const socketRef = useRef<Socket | null>(null);
+  const echoRef = useRef<any>(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -41,23 +43,36 @@ export function useNotificationsSocket(userId: number) {
     };
     fetchInitialNotifications();
 
-    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:6001', {
+    // Khởi tạo Echo với socket.io-client@2.4
+    // @ts-ignore
+    window.io = io;
+    const echo = new Echo({
+      broadcaster: 'socket.io',
+      host: process.env.NEXT_PUBLIC_SOCKET_URL || 'http://192.168.1.72:6001',
       transports: ['websocket'],
-      // Nếu cần auth: auth: { token: ... }
+      withCredentials: true, 
+      forceTLS: false,
+      disableStats: true,
+      auth: {
+        headers: {
+          "content-type": "application/json",
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+      },
+      // Nếu cần auth: thêm auth: { headers: { Authorization: ... } }
     });
-    socketRef.current = socket;
-
-    // Join vào room user
-    socket.emit('subscribe', { channel: `private-user.${userId}` });
-
-    // Lắng nghe event notification
-    socket.on('notification', (notification: NotificationData) => {
-      setNotifications(prev => [notification, ...prev]);
-      setUnreadCount(prev => prev + 1);
+    echoRef.current = echo;
+    // Lắng nghe notification trên kênh private-user.{userId}
+    const channel = echo.channel(`kpi_database_user.${userId}`);
+    channel.listen('.notification', (notification: any) => {
+      fetchInitialNotifications()
     });
 
     return () => {
-      socket.disconnect();
+      if (echoRef.current) {
+        echoRef.current.leave(`user.${userId}`);
+        echoRef.current.disconnect();
+      }
     };
   }, [userId]);
 
