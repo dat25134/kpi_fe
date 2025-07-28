@@ -294,7 +294,7 @@ export default function MainHeader() {
                 className="text-red-600 focus:text-red-600"
                 onClick={handleLogout}
               >
-                <Link href="#">Đăng xuất</Link>
+                <Link href="/logout">Đăng xuất</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
             <ChangePasswordModal open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
