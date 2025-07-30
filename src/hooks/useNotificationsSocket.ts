@@ -49,7 +49,7 @@ export function useNotificationsSocket(userId: number) {
     window.io = io;
     const echo = new Echo({
       broadcaster: 'socket.io',
-      host: process.env.NEXT_PUBLIC_SOCKET_URL || 'http://192.168.1.72:6001',
+      host: process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:6001',
       transports: ['websocket'],
       withCredentials: true, 
       forceTLS: false,

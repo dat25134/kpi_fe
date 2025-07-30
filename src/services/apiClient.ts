@@ -3,7 +3,7 @@ import { setAuthToken, getAuthToken } from "./auth";
 import { toast } from "sonner";
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:90/api',
   timeout: 10000,
 });
 
