@@ -32,6 +32,10 @@ export default function UserProfileDetailInfo({ userProfile }: UserProfileDetail
           <span className="text-sm text-gray-500">Kinh nghiệm:</span>
           <span className="text-sm font-medium">{userProfile?.experience}</span>
         </div>
+        <div className="flex justify-between">
+          <span className="text-sm text-gray-500">CCCD:</span>
+          <span className="text-sm font-medium">{userProfile?.cccd || 'Chưa cập nhật'}</span>
+        </div>
       </CardContent>
     </Card>
   );

@@ -29,6 +29,10 @@ export default function EmployeeDetailPersonalInfo({ employee }: EmployeeDetailP
             {formatDate(employee.joinDate, "DD/MM/YYYY")}
           </span>
         </div>
+        <div className="flex justify-between">
+          <span className="text-sm text-gray-500">CCCD:</span>
+          <span className="text-sm font-medium">{employee.cccd || 'Chưa cập nhật'}</span>
+        </div>
       </CardContent>
     </Card>
   );
