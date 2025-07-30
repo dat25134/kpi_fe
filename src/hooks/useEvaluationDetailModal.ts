@@ -232,8 +232,12 @@ export const useEvaluationDetailModal = (evaluationId?: number | string, open?: 
         canUpdateLevel2: false
       };
 
-  // Quyền chỉnh sửa: chỉ người tạo khi là draft
-  const canEdit = data && user && data.status === 'draft' && user.role === data.creator_role;
+  // Quyền chỉnh sửa: người tạo khi draft, trưởng phòng khi submitted/level1_approved, BGĐ khi level1_approved/level2_approved
+  const canEdit =
+    (data && user && data.status === 'draft' && user.role === data.creator_role) ||
+    (data && user && data.status === 'submitted' && user.role === data.level1_approver_role) ||
+    (data && user && data.status === 'level1_approved' && (user.role === data.level1_approver_role || user.role === data.level2_approver_role)) ||
+    (data && user && data.status === 'level2_approved' && user.role === data.level2_approver_role);
   
   return {
     // State

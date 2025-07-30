@@ -66,6 +66,22 @@ export default function EvaluationDetailModal({
   const isLevel1Approver = user && data && user.role === data.level1_approver_role
   const canEditWorkDescriptions = isLevel1Approver && actionButtonsConfig.canLevel1Approve
 
+  // Xác định currentMode cho ActionButtons
+  let currentMode: 'draft' | 'submit' | 'level1-approve' | 'level1-update' | 'level2-approve' | 'level2-update' | 'complete' = 'draft';
+  if (data?.status === 'draft' && user?.role === data?.creator_role) {
+    currentMode = 'draft';
+  } else if (data?.status === 'submitted' && user?.role === data?.level1_approver_role) {
+    currentMode = 'level1-approve';
+  } else if (data?.status === 'level1_approved' && user?.role === data?.level1_approver_role) {
+    currentMode = 'level1-update';
+  } else if (data?.status === 'level1_approved' && user?.role === data?.level2_approver_role) {
+    currentMode = 'level2-approve';
+  } else if (data?.status === 'level2_approved' && user?.role === data?.level2_approver_role) {
+    currentMode = 'level2-update-or-complete';
+  } else if (data?.status === 'completed') {
+    currentMode = 'complete';
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
@@ -130,15 +146,18 @@ export default function EvaluationDetailModal({
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Đóng
             </Button>
-            <ActionButtons
-              actionButtonsConfig={actionButtonsConfig}
-              saving={state.saving}
-              onSaveDraft={handleSaveDraft}
-              onSubmit={handleSubmit}
-              onLevel1Approve={handleLevel1Approve}
-              onLevel2Approve={handleLevel2Approve}
-              onComplete={handleComplete}
-            />
+            {canEdit && (
+              <ActionButtons
+                actionButtonsConfig={actionButtonsConfig}
+                saving={state.saving}
+                onSaveDraft={handleSaveDraft}
+                onSubmit={handleSubmit}
+                onLevel1Approve={handleLevel1Approve}
+                onLevel2Approve={handleLevel2Approve}
+                onComplete={handleComplete}
+                currentMode={currentMode}
+              />
+            )}
           </div>
         </div>
       </DialogContent>
@@ -149,6 +168,7 @@ export default function EvaluationDetailModal({
         title="Xác nhận gửi đánh giá"
         description={confirmMessage}
         onConfirm={handleConfirm}
+        confirmText="Xác nhận gửi"
       />
     </Dialog>
   )

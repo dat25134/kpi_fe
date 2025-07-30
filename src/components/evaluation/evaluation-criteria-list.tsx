@@ -4,6 +4,7 @@ import { type EvaluationCriteriaDetail } from "@/types/evaluation"
 import CriteriaCategory from "./CriteriaCategory"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { EvaluationCriteriaListProps } from '@/types/evaluation';
+import { useState, useEffect } from "react"
 
 interface Props extends EvaluationCriteriaListProps {
   fieldErrors?: Record<string, string[]>;
@@ -58,8 +59,8 @@ export default function EvaluationCriteriaList({
 
   // Xác định quyền nhập cho từng tab
   const isSelfEditable = currentUserRole === creatorRole && evaluationStatus === 'draft';
-  const isLevel1Editable = currentUserRole === level1ApproverRole && evaluationStatus === 'submitted';
-  const isLevel2Editable = currentUserRole === level2ApproverRole && evaluationStatus === 'level1_approved';
+  const isLevel1Editable = currentUserRole === level1ApproverRole && (evaluationStatus === 'submitted' || evaluationStatus === 'level1_approved');
+  const isLevel2Editable = currentUserRole === level2ApproverRole && (evaluationStatus === 'level1_approved' || evaluationStatus === 'level2_approved');
 
   // Xác định tabs hiển thị dựa trên role, status và dữ liệu đã có
   const getVisibleTabs = () => {
@@ -97,8 +98,35 @@ export default function EvaluationCriteriaList({
   const visibleTabs = getVisibleTabs();
   const defaultTab = visibleTabs[0];
 
+  // State để theo dõi tab đang active
+  const [activeTab, setActiveTab] = useState(defaultTab);
+
+  // Autofill dữ liệu khi vào tab đánh giá cấp 1 hoặc cấp 2
+  useEffect(() => {
+    if (activeTab === 'level1') {
+      details.forEach(item => {
+        if ((item.level1_score == null || item.level1_score === '') && item.self_score != null && item.self_score !== '') {
+          onScoreChange?.(item.id, 'level1_score', item.self_score);
+        }
+        if ((item.level1_comment == null || item.level1_comment === '') && item.self_comment != null && item.self_comment !== '') {
+          onCommentChange?.(item.id, 'level1_comment', item.self_comment);
+        }
+      });
+    }
+    if (activeTab === 'level2') {
+      details.forEach(item => {
+        if ((item.level2_score == null || item.level2_score === '') && item.level1_score != null && item.level1_score !== '') {
+          onScoreChange?.(item.id, 'level2_score', item.level1_score);
+        }
+        if ((item.level2_comment == null || item.level2_comment === '') && item.level1_comment != null && item.level1_comment !== '') {
+          onCommentChange?.(item.id, 'level2_comment', item.level1_comment);
+        }
+      });
+    }
+  }, [activeTab, details, onScoreChange, onCommentChange]);
+
   return (
-    <Tabs defaultValue={defaultTab} className="space-y-6">
+    <Tabs defaultValue={defaultTab} value={activeTab} onValueChange={setActiveTab} className="space-y-6">
       <TabsList className={`w-full grid mb-4 ${visibleTabs.length === 1 ? 'grid-cols-1' : visibleTabs.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
         {visibleTabs.includes('self') && (
           <TabsTrigger value="self">Tự đánh giá</TabsTrigger>
@@ -136,6 +164,12 @@ export default function EvaluationCriteriaList({
       
       {visibleTabs.includes('level1') && (
         <TabsContent value="level1">
+          {evaluationStatus === 'submitted' && (
+            <div className="mb-2 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-300 rounded px-3 py-2 flex items-center">
+              <svg className="w-4 h-4 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zm-8-4a1 1 0 100 2 1 1 0 000-2zm2 8a1 1 0 11-2 0v-3a1 1 0 112 0v3z"/></svg>
+              Kết quả này được tham khảo từ <span className="font-bold ml-1">Tự đánh giá</span>. Nếu không có gì thay đổi, bạn có thể gửi đánh giá luôn.
+            </div>
+          )}
           {errorsByTab.level1.length > 0 && (
             <div className="mb-4 bg-red-50 border border-red-300 text-red-700 rounded p-3 text-sm">
               <ul className="list-disc pl-5">
@@ -159,6 +193,12 @@ export default function EvaluationCriteriaList({
       
       {visibleTabs.includes('level2') && (
         <TabsContent value="level2">
+          {evaluationStatus === 'level1_approved' && (
+            <div className="mb-2 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-300 rounded px-3 py-2 flex items-center">
+              <svg className="w-4 h-4 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zm-8-4a1 1 0 100 2 1 1 0 000-2zm2 8a1 1 0 11-2 0v-3a1 1 0 112 0v3z"/></svg>
+              Kết quả này được tham khảo từ <span className="font-bold ml-1">Đánh giá cấp 1</span>. Nếu không có gì thay đổi, bạn có thể gửi đánh giá luôn.
+            </div>
+          )}
           {errorsByTab.level2.length > 0 && (
             <div className="mb-4 bg-red-50 border border-red-300 text-red-700 rounded p-3 text-sm">
               <ul className="list-disc pl-5">
