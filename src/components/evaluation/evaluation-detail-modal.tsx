@@ -67,7 +67,7 @@ export default function EvaluationDetailModal({
   const canEditWorkDescriptions = isLevel1Approver && actionButtonsConfig.canLevel1Approve
 
   // Xác định currentMode cho ActionButtons
-  let currentMode: 'draft' | 'submit' | 'level1-approve' | 'level1-update' | 'level2-approve' | 'level2-update' | 'complete' = 'draft';
+  let currentMode: 'draft' | 'submit' | 'level1-approve' | 'level1-update' | 'level2-approve' | 'level2-update' | 'level2-update-or-complete' | 'complete' = 'draft';
   if (data?.status === 'draft' && user?.role === data?.creator_role) {
     currentMode = 'draft';
   } else if (data?.status === 'submitted' && user?.role === data?.level1_approver_role) {
