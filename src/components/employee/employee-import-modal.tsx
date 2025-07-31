@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { toast } from "sonner"
 import * as XLSX from "xlsx"
-import { useImportEmployees } from '@/hooks/useEmployees';
+import { DownloadOutlined } from '@ant-design/icons'
+import { useImportEmployees, useDownloadTemplate } from '@/hooks/useEmployees';
 
 interface EmployeeImportModalProps {
   open: boolean
@@ -24,6 +25,7 @@ export default function EmployeeImportModal({ open, onOpenChange, onImported }: 
   const [preview, setPreview] = useState<EmployeePreview[]>([])
   const [error, setError] = useState<string | null>(null)
   const { importEmployees, loading, success } = useImportEmployees();
+  const { downloadTemplate, loading: downloadLoading, error: downloadError, resetError: resetDownloadError } = useDownloadTemplate();
   const [inputKey, setInputKey] = useState(0)
 
   // Đọc file và parse CSV/Excel
@@ -102,6 +104,7 @@ export default function EmployeeImportModal({ open, onOpenChange, onImported }: 
     setFile(null)
     setPreview([])
     setError(null)
+    resetDownloadError()
     setInputKey(prev => prev + 1)
     onOpenChange(false)
   }
@@ -115,6 +118,21 @@ export default function EmployeeImportModal({ open, onOpenChange, onImported }: 
       width={1200}
     >
       <div className="mb-2 text-gray-600">Chọn file CSV/Excel, kiểm tra danh sách preview, sau đó nhấn Import để tải lên.</div>
+      
+      <div className="mb-4">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={downloadTemplate} 
+          disabled={downloadLoading}
+          className="mb-2"
+        >
+          <DownloadOutlined className="mr-2" />
+          {downloadLoading ? "Đang tải..." : "Tải template Excel"}
+        </Button>
+        {downloadError && <div className="text-red-600 text-sm">{downloadError}</div>}
+      </div>
+      
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input key={inputKey} type="file" accept=".csv,.xls,.xlsx" onChange={handleFileChange} />
         {preview.length > 0 && (

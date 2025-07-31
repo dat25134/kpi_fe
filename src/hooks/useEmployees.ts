@@ -7,12 +7,14 @@ import {
   deleteEmployee,
   fetchEmployeeDetail,
   fetchManagerEmployees,
-  importEmployees as importEmployeesService
+  importEmployees as importEmployeesService,
+  downloadEmployeeTemplate
 } from '@/services/employee';
 import type { Employee, EmployeeSummary, EmployeeFilters, EmployeeListResponse } from '@/types/employee';
 import useSWR from 'swr';
 import { syncEmployeePermissions } from '@/services/permission';
 import { fetchAllUsers } from '@/services/user';
+import { toast } from 'sonner';
 
 export function useEmployees() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -180,4 +182,37 @@ export function useImportEmployees() {
   }, []);
 
   return { importEmployees, loading, error, success };
+}
+
+export function useDownloadTemplate() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const downloadTemplate = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const blob = await downloadEmployeeTemplate();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'template-import-employees.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      // Hiển thị thông báo thành công
+      toast.success('Tải template thành công!');
+    } catch (error) {
+      setError('Không thể tải template. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const resetError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  return { downloadTemplate, loading, error, resetError };
 } 

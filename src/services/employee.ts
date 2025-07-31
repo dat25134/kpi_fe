@@ -110,3 +110,14 @@ export async function importEmployees(file: File) {
 export async function resetEmployeePassword(id: number): Promise<void> {
   await apiClient.post(API_ENDPOINTS.EMPLOYEES.RESET_PASSWORD(id), {}, getConfig());
 }
+
+/**
+ * Download template Excel cho import nhân viên
+ */
+export async function downloadEmployeeTemplate(): Promise<Blob> {
+  const response = await apiClient.get(API_ENDPOINTS.EMPLOYEES.TEMPLATE, {
+    ...getConfig(),
+    responseType: 'blob',
+  });
+  return response.data;
+}

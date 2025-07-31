@@ -26,6 +26,7 @@ export const API_ENDPOINTS = {
     MANAGER: `${API_URL}/employees/manager`,
     ALL: `${API_URL}/employees/all-employees`,
     IMPORT: `${API_URL}/employees/import`,
+    TEMPLATE: `${API_URL}/employees/template`,
     // Thêm endpoint reset password
     RESET_PASSWORD: (id: number) => `${API_URL}/employees/${id}/reset-password`,
   },
