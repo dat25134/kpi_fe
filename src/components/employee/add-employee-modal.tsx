@@ -74,12 +74,12 @@ export default function AddEmployeeModal({
         departmentId: editingEmployee.department?.id?.toString() || "",
         status: editingEmployee.status,
         joinDate: editingEmployee.joinDate ? dayjs(editingEmployee.joinDate).format("YYYY-MM-DD") : "",
-        address: editingEmployee.address,
+        address: editingEmployee.address || "",
         birthDate: editingEmployee.birthDate ? dayjs(editingEmployee.birthDate).format("YYYY-MM-DD") : "",
-        gender: editingEmployee.gender,
-        education: editingEmployee.education,
-        experience: editingEmployee.experience,
-        skills: editingEmployee.skills.join(", "),
+        gender: editingEmployee.gender || "",
+        education: editingEmployee.education || "",
+        experience: editingEmployee.experience || "",
+        skills: editingEmployee.skills?.join(", ") || "",
         cccd: editingEmployee.cccd || "",
       })
     } else {

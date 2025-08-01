@@ -44,7 +44,7 @@ export default function AddEmployeeFormFields({
             <Input
               id="name"
               placeholder="Nhập họ và tên"
-              value={formData.name}
+              value={formData.name || ""}
               onChange={(e) => handleInputChange("name", e.target.value)}
               required
             />
@@ -60,7 +60,7 @@ export default function AddEmployeeFormFields({
               id="email"
               type="email"
               placeholder="Nhập email"
-              value={formData.email}
+              value={formData.email || ""}
               onChange={(e) => handleInputChange("email", e.target.value)}
               required
               disabled={!!editingEmployee}
@@ -76,7 +76,7 @@ export default function AddEmployeeFormFields({
             <Input
               id="cccd"
               placeholder="Nhập số CCCD"
-              value={formData.cccd}
+              value={formData.cccd || ""}
               onChange={(e) => handleInputChange("cccd", e.target.value)}
             />
             <div className="min-h-[1.25rem]">
@@ -90,7 +90,7 @@ export default function AddEmployeeFormFields({
             <Input
               id="phone"
               placeholder="Nhập số điện thoại"
-              value={formData.phone}
+              value={formData.phone || ""}
               onChange={(e) => {
                 const formatted = formatVietnamesePhoneNumber(e.target.value);
                 handleInputChange("phone", formatted);
@@ -239,7 +239,7 @@ export default function AddEmployeeFormFields({
           <Textarea
             id="address"
             placeholder="Nhập địa chỉ"
-            value={formData.address}
+            value={formData.address || ""}
             onChange={(e) => handleInputChange("address", e.target.value)}
             className="min-h-[60px] resize-none"
           />
@@ -251,7 +251,7 @@ export default function AddEmployeeFormFields({
           <Input
             id="education"
             placeholder="VD: Cử nhân Công nghệ thông tin"
-            value={formData.education}
+            value={formData.education || ""}
             onChange={(e) => handleInputChange("education", e.target.value)}
           />
           {errors.education && <p className="text-sm text-red-500 mt-1">{errors.education[0]}</p>}
@@ -262,7 +262,7 @@ export default function AddEmployeeFormFields({
           <Input
             id="experience"
             placeholder="VD: 5 năm"
-            value={formData.experience}
+            value={formData.experience || ""}
             onChange={(e) => handleInputChange("experience", e.target.value)}
           />
           {errors.experience && <p className="text-sm text-red-500 mt-1">{errors.experience[0]}</p>}
@@ -273,7 +273,7 @@ export default function AddEmployeeFormFields({
           <Textarea
             id="skills"
             placeholder="Nhập các kỹ năng, cách nhau bởi dấu phẩy"
-            value={formData.skills}
+            value={formData.skills || ""}
             onChange={(e) => handleInputChange("skills", e.target.value)}
             className="min-h-[80px] resize-none"
           />

@@ -54,7 +54,7 @@ export default function EmployeeDetailModal({ open, onOpenChange, employee }: Em
                   <div className="flex items-center gap-2 mt-2">
                     <Badge variant="outline" className="flex items-center gap-1">
                       <Building2 className="h-3 w-3" />
-                      {employee.department.name}
+                      {employee.department?.name || "Chưa có phòng ban"}
                     </Badge>
                     <Badge
                       className={
@@ -69,7 +69,7 @@ export default function EmployeeDetailModal({ open, onOpenChange, employee }: Em
                 </div>
                 <div className="text-right">
                   <div className="text-sm text-gray-500">Mã nhân viên</div>
-                  <div className="font-mono font-bold">EMP{employee.id.toString().padStart(4, "0")}</div>
+                  <div className="font-mono font-bold">{employee.employee_id || "Chưa cập nhật"}</div>
                 </div>
               </div>
             </CardContent>
@@ -92,15 +92,15 @@ export default function EmployeeDetailModal({ open, onOpenChange, employee }: Em
                   <CardContent className="space-y-3">
                     <div className="flex items-center gap-3">
                       <Mail className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm">{employee.email}</span>
+                      <span className="text-sm">{employee.email || "Chưa cập nhật"}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <Phone className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm">{employee.phone}</span>
+                      <span className="text-sm">{employee.phone || "Chưa cập nhật"}</span>
                     </div>
                     <div className="flex items-start gap-3">
                       <MapPin className="h-4 w-4 text-gray-400 mt-0.5" />
-                      <span className="text-sm">{employee.address}</span>
+                      <span className="text-sm">{employee.address || "Chưa cập nhật"}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -118,11 +118,11 @@ export default function EmployeeDetailModal({ open, onOpenChange, employee }: Em
                 <CardContent className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-gray-500">Trình độ học vấn</label>
-                    <p className="text-sm font-medium">{employee.education}</p>
+                    <p className="text-sm font-medium">{employee.education || "Chưa cập nhật"}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-500">Kinh nghiệm làm việc</label>
-                    <p className="text-sm font-medium">{employee.experience}</p>
+                    <p className="text-sm font-medium">{employee.experience || "Chưa cập nhật"}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -163,7 +163,9 @@ export default function EmployeeDetailModal({ open, onOpenChange, employee }: Em
                   <CardContent className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-500">Lương cơ bản:</span>
-                      <span className="text-sm font-medium text-green-600">{formatVND(employee.salary.toString())} VNĐ</span>
+                      <span className="text-sm font-medium text-green-600">
+                        {employee.salary ? formatVND(employee.salary.toString()) : "Chưa cập nhật"} VNĐ
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-500">Trạng thái:</span>
@@ -193,11 +195,14 @@ export default function EmployeeDetailModal({ open, onOpenChange, employee }: Em
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {employee.skills.map((skill: string, index: number) => (
+                    {employee.skills?.map((skill: string, index: number) => (
                       <Badge key={index} variant="secondary" className="px-3 py-1">
                         {skill}
                       </Badge>
                     ))}
+                    {(!employee.skills || employee.skills.length === 0) && (
+                      <p className="text-gray-500">Chưa có kỹ năng nào được cập nhật</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -214,7 +219,7 @@ export default function EmployeeDetailModal({ open, onOpenChange, employee }: Em
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {employee.projects.map((project: any, index: number) => (
+                    {employee.projects?.map((project: any, index: number) => (
                       <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                         <div>
                           <h4 className="font-medium">{project.name}</h4>
@@ -225,7 +230,7 @@ export default function EmployeeDetailModal({ open, onOpenChange, employee }: Em
                         </Badge>
                       </div>
                     ))}
-                    {employee.projects.length === 0 && (
+                    {(!employee.projects || employee.projects.length === 0) && (
                       <p className="text-center text-gray-500 py-4">Chưa tham gia dự án nào</p>
                     )}
                   </div>
