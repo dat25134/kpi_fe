@@ -7,6 +7,7 @@ import { useCreateCriteria } from "@/hooks/useCriteria";
 import { toast } from "sonner";
 import { mutate } from "swr";
 import type { CreateCriteriaPayload } from "@/types/evaluation";
+import { getErrorMessage, getValidationErrors } from "@/services/errorHandler";
 
 interface CreateCriteriaModalProps {
   open: boolean;
@@ -66,7 +67,9 @@ const CreateCriteriaModal: React.FC<CreateCriteriaModalProps> = ({ open, onOpenC
       onOpenChange(false);
       onSuccess && onSuccess();
     } catch (error: any) {
-      toast.error(error?.message || "Có lỗi xảy ra");
+      const msg = getErrorMessage(error);
+      setErrors(getValidationErrors(error) || {});
+      toast.error(msg || "Có lỗi xảy ra");
     }
   };
 
