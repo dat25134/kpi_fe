@@ -15,6 +15,7 @@ import useSWR from 'swr';
 import { syncEmployeePermissions } from '@/services/permission';
 import { fetchAllUsers } from '@/services/user';
 import { toast } from 'sonner';
+import { useLoading } from '@/context/loading-context';
 
 export function useEmployees() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -187,6 +188,7 @@ export function useImportEmployees() {
 export function useDownloadTemplate() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { hideLoading } = useLoading();
 
   const downloadTemplate = useCallback(async () => {
     setLoading(true);
@@ -207,8 +209,10 @@ export function useDownloadTemplate() {
       setError('Không thể tải template. Vui lòng thử lại.');
     } finally {
       setLoading(false);
+      // Tắt loading context sau khi hoàn thành
+      hideLoading();
     }
-  }, []);
+  }, [hideLoading]);
 
   const resetError = useCallback(() => {
     setError(null);
