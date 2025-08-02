@@ -64,7 +64,7 @@ export function useNotificationsSocket(userId: number) {
     });
     echoRef.current = echo;
     // Lắng nghe notification trên kênh private-user.{userId}
-    const channel = echo.channel(`kpi_database_user.${userId}`);
+    const channel = echo.channel(`${process.env.NEXT_PUBLIC_CHANNEL_NAME}.${userId}`);
     channel.listen('.notification', (notification: any) => {
       fetchInitialNotifications()
       toast.info(notification.data.title, {
